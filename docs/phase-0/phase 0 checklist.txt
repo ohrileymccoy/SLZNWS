@@ -1,0 +1,24 @@
+# Phase 0 Checklist — Oak Hill News
+
+## Required
+[ ] Cloudflare account created and 2FA enabled  
+[ ] Domain decision recorded (MVP: `https://ohn.pages.dev`)  
+[ ] Resource & binding plan finalized:
+    - D1=`ohn_prod` → binding `DB`
+    - R2=`ohn-media` → binding `MEDIA`
+    - KV=`ohn-cache` → binding `CACHE`
+    - Env: `ALLOWED_ORIGIN=https://ohn.pages.dev`
+[ ] GitHub repo online; default branch `main`  
+[ ] Protect `main` (require PRs before merge)
+
+## Recommended
+[ ] `.gitattributes` (LF in repo; CRLF for .bat/.cmd)  
+[ ] `.editorconfig` (LF, 2-space indent, UTF-8)  
+[ ] Global Git defaults set:
+    - `init.defaultBranch=main`
+    - `core.autocrlf=input`
+    - `core.eol=lf`
+
+## Optional (Phase 12 will finalize)
+[ ] Cloudflare Pages project connected to the repo  
+[ ] Functions enabled; placeholder deploy ok

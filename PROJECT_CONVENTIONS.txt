@@ -1,0 +1,71 @@
+# Project Conventions — Oak Hill News
+
+Modern, sharp, reactive local-news site with an infinite feed + visitor dashboard. Cloudflare-first stack for near-zero ops and edge performance.
+
+## 1) Tech Stack
+- **Frontend:** React (Vite), React Router, Tailwind CSS
+- **Hosting:** Cloudflare Pages + Pages Functions
+- **Data:** Cloudflare D1 (SQL), R2 (media), KV (cache/rate flags)
+- **Analytics:** Cloudflare Web Analytics (MVP)
+
+## 2) Branching & PR
+- Default branch: `main` (protected; PRs required)
+- Branch names:
+  - Features: `feat/<short-name>`
+  - Fixes: `fix/<short-name>`
+  - Chores: `chore/<short-name>`
+  - Docs: `docs/<short-name>`
+- PR requirements:
+  - Clear title & short description
+  - Screenshots/GIFs for UI changes
+  - Small, focused diffs preferred (under ~300 lines)
+
+## 3) Commits
+- Style: short, imperative
+  - `feat: add article card shell`
+  - `fix: preserve scroll on article back nav`
+  - `chore: set LF line endings`
+- Squash & merge PRs into `main`.
+
+## 4) Files & Naming
+- React components: `PascalCase.jsx`
+- Other files/dirs: `kebab-case`
+- No secrets in repo; env vars live in Cloudflare dashboard
+- Keep `/public` tiny (favicons, static assets)
+
+## 5) Styling & Theme
+- Tailwind utility-first
+- **Design ethos:** sharp, angular, floating cards; elite, fast, responsive
+- **Brand tokens:** 
+  - Primary: `#0430FC`
+  - Accent: `#DCFC04`
+- Dark-first (light mode later)
+- Reserve image space to prevent CLS
+
+## 6) Accessibility (MVP)
+- Keyboard focus visible on all interactive elements
+- All images have meaningful `alt` (decorative: empty alt)
+- Sufficient color contrast; readable line length for articles
+
+## 7) Performance
+- Vite build defaults; code-split routes as needed
+- Client cache + request dedupe for list pages
+- Avoid re-render storms; memoize hot paths (later if needed)
+
+## 8) Security (Public Read Only at MVP)
+- Server only returns `is_published = true`
+- CORS restricted via `ALLOWED_ORIGIN`
+- Soft IP-based rate limiting on read endpoints
+- Uploads/signing deferred until admin exists
+
+## 9) Environments & Bindings (summary)
+- D1 → `DB`, R2 → `MEDIA`, KV → `CACHE`
+- Document exact names in `docs/phase-0/resource_naming_plan.md`
+
+## 10) Definition of Done (MVP)
+- Smooth infinite feed + visitor dashboard
+- Clean article page (OG/Twitter meta)
+- Public read-only; no draft leakage
+- Deployed on Cloudflare; analytics visible
+
+_Last updated: Phase 0_
