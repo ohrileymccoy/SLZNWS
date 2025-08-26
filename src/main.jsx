@@ -13,7 +13,7 @@ import "./index.css";
 
 
 /**
- * Oak Hill News — Routing + UX Shell (Phase 6–7, JS version)
+ * SLN — Routing + UX Shell (Phase 6–7, JS version)
  * - Routes: /, /section/:section, /featured, /article/:slug
  * - Dark, sharp, floating-card UI using Tailwind
  * - Sentinel demo for infinite scroll (mocked)
@@ -61,7 +61,7 @@ function Header() {
             aria-hidden
           />
           <span className="font-semibold tracking-wide">
-            Oak Hill <span className="text-neutral-400">News</span>
+            Sleazy <span className="text-neutral-400">News</span>
           </span>
         </Link>
         <nav className="flex items-center gap-1">
