@@ -1,0 +1,7 @@
+name = "slznws"
+compatibility_date = "2025-08-01"
+
+[[d1_databases]]
+binding = "DB"                     # this is what your code and CLI will use
+database_name = "sln-d1"        # <-- replace with your actual database_name
+database_id   = "ada5fe84-e2f8-4445-a520-9fd123f35038"# <-- replace with your actual database_id
