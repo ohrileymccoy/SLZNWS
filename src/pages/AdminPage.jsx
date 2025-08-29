@@ -1,3 +1,4 @@
+// src/pages/AdminPage.jsx
 import UploadVideo from "../components/UploadVideo.jsx";
 import VideoGrid from "../components/VideoGrid.jsx";
 
@@ -9,11 +10,9 @@ export default function AdminPage() {
           <h1 className="text-2xl font-bold">Admin — Upload Video</h1>
         </header>
 
-        {/* Upload form */}
         <UploadVideo />
 
-        {/* Show latest uploads */}
-        <div className="mt-10">
+        <div className="mt-8">
           <h2 className="text-xl font-semibold mb-3">Latest Videos</h2>
           <VideoGrid />
         </div>

@@ -6,7 +6,7 @@ export interface Env {
 
 import { handleUpload } from "./api/v1/upload";
 import { handleList }   from "./api/v1/list";
-
+import { handleDelete } from "./api/v1/delete";
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
@@ -25,21 +25,26 @@ export default {
     }
 
     // 2. API routes
-    if (url.pathname.startsWith("/api/")) {
-      if (url.pathname === "/api/v1/videos/upload" && request.method === "POST") {
-        return handleUpload(request, env);
-      }
-      if (url.pathname === "/api/v1/videos" && request.method === "GET") {
-        return handleList(request, env);
-      }
+if (url.pathname.startsWith("/api/")) {
+  if (url.pathname === "/api/v1/videos/upload" && request.method === "POST") {
+    return handleUpload(request, env);
+  }
+  if (url.pathname === "/api/v1/videos" && request.method === "GET") {
+    return handleList(request, env);
+  }
+  if (url.pathname === "/api/v1/videos/delete" && request.method === "POST") {
+    return handleDelete(request, env);
+  }
 
-      return new Response(JSON.stringify({ error: "Not Found" }), {
-        status: 404,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
+  return new Response(JSON.stringify({ error: "Not Found" }), {
+    status: 404,
+    headers: { "Content-Type": "application/json" },
+  });
+}
 
     // 3. Everything else → static assets / SPA fallback
     return env.ASSETS.fetch(request);
+    
   }
+  
 };
