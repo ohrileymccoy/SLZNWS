@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tailwindcss -i ./src/input.css -o ./src/index.css && vite build",
     "lint": "eslint .",
-     "preview": "vite preview --port 5174 --strictPort",
+    "preview": "vite preview --port 5174 --strictPort",
     "tw:dev": "tailwindcss -i ./src/input.css -o ./src/index.css -w",
     "cf:dev": "wrangler pages dev dist --port=8788"
   },
@@ -17,6 +17,7 @@
     "react-router-dom": "^7.8.1"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250828.0",
     "@eslint/js": "^9.33.0",
     "@tailwindcss/cli": "^4.1.12",
     "@types/react": "^19.1.10",

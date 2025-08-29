@@ -1,7 +1,24 @@
 name = "slznws"
+main = "src/index.ts"
 compatibility_date = "2025-08-01"
 
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+# Force Worker first on R2 proxy
+run_worker_first = ["/api/*", "/r2/*"]
+
+
 [[d1_databases]]
-binding = "DB"                     # this is what your code and CLI will use
-database_name = "sln-d1"        # <-- replace with your actual database_name
-database_id   = "ada5fe84-e2f8-4445-a520-9fd123f35038"# <-- replace with your actual database_id
+binding = "DB"
+database_name = "sln-d1"
+database_id   = "ada5fe84-e2f8-4445-a520-9fd123f35038"
+
+[[r2_buckets]]
+binding = "VIDEOS_BUCKET"
+bucket_name = "sln-media"
+
+[vars]
+# Use your Public Development URL + bucket name (no trailing slash)
+R2_PUBLIC_BASE = "https://pub-cebff8a701df40d5852164373722153e.r2.dev/sln-media"

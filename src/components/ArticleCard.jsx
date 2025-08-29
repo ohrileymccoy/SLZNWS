@@ -1,9 +1,56 @@
-export default function ArticleCard({ i = 1 }) {
-  return (
-    <article className="rounded-2xl border border-white/10 bg-white/5 p-5">
-      <div className="aspect-[16/9] w-full rounded-xl bg-neutral-800 mb-4" />
-      <h3 className="text-lg font-semibold">Sample headline #{i}</h3>
-      <p className="mt-1 text-sm text-neutral-300">Dek/subhead goes here to tease the story.</p>
-    </article>
+export default function ArticleCard({
+  title,
+  href,              // link when NOT a video
+  eyebrow,           // tiny label above title
+  imageUrl,          // fallback image (when not a video)
+  videoUrl,          // if present, render <video>
+  posterUrl,         // optional poster for video
+  footer,            // optional footer area
+}) {
+  const isVideo = !!videoUrl;
+
+  const CardInner = (
+    <div className="rounded-2xl border border-neutral-800 bg-neutral-900/60 hover:border-neutral-700 transition-colors overflow-hidden">
+      <div className="aspect-video">
+        {isVideo ? (
+          <video
+            className="w-full h-full"
+            controls
+            playsInline
+            preload="metadata"
+            poster={posterUrl || undefined}
+          >
+            <source src={videoUrl} type="video/mp4" />
+          </video>
+        ) : (
+          <img
+            src={imageUrl}
+            alt={title || ""}
+            className="w-full h-full object-cover"
+            loading="lazy"
+          />
+        )}
+      </div>
+
+      <div className="p-3">
+        {eyebrow && (
+          <div className="uppercase tracking-widest text-[10px] text-neutral-400 mb-1">
+            {eyebrow}
+          </div>
+        )}
+        {title && <h3 className="text-sm font-semibold line-clamp-2">{title}</h3>}
+        {footer && <div className="mt-2 text-xs text-neutral-500">{footer}</div>}
+      </div>
+    </div>
   );
+
+  // Don’t wrap playable video in a link (prevents weird click behavior)
+  if (!isVideo && href) {
+    return (
+      <a href={href} className="block">
+        {CardInner}
+      </a>
+    );
+  }
+  return CardInner;
 }
