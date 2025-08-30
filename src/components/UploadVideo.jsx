@@ -4,6 +4,8 @@ export default function UploadVideo() {
   const fileInputRef = useRef(null);
   const [file, setFile] = useState(null);
   const [title, setTitle] = useState("");
+  const [caption, setCaption] = useState("");
+  const [section, setSection] = useState("news");
   const [uploading, setUploading] = useState(false);
   const [status, setStatus] = useState(null); // { ok, msg, url }
 
@@ -37,19 +39,22 @@ export default function UploadVideo() {
       setStatus({ ok: false, msg: "Pick a file first." });
       return;
     }
-    const ext = (file.name.split(".").pop() || "").toLowerCase() || "mp4";
     const safeTitle = title?.trim() || file.name.replace(/\.[^.]+$/, "");
     const slug = slugify(safeTitle) || slugify(file.name.replace(/\.[^.]+$/, ""));
 
-    const qs = new URLSearchParams({ title: safeTitle, slug, ext });
+    const body = new FormData();
+    body.append("file", file);
+    body.append("title", safeTitle);
+    body.append("slug", slug);
+    body.append("caption", caption);
+    body.append("section", section);
 
     setUploading(true);
     setStatus(null);
     try {
-      const res = await fetch(`/api/v1/videos/upload?${qs.toString()}`, {
+      const res = await fetch(`/api/v1/videos/upload`, {
         method: "POST",
-        headers: { "Content-Type": file.type || "application/octet-stream" },
-        body: file,
+        body,
       });
       const json = await res.json().catch(() => ({}));
       if (!res.ok || json.ok === false) {
@@ -57,6 +62,9 @@ export default function UploadVideo() {
       }
       setStatus({ ok: true, msg: "Uploaded!", url: json.url || json.public_url });
       setFile(null);
+      setTitle("");
+      setCaption("");
+      setSection("news");
       if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (err) {
       setStatus({ ok: false, msg: err.message || String(err) });
@@ -79,9 +87,31 @@ export default function UploadVideo() {
         className="w-full rounded-xl bg-neutral-900 border border-neutral-800 px-3 py-2 outline-none focus:border-neutral-600 mb-4"
       />
 
-      {/* Visible file input + Select + Upload buttons */}
+      {/* Caption */}
+      <label className="block text-xs text-neutral-400 mb-1">Caption</label>
+      <input
+        type="text"
+        value={caption}
+        onChange={(e) => setCaption(e.target.value)}
+        placeholder="Short description"
+        className="w-full rounded-xl bg-neutral-900 border border-neutral-800 px-3 py-2 outline-none focus:border-neutral-600 mb-4"
+      />
+
+      {/* Section */}
+      <label className="block text-xs text-neutral-400 mb-1">Section</label>
+      <select
+        value={section}
+        onChange={(e) => setSection(e.target.value)}
+        className="w-full rounded-xl bg-neutral-900 border border-neutral-800 px-3 py-2 outline-none focus:border-neutral-600 mb-4"
+      >
+        <option value="news">News</option>
+        <option value="culture">Culture</option>
+        <option value="sports">Sports</option>
+        <option value="featured">Featured</option>
+      </select>
+
+      {/* File + buttons */}
       <div className="flex flex-wrap items-center gap-3">
-        {/* Visible file input so it never looks like plain text */}
         <input
           ref={fileInputRef}
           type="file"
@@ -94,8 +124,6 @@ export default function UploadVideo() {
             max-w-xs
           "
         />
-
-        {/* Explicit Select button (duplicates the input’s native button, but obvious) */}
         <button
           type="button"
           onClick={onSelectClick}
@@ -104,8 +132,6 @@ export default function UploadVideo() {
         >
           Select file
         </button>
-
-        {/* Upload button */}
         <button
           type="button"
           onClick={onUploadClick}
@@ -118,8 +144,6 @@ export default function UploadVideo() {
         >
           {uploading ? "Uploading…" : "Upload"}
         </button>
-
-        {/* Filename */}
         <span className="text-xs text-neutral-400 truncate">
           {file ? `${file.name} (${Math.round(file.size / 1024)} KB)` : "No file selected"}
         </span>

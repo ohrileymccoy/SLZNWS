@@ -5,6 +5,7 @@ export default function ArticleCard({
   imageUrl,          // fallback image (when not a video)
   videoUrl,          // if present, render <video>
   posterUrl,         // optional poster for video
+  caption,           // 👈 merged: short text under title
   footer,            // optional footer area
 }) {
   const isVideo = !!videoUrl;
@@ -39,6 +40,7 @@ export default function ArticleCard({
           </div>
         )}
         {title && <h3 className="text-sm font-semibold line-clamp-2">{title}</h3>}
+        {caption && <p className="text-xs text-neutral-400 mt-1">{caption}</p>}
         {footer && <div className="mt-2 text-xs text-neutral-500">{footer}</div>}
       </div>
     </div>

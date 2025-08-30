@@ -54,13 +54,15 @@ async function handleDelete(video) {
       {videos.map((v) => (
         <li key={v.id} className="relative group">
           {/* Video card */}
-          <ArticleCard
-            title={v.title || v.slug}
-            eyebrow="Video"
-            videoUrl={v.public_url}
-            posterUrl={v.poster_url}
-            mime={v.mime}
-          />
+         <ArticleCard
+  title={v.title || v.slug}
+  eyebrow={v.section || "Video"}
+  videoUrl={v.public_url}
+  posterUrl={v.poster_url}
+  caption={v.caption}
+  mime={v.mime}
+  onDelete={() => handleDelete(v.id)}
+/>
 
           {/* Delete button (appears on hover) */}
           <button

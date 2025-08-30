@@ -2,33 +2,56 @@ export async function handleUpload(
   request: Request,
   env: { DB: D1Database; VIDEOS_BUCKET: R2Bucket; R2_PUBLIC_BASE?: string }
 ) {
-  const url = new URL(request.url);
-  const title = url.searchParams.get("title") ?? "Untitled";
-  const description = url.searchParams.get("description") ?? "";
-  const slug = url.searchParams.get("slug") ?? crypto.randomUUID();
-  const ext = (url.searchParams.get("ext") ?? "mp4").replace(/\./g, "").toLowerCase();
-  const mime = request.headers.get("content-type") || "video/mp4";
+  // Parse form fields from multipart/form-data
+  const formData = await request.formData();
+  const file = formData.get("file") as File;
+  if (!file) {
+    return Response.json({ ok: false, error: "Missing file" }, { status: 400 });
+  }
 
+  const title = (formData.get("title") as string) || "Untitled";
+  const caption = (formData.get("caption") as string) || "";
+  const section = (formData.get("section") as string) || "news";
+  const slug =
+    (formData.get("slug") as string) || crypto.randomUUID();
+  const mime = file.type || "video/mp4";
+
+  // Build R2 key: media/videos/YYYY/MM/uuid.ext
   const now = new Date();
-  const key = `media/videos/${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, "0")}/${crypto.randomUUID()}.${ext}`;
+  const ext =
+    (file.name.split(".").pop() || "mp4").replace(/\./g, "").toLowerCase();
+  const key = `media/videos/${now.getFullYear()}/${String(
+    now.getMonth() + 1
+  ).padStart(2, "0")}/${crypto.randomUUID()}.${ext}`;
 
   // Store in R2 with the right content-type
-  await env.VIDEOS_BUCKET.put(key, request.body, {
+  await env.VIDEOS_BUCKET.put(key, file.stream(), {
     httpMetadata: {
       contentType: mime,
       cacheControl: "public, max-age=31536000, immutable",
     },
   });
 
-  // Store only the object key in D1
+  // Store metadata in D1
   await env.DB.prepare(
-    `INSERT INTO videos (slug,title,description,r2_key,mime,status)
-     VALUES (?,?,?,?,?, 'uploaded')`
-  ).bind(slug, title, description, key, mime).run();
+    `INSERT INTO videos (slug, title, caption, section, r2_key, mime, status, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, 'uploaded', datetime('now'))`
+  )
+    .bind(slug, title, caption, section, key, mime)
+    .run();
 
   // Build public URL with the same base you use in list.ts
   const base = (env.R2_PUBLIC_BASE || "").replace(/\/$/, "");
   const publicUrl = `${base}/${key}`;
 
-  return Response.json({ ok: true, slug, key, url: publicUrl, mime });
+  return Response.json({
+    ok: true,
+    slug,
+    key,
+    url: publicUrl,
+    mime,
+    title,
+    caption,
+    section,
+  });
 }

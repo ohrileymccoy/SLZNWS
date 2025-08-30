@@ -11,6 +11,8 @@ import {
 } from "react-router-dom";
 import "./index.css";
 import AdminPage from "./pages/AdminPage.jsx";
+import Feed from "./components/Feed.jsx";
+
 
 /**
  * SLN — Routing + UX Shell (Phase 6–7, JS version)
@@ -97,10 +99,10 @@ function Footer() {
   return (
     <footer className="border-t border-neutral-800">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-10 text-sm text-neutral-400 flex items-center justify-between">
-        <p>© {new Date().getFullYear()} Oak Hill News</p>
+        <p>© {new Date().getFullYear()} Sleazy News Beckley</p>
         <p>
           <span className="inline-block h-2 w-2 rounded-full mr-2" style={{ background: brand.accent }} />
-          Edge-first. Sharp. Fast.
+          Half-news, half-satire.
         </p>
       </div>
     </footer>
@@ -116,7 +118,8 @@ function HomePage() {
       <KPIBand />
       <FeaturedRail onOpen={(slug) => navigate(`/article/${slug}`)} />
       <SectionTabs />
-      <FeedScaffold title="Latest" subtitle="Freshly published across all sections" />
+     <Feed />
+
     </div>
   );
 }
@@ -132,11 +135,8 @@ function SectionPage() {
   return (
     <div className="py-8">
       <PageTitle title={title} eyebrow="Section" />
-      <FeedScaffold
-        title={`${title} Stories`}
-        subtitle={`Stories in ${title.toLowerCase()}`}
-        section={sectionKey}
-      />
+      <Feed section={sectionKey} />
+
     </div>
   );
 }
@@ -145,7 +145,7 @@ function FeaturedPage() {
   return (
     <div className="py-8">
       <PageTitle title="Featured" eyebrow="Curated" />
-      <FeedScaffold title="Featured Stories" subtitle="Editor picks" featuredOnly />
+     <Feed section="featured" />
     </div>
   );
 }
