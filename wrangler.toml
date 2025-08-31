@@ -16,7 +16,7 @@ database_name = "sln-d1"
 database_id   = "ada5fe84-e2f8-4445-a520-9fd123f35038"
 
 [[r2_buckets]]
-binding = "VIDEOS_BUCKET"
+binding = "MEDIA"
 bucket_name = "sln-media"
 
 [vars]
