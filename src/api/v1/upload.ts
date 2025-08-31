@@ -1,6 +1,6 @@
 export async function handleUpload(
   request: Request,
-  env: { DB: D1Database; VIDEOS_BUCKET: R2Bucket; R2_PUBLIC_BASE?: string }
+  env: { DB: D1Database; MEDIA: R2Bucket; R2_PUBLIC_BASE?: string }
 ) {
   // Parse form fields from multipart/form-data
   const formData = await request.formData();
@@ -25,7 +25,7 @@ export async function handleUpload(
   ).padStart(2, "0")}/${crypto.randomUUID()}.${ext}`;
 
   // Store in R2 with the right content-type
-  await env.VIDEOS_BUCKET.put(key, file.stream(), {
+  await env.MEDIA.put(key, file.stream(), {
     httpMetadata: {
       contentType: mime,
       cacheControl: "public, max-age=31536000, immutable",

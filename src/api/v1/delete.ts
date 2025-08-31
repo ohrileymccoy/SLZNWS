@@ -2,7 +2,7 @@
 
 export async function handleDelete(
   request: Request,
-  env: { DB: D1Database; VIDEOS_BUCKET: R2Bucket }
+  env: { DB: D1Database; MEDIA: R2Bucket }
 ): Promise<Response> {
   try {
     const body: any = await request.json().catch(() => ({}));
@@ -32,7 +32,7 @@ export async function handleDelete(
     // Delete from R2
    // Delete from R2
 if (lookup.r2_key) {
-  await env.VIDEOS_BUCKET.delete(String(lookup.r2_key));
+  await env.MEDIA.delete(String(lookup.r2_key));
 }
 
     // Delete from DB

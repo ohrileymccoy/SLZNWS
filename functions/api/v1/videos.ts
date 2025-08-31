@@ -78,7 +78,7 @@ export async function onRequestDelete({ request, env }) {
     const r2Key = results[0].r2_key;
 
     // Delete from R2
-    await env.VIDEOS_BUCKET.delete(r2Key);
+    await env.MEDIA.delete(r2Key);
 
     // Delete from DB
     await env.DB.prepare("DELETE FROM videos WHERE id = ?").bind(id).run();

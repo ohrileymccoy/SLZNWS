@@ -1,7 +1,7 @@
 export interface Env {
   ASSETS: Fetcher;
   DB: D1Database;
-  VIDEOS_BUCKET: R2Bucket;
+  MEDIA: R2Bucket;
 }
 
 import { handleUpload } from "./api/v1/upload";
@@ -14,7 +14,7 @@ export default {
     // 1. Local R2 proxy
     if (url.pathname.startsWith("/r2/")) {
       const key = url.pathname.replace(/^\/r2\//, "");
-      const obj = await env.VIDEOS_BUCKET.get(key);
+      const obj = await env.MEDIA.get(key);
       if (!obj) return new Response("Not found", { status: 404 });
       return new Response(obj.body, {
         headers: {

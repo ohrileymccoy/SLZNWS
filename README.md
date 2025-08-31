@@ -75,7 +75,7 @@ name = "sln-app"
 compatibility_date = "2025-08-29"
 
 [[r2_buckets]]
-binding = "VIDEOS_BUCKET"
+binding = "MEDIA" // huge change
 bucket_name = "sln-media"
 
 [[d1_databases]]
@@ -112,7 +112,7 @@ Confirm it renders in the Home feed
 
 🔑 Environment Variables
 
-VIDEOS_BUCKET → Cloudflare R2 binding (media storage)
+MEDIA → Cloudflare R2 binding (media storage)
 
 DB → Cloudflare D1 binding (metadata)
 
