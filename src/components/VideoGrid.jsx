@@ -11,7 +11,9 @@ export default function VideoGrid() {
     async function load() {
       try {
         setLoading(true);
-        const res = await fetch("/api/v1/videos?status=uploaded&limit=12");
+        const API_BASE = import.meta.env.VITE_API_BASE || "";
+const res = await fetch(`${API_BASE}/api/v1/videos?status=uploaded&limit=12`);
+
         if (!res.ok) throw new Error(`API ${res.status}`);
         const json = await res.json();
         setVideos(json.items || []);
