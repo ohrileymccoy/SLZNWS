@@ -35,67 +35,56 @@ export default function UploadVideo() {
   }
 
   async function onUploadClick() {
-    if (!file) {
-      setStatus({ ok: false, msg: "Pick a file first." });
-      return;
-    }
-    const safeTitle = title?.trim() || file.name.replace(/\.[^.]+$/, "");
-    const slug =
-      slugify(safeTitle) || slugify(file.name.replace(/\.[^.]+$/, ""));
-
-    setUploading(true);
-    setStatus(null);
-    try {
-      // STEP 1: get presigned URL from backend
-      const presignRes = await fetch("/api/v1/upload_url", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ filename: file.name }),
-      });
-      if (!presignRes.ok) throw new Error("Failed to get upload URL");
-      const { uploadUrl, key } = await presignRes.json();
-
-      // STEP 2: upload file to R2
-      const putRes = await fetch(uploadUrl, {
-        method: "PUT",
-        headers: { "Content-Type": file.type },
-        body: file,
-      });
-      if (!putRes.ok) throw new Error("Failed to upload to storage");
-
-      // STEP 3: save metadata row in D1
-      const saveRes = await fetch("/api/v1/videos", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          slug,
-          title: safeTitle,
-          caption,
-          section,
-          r2_key: key,
-          mime: file.type,
-          status: "uploaded",
-        }),
-      });
-      if (!saveRes.ok) throw new Error("Failed to save DB row");
-      const saved = await saveRes.json();
-
-      setStatus({
-        ok: true,
-        msg: "Uploaded!",
-        url: saved.public_url || saved.url,
-      });
-      setFile(null);
-      setTitle("");
-      setCaption("");
-      setSection("news");
-      if (fileInputRef.current) fileInputRef.current.value = "";
-    } catch (err) {
-      setStatus({ ok: false, msg: err.message || String(err) });
-    } finally {
-      setUploading(false);
-    }
+  if (!file) {
+    setStatus({ ok: false, msg: "Pick a file first." });
+    return;
   }
+
+  const safeTitle = title?.trim() || file.name.replace(/\.[^.]+$/, "");
+  const slug =
+    slugify(safeTitle) || slugify(file.name.replace(/\.[^.]+$/, ""));
+
+  setUploading(true);
+  setStatus(null);
+
+  try {
+    // STEP 1: build form data for upload
+    const form = new FormData();
+    form.append("file", file);
+    form.append("title", safeTitle);
+    form.append("slug", slug);
+    form.append("caption", caption);
+    form.append("section", section);
+
+    // STEP 2: send file + metadata directly to backend
+    // backend handles env.MEDIA.put() + DB insert
+    const res = await fetch("/api/v1/upload_url", {
+      method: "POST",
+      body: form,
+    });
+    if (!res.ok) throw new Error("Upload failed");
+
+    // STEP 3: parse backend response (includes public_url)
+    const json = await res.json();
+
+    // STEP 4: update UI with success message + link
+    setStatus({ ok: true, msg: "Uploaded!", url: json.public_url });
+
+    // STEP 5: reset form state
+    setFile(null);
+    setTitle("");
+    setCaption("");
+    setSection("news");
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  } catch (err) {
+    // Handle errors gracefully
+    setStatus({ ok: false, msg: err.message || String(err) });
+  } finally {
+    // Always clear "Uploading…" spinner
+    setUploading(false);
+  }
+}
+
 
   return (
     <div className="rounded-2xl border border-neutral-800 bg-neutral-900/60 p-4">
