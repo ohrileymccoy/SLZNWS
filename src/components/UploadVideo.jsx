@@ -40,27 +40,51 @@ export default function UploadVideo() {
       return;
     }
     const safeTitle = title?.trim() || file.name.replace(/\.[^.]+$/, "");
-    const slug = slugify(safeTitle) || slugify(file.name.replace(/\.[^.]+$/, ""));
-
-    const body = new FormData();
-    body.append("file", file);
-    body.append("title", safeTitle);
-    body.append("slug", slug);
-    body.append("caption", caption);
-    body.append("section", section);
+    const slug =
+      slugify(safeTitle) || slugify(file.name.replace(/\.[^.]+$/, ""));
 
     setUploading(true);
     setStatus(null);
     try {
-      const res = await fetch(`/api/v1/videos/upload`, {
+      // STEP 1: get presigned URL from backend
+      const presignRes = await fetch("/api/v1/upload_url", {
         method: "POST",
-        body,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ filename: file.name }),
       });
-      const json = await res.json().catch(() => ({}));
-      if (!res.ok || json.ok === false) {
-        throw new Error(json.error || `Upload failed (${res.status})`);
-      }
-      setStatus({ ok: true, msg: "Uploaded!", url: json.url || json.public_url });
+      if (!presignRes.ok) throw new Error("Failed to get upload URL");
+      const { uploadUrl, key } = await presignRes.json();
+
+      // STEP 2: upload file to R2
+      const putRes = await fetch(uploadUrl, {
+        method: "PUT",
+        headers: { "Content-Type": file.type },
+        body: file,
+      });
+      if (!putRes.ok) throw new Error("Failed to upload to storage");
+
+      // STEP 3: save metadata row in D1
+      const saveRes = await fetch("/api/v1/videos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          slug,
+          title: safeTitle,
+          caption,
+          section,
+          r2_key: key,
+          mime: file.type,
+          status: "uploaded",
+        }),
+      });
+      if (!saveRes.ok) throw new Error("Failed to save DB row");
+      const saved = await saveRes.json();
+
+      setStatus({
+        ok: true,
+        msg: "Uploaded!",
+        url: saved.public_url || saved.url,
+      });
       setFile(null);
       setTitle("");
       setCaption("");
@@ -78,7 +102,9 @@ export default function UploadVideo() {
       <h2 className="text-lg font-semibold mb-4">Upload Video</h2>
 
       {/* Title */}
-      <label className="block text-xs text-neutral-400 mb-1">Title (optional)</label>
+      <label className="block text-xs text-neutral-400 mb-1">
+        Title (optional)
+      </label>
       <input
         type="text"
         value={title}
@@ -145,19 +171,30 @@ export default function UploadVideo() {
           {uploading ? "Uploading…" : "Upload"}
         </button>
         <span className="text-xs text-neutral-400 truncate">
-          {file ? `${file.name} (${Math.round(file.size / 1024)} KB)` : "No file selected"}
+          {file
+            ? `${file.name} (${Math.round(file.size / 1024)} KB)`
+            : "No file selected"}
         </span>
       </div>
 
       {/* Status */}
       {status && (
-        <div className={`mt-3 text-sm ${status.ok ? "text-green-400" : "text-red-400"}`}>
+        <div
+          className={`mt-3 text-sm ${
+            status.ok ? "text-green-400" : "text-red-400"
+          }`}
+        >
           {status.msg}
           {status.ok && status.url && (
             <>
               {" "}
               —{" "}
-              <a className="underline" href={status.url} target="_blank" rel="noreferrer">
+              <a
+                className="underline"
+                href={status.url}
+                target="_blank"
+                rel="noreferrer"
+              >
                 Open
               </a>
             </>
@@ -166,7 +203,8 @@ export default function UploadVideo() {
       )}
 
       <p className="mt-3 text-xs text-neutral-500">
-        Tip: We auto-slugify from Title or filename. Works best with H.264/AAC MP4.
+        Tip: We auto-slugify from Title or filename. Works best with H.264/AAC
+        MP4.
       </p>
     </div>
   );
