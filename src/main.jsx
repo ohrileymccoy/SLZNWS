@@ -67,14 +67,15 @@ function Header() {
             Sleazy <span className="text-neutral-400">News</span>
           </span>
         </Link>
-        <nav className="flex items-center gap-1">
-          <NavLink to="/" label="Home" active={isActive("/")} />
-          <NavLink to="/section/news" label="News" active={isActive("/section/news")} />
-          <NavLink to="/section/culture" label="Culture" active={isActive("/section/culture")} />
-          <NavLink to="/section/sports" label="Sports" active={isActive("/section/sports")} />
-          <NavLink to="/featured" label="Featured" active={isActive("/featured")} />
-          <NavLink to="/admin" label="Admin" active={isActive("/admin")} />
-        </nav>
+        <nav className="flex flex-wrap items-center justify-center gap-2 w-full overflow-x-hidden">
+  <NavLink to="/" label="Home" active={isActive("/")} />
+  <NavLink to="/section/news" label="News" active={isActive("/section/news")} />
+  <NavLink to="/section/culture" label="Culture" active={isActive("/section/culture")} />
+  <NavLink to="/section/sports" label="Sports" active={isActive("/section/sports")} />
+  <NavLink to="/featured" label="Featured" active={isActive("/featured")} />
+  <NavLink to="/admin" label="Admin" active={isActive("/admin")} />
+</nav>
+
       </div>
     </header>
   );
