@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 
-export default function UploadVideo() {
+export default function UploadVideo({ simple = false }) {
+
   const fileInputRef = useRef(null);
   const [file, setFile] = useState(null);
   const [title, setTitle] = useState("");
@@ -102,28 +103,36 @@ export default function UploadVideo() {
         className="w-full rounded-xl bg-neutral-900 border border-neutral-800 px-3 py-2 outline-none focus:border-neutral-600 mb-4"
       />
 
-      {/* Caption */}
-      <label className="block text-xs text-neutral-400 mb-1">Caption</label>
-      <input
-        type="text"
-        value={caption}
-        onChange={(e) => setCaption(e.target.value)}
-        placeholder="Short description"
-        className="w-full rounded-xl bg-neutral-900 border border-neutral-800 px-3 py-2 outline-none focus:border-neutral-600 mb-4"
-      />
+     {/* Caption */}
+{!simple && (
+  <>
+    <label className="block text-xs text-neutral-400 mb-1">Caption</label>
+    <input
+      type="text"
+      value={caption}
+      onChange={(e) => setCaption(e.target.value)}
+      placeholder="Short description"
+      className="w-full rounded-xl bg-neutral-900 border border-neutral-800 px-3 py-2 outline-none focus:border-neutral-600 mb-4"
+    />
+  </>
+)}
 
-      {/* Section */}
-      <label className="block text-xs text-neutral-400 mb-1">Section</label>
-      <select
-        value={section}
-        onChange={(e) => setSection(e.target.value)}
-        className="w-full rounded-xl bg-neutral-900 border border-neutral-800 px-3 py-2 outline-none focus:border-neutral-600 mb-4"
-      >
-        <option value="news">News</option>
-        <option value="culture">Culture</option>
-        <option value="sports">Sports</option>
-        <option value="featured">Featured</option>
-      </select>
+{/* Section */}
+{!simple && (
+  <>
+    <label className="block text-xs text-neutral-400 mb-1">Section</label>
+    <select
+      value={section}
+      onChange={(e) => setSection(e.target.value)}
+      className="w-full rounded-xl bg-neutral-900 border border-neutral-800 px-3 py-2 outline-none focus:border-neutral-600 mb-4"
+    >
+      <option value="news">News</option>
+      <option value="culture">Culture</option>
+      <option value="sports">Sports</option>
+      <option value="featured">Featured</option>
+    </select>
+  </>
+)}
 
       {/* File + buttons */}
       <div className="flex flex-wrap items-center gap-3">

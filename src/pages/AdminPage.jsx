@@ -7,14 +7,16 @@ export default function AdminPage() {
     <div className="min-h-screen bg-neutral-950 text-neutral-100 px-6 py-10">
       <div className="mx-auto max-w-6xl space-y-8">
         <header className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Admin — Upload Video</h1>
+          <h1 className="text-2xl font-bold">Admin — Upload & Moderate Videos</h1>
         </header>
 
+        {/* Upload form stays the same */}
         <UploadVideo />
 
         <div className="mt-8">
           <h2 className="text-xl font-semibold mb-3">Latest Videos</h2>
-          <VideoGrid />
+          {/* Explicitly enable admin mode so this grid shows controls */}
+          <VideoGrid adminMode />
         </div>
       </div>
     </div>

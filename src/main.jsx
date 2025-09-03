@@ -12,7 +12,7 @@ import {
 import "./index.css";
 import AdminPage from "./pages/AdminPage.jsx";
 import Feed from "./components/Feed.jsx";
-
+import Submit from "./pages/Submit.jsx";
 
 /**
  * SLN — Routing + UX Shell (Phase 6–7, JS version)
@@ -43,6 +43,7 @@ function AppShell() {
           <Route path="/featured" element={<FeaturedPage />} />
           <Route path="/article/:slug" element={<ArticlePage />} />
           <Route path="*" element={<NotFound />} />
+          <Route path="/submit" element={<Submit />} />
           <Route path="/admin" element={<AdminPage />} />
         </Routes>
       </main>
@@ -73,7 +74,7 @@ function Header() {
   <NavLink to="/section/culture" label="Culture" active={isActive("/section/culture")} />
   <NavLink to="/section/sports" label="Sports" active={isActive("/section/sports")} />
   <NavLink to="/featured" label="Featured" active={isActive("/featured")} />
-  <NavLink to="/admin" label="Admin" active={isActive("/admin")} />
+
 </nav>
 
       </div>

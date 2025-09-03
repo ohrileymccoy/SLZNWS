@@ -29,6 +29,15 @@ export default function NavBar() {
           >
             Sports
           </span>
+
+          {/* New public upload link */}
+          <Link to="/submit" className="hover:text-white block">
+          Submit
+          </Link>
+
+
+          {/* Admin stays hidden from nav to avoid public exposure */}
+          {/* <Link to="/admin" className="hover:text-white block">Admin</Link> */}
         </div>
       </div>
     </nav>
