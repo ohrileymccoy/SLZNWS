@@ -35,7 +35,7 @@ export default function VideoGrid({ adminMode = false }) {
   // Update section handler (admin only)
   async function updateSection(slug, newSection) {
     try {
-      const res = await fetch("/api/v1/videos/update-section", {
+      const res = await fetch("/api/v1/videos/update_section", {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
