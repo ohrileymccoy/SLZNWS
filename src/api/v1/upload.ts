@@ -15,6 +15,30 @@ export async function handleUpload(
   const slug =
     (formData.get("slug") as string) || crypto.randomUUID();
   const mime = file.type || "video/mp4";
+// --- Validation layer ---
+const allowedSections = ["news", "culture", "sports"];
+const maxTitleLength = 200;
+const maxCaptionLength = 1000;
+
+// Slug: only lowercase letters, numbers, hyphens
+if (!/^[a-z0-9-]+$/.test(slug)) {
+  return Response.json({ ok: false, error: "Invalid slug format" }, { status: 400 });
+}
+
+// Section: must be one of allowed
+if (!allowedSections.includes(section)) {
+  return Response.json({ ok: false, error: "Invalid section" }, { status: 400 });
+}
+
+// Title length
+if (title.length > maxTitleLength) {
+  return Response.json({ ok: false, error: "Title too long" }, { status: 400 });
+}
+
+// Caption length
+if (caption.length > maxCaptionLength) {
+  return Response.json({ ok: false, error: "Caption too long" }, { status: 400 });
+}
 
   // Build R2 key: media/videos/YYYY/MM/uuid.ext
   const now = new Date();
