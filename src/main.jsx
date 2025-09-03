@@ -12,7 +12,7 @@ import {
 import "./index.css";
 import AdminPage from "./pages/AdminPage.jsx";
 import Feed from "./components/Feed.jsx";
-
+import UploadPage from "./pages/UploadPage.jsx";  // add this import
 
 /**
  * SLN — Routing + UX Shell (Phase 6–7, JS version)
@@ -44,6 +44,7 @@ function AppShell() {
           <Route path="/article/:slug" element={<ArticlePage />} />
           <Route path="*" element={<NotFound />} />
           <Route path="/admin" element={<AdminPage />} />
+          <Route path="/upload" element={<UploadPage />} />
         </Routes>
       </main>
       <Footer />
@@ -73,8 +74,9 @@ function Header() {
   <NavLink to="/section/culture" label="Culture" active={isActive("/section/culture")} />
   <NavLink to="/section/sports" label="Sports" active={isActive("/section/sports")} />
   <NavLink to="/featured" label="Featured" active={isActive("/featured")} />
-  <NavLink to="/admin" label="Admin" active={isActive("/admin")} />
+  <NavLink to="/upload" label="Upload" active={isActive("/upload")} /> {/* 👈 replaces Admin */}
 </nav>
+
 
       </div>
     </header>

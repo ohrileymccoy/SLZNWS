@@ -2,9 +2,18 @@
 
 export async function handleDelete(
   request: Request,
-  env: { DB: D1Database; MEDIA: R2Bucket }
+  env: { DB: D1Database; MEDIA: R2Bucket; ADMIN_SECRET: string }
 ): Promise<Response> {
   try {
+    // --- Auth check ---
+    const auth = request.headers.get("Authorization");
+    if (auth !== `Bearer ${env.ADMIN_SECRET}`) {
+      return new Response(
+        JSON.stringify({ ok: false, error: "Forbidden" }),
+        { status: 403, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
     const body: any = await request.json().catch(() => ({}));
     const { id, slug } = body;
 
@@ -18,9 +27,11 @@ export async function handleDelete(
     // Look up the row to get the R2 key
     const lookup = id
       ? await env.DB.prepare("SELECT id, slug, r2_key FROM videos WHERE id = ?")
-          .bind(id).first()
+          .bind(id)
+          .first()
       : await env.DB.prepare("SELECT id, slug, r2_key FROM videos WHERE slug = ?")
-          .bind(slug).first();
+          .bind(slug)
+          .first();
 
     if (!lookup) {
       return new Response(
@@ -29,14 +40,15 @@ export async function handleDelete(
       );
     }
 
-    // Delete from R2
-   // Delete from R2
-if (lookup.r2_key) {
-  await env.MEDIA.delete(String(lookup.r2_key));
-}
+    // Delete from R2 if key exists
+    if (lookup.r2_key) {
+      await env.MEDIA.delete(String(lookup.r2_key));
+    }
 
     // Delete from DB
-    await env.DB.prepare("DELETE FROM videos WHERE id = ?").bind(lookup.id).run();
+    await env.DB.prepare("DELETE FROM videos WHERE id = ?")
+      .bind(lookup.id)
+      .run();
 
     return new Response(
       JSON.stringify({ ok: true, deleted: lookup }),
