@@ -41,12 +41,15 @@ if (caption.length > maxCaptionLength) {
 }
 
   // Build R2 key: media/videos/YYYY/MM/uuid.ext
-  const now = new Date();
-  const ext =
-    (file.name.split(".").pop() || "mp4").replace(/\./g, "").toLowerCase();
-  const key = `media/videos/${now.getFullYear()}/${String(
-    now.getMonth() + 1
-  ).padStart(2, "0")}/${crypto.randomUUID()}.${ext}`;
+const now = new Date();
+const ext =
+  (file.name.split(".").pop() || "mp4").replace(/\./g, "").toLowerCase();
+
+// Use dash between year-month to match existing R2 structure
+const year = now.getFullYear();
+const month = String(now.getMonth() + 1).padStart(2, "0");
+const key = `media/videos/${year}-${month}/${crypto.randomUUID()}.${ext}`;
+
 
   // Store in R2 with the right content-type
   await env.MEDIA.put(key, file.stream(), {
