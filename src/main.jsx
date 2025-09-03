@@ -13,7 +13,8 @@ import "./index.css";
 import AdminPage from "./pages/AdminPage.jsx";
 import Feed from "./components/Feed.jsx";
 import Submit from "./pages/Submit.jsx";
-import slnLogo from "../assets/logo.png";
+import slnLogo from "./assets/logo.png";
+
 /**
  * SLN — Routing + UX Shell (Phase 6–7, JS version)
  * - Routes: /, /section/:section, /featured, /article/:slug
@@ -58,7 +59,7 @@ function Header() {
   return (
     <header className="sticky top-0 z-40 backdrop-blur supports-[backdrop-filter]:bg-neutral-950/70 border-b border-neutral-800">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        import slnLogo from "../assets/sln-logo.png";
+
 
 <Link to="/" className="group flex items-center gap-2">
   <img
