@@ -1,6 +1,6 @@
 import UploadVideo from "../components/UploadVideo.jsx";
 
-export default function UploadPage() {
+export default function Submit() {
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100 px-6 py-10">
       <div className="mx-auto max-w-2xl space-y-6">

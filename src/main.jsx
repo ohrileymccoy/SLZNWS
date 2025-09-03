@@ -75,7 +75,10 @@ function Header() {
   <NavLink to="/section/sports" label="Sports" active={isActive("/section/sports")} />
   <NavLink to="/featured" label="Featured" active={isActive("/featured")} />
 
+  {/* New public submit link */}
+  <NavLink to="/submit" label="Submit" active={isActive("/submit")} />
 </nav>
+
 
       </div>
     </header>
