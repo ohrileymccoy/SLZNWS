@@ -36,13 +36,14 @@ export default function VideoGrid({ adminMode = false }) {
   async function updateSection(slug, newSection) {
     try {
       const res = await fetch("/api/v1/videos/update-section", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(adminMode && ADMIN_BEARER ? { Authorization: ADMIN_BEARER } : {}),
-        },
-        body: JSON.stringify({ slug, section: newSection }),
-      });
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "Authorization": `Bearer ${import.meta.env.VITE_ADMIN_SECRET}`,
+  },
+  body: JSON.stringify({ slug, section: newSection }),
+});
+
       const out = await res.json();
       if (!out.ok) {
         alert(out.error || "Failed to update section");
@@ -61,14 +62,15 @@ export default function VideoGrid({ adminMode = false }) {
   async function handleDelete(video) {
     if (!confirm("Delete this video?")) return;
     try {
-      const res = await fetch("/api/v1/videos/delete", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(adminMode && ADMIN_BEARER ? { Authorization: ADMIN_BEARER } : {}),
-        },
-        body: JSON.stringify({ id: video.id, slug: video.slug }),
-      });
+     const res = await fetch("/api/v1/videos/delete", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "Authorization": `Bearer ${import.meta.env.VITE_ADMIN_SECRET}`,
+  },
+  body: JSON.stringify({ id: video.id, slug: video.slug }),
+});
+
       const json = await res.json();
       if (json.ok) {
         setVideos((prev) => prev.filter((v) => v.id !== video.id));
