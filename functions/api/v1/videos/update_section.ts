@@ -22,6 +22,7 @@ export async function onRequestPost({ request, env }) {
   }
 
   const { slug, section } = body || {};
+  console.log("Update request:", { slug, section });
 
   // --- Validate inputs ---
   const allowed = ["news", "culture", "sports"];
@@ -38,12 +39,21 @@ export async function onRequestPost({ request, env }) {
     });
   }
 
-  // --- Update row ---
-  const result = await env.DB.prepare(
-    "UPDATE videos SET section = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE slug = ?"
-  )
-    .bind(section, slug)
-    .run();
+  // --- Update row (safe: no updated_at) ---
+  let result;
+  try {
+    result = await env.DB.prepare(
+      "UPDATE videos SET section = ? WHERE slug = ?"
+    )
+      .bind(section, slug)
+      .run();
+  } catch (err) {
+    console.error("DB error in update_section:", err);
+    return new Response(JSON.stringify({ ok: false, error: "DB error" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
 
   if (result.meta.changes === 0) {
     return new Response(JSON.stringify({ ok: false, error: "Video not found" }), {
