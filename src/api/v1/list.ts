@@ -19,7 +19,8 @@ export async function handleList(
   const section = url.searchParams.get("section");
 
   // Build query dynamically (exclude seed rows)
-  let query = `SELECT id, slug, title, caption, section, description, r2_key, mime, poster_key, captions_key, status, created_at
+  let query = `SELECT id, slug, title, caption, section, description,
+                      r2_key, mime, poster_key, captions_key, status, created_at
                FROM videos
                WHERE status = ? AND is_seed = 0`;
   if (section) query += ` AND section = ?`;
@@ -36,10 +37,11 @@ export async function handleList(
 
   const base = isLocal
     ? "http://127.0.0.1:8787/r2" // absolute path for local
-    : (env.R2_PUBLIC_BASE || "").replace(/\/$/, "");
+    : (env.R2_PUBLIC_BASE || "").trim().replace(/\/$/, ""); // <-- trim added
 
   const items = (stmt.results || []).map((row: any) => ({
     ...row,
+    // Always rebuild URLs fresh to avoid broken DB values
     public_url: row.r2_key ? `${base}/${row.r2_key}` : null,
     poster_url: row.poster_key ? `${base}/${row.poster_key}` : null,
     eyebrow: row.section || "Video",

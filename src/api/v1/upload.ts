@@ -68,8 +68,8 @@ const key = `media/videos/${year}-${month}/${crypto.randomUUID()}.${ext}`;
     .run();
 
   // Build public URL with the same base you use in list.ts
-  const base = (env.R2_PUBLIC_BASE || "").replace(/\/$/, "");
-  const publicUrl = `${base}/${key}`;
+ const base = (env.R2_PUBLIC_BASE || "").trim().replace(/\/$/, "");
+const publicUrl = `${base}/${key}`;
 
   return Response.json({
     ok: true,
