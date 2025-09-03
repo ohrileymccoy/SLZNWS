@@ -13,7 +13,7 @@ import "./index.css";
 import AdminPage from "./pages/AdminPage.jsx";
 import Feed from "./components/Feed.jsx";
 import Submit from "./pages/Submit.jsx";
-
+import slnLogo from "../assets/logo.png";
 /**
  * SLN — Routing + UX Shell (Phase 6–7, JS version)
  * - Routes: /, /section/:section, /featured, /article/:slug
@@ -58,16 +58,19 @@ function Header() {
   return (
     <header className="sticky top-0 z-40 backdrop-blur supports-[backdrop-filter]:bg-neutral-950/70 border-b border-neutral-800">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        <Link to="/" className="group flex items-center gap-2">
-          <div
-            className="h-7 w-7 rounded-lg border border-neutral-700"
-            style={{ background: brand.primary }}
-            aria-hidden
-          />
-          <span className="font-semibold tracking-wide">
-            Sleazy <span className="text-neutral-400">News</span>
-          </span>
-        </Link>
+        import slnLogo from "../assets/sln-logo.png";
+
+<Link to="/" className="group flex items-center gap-2">
+  <img
+    src={slnLogo}
+    alt="Sleazy News Logo"
+    className="h-7 w-7 object-contain"
+  />
+  <span className="font-semibold tracking-wide">
+    Sleazy <span className="text-neutral-400">News</span>
+  </span>
+</Link>
+
         <nav className="flex flex-wrap items-center justify-center gap-2 w-full overflow-x-hidden">
   <NavLink to="/" label="Home" active={isActive("/")} />
   <NavLink to="/section/news" label="News" active={isActive("/section/news")} />
