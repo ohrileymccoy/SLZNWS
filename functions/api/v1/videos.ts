@@ -2,11 +2,12 @@
 
 // --- Environment bindings available to this Worker ---
 type EnvWithVars = {
-  DB: D1Database;          // Cloudflare D1 Database
-  MEDIA: R2Bucket;         // Cloudflare R2 bucket binding
-  R2_PUBLIC_BASE?: "https://pub-cebff8a701df40d5852164373722153e.r2.dev"; // Public R2 base URL (set in Pages > Environment variables)
-  ADMIN_SECRET?: string;   // Secret token for admin-only actions
+  DB: D1Database;
+  MEDIA: R2Bucket;
+  R2_PUBLIC_BASE?: string;
+  ADMIN_SECRET?: string;
 };
+
 
 //
 // GET /api/v1/videos?status=uploaded&limit=12&section=news
