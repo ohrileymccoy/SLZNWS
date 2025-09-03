@@ -1,36 +1,46 @@
 export async function onRequestPost({ request, env }) {
   try {
     const form = await request.formData();
-    const file = form.get("file");
-    const title = form.get("title");
-    const slug = form.get("slug");
-    const caption = form.get("caption");
-    const section = form.get("section") || "news";
-
+    const file = form.get("file") as File;
     if (!(file instanceof File)) {
       return new Response("Missing file", { status: 400 });
     }
 
-    const key = `media/videos/${new Date().toISOString().slice(0,7)}/${crypto.randomUUID()}-${file.name}`;
+    // --- Build standardized key: media/videos/YYYY-MM/uuid.ext ---
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const ext = (file.name.split(".").pop() || "mp4").toLowerCase();
+    const key = `media/videos/${year}-${month}/${crypto.randomUUID()}.${ext}`;
 
-    // Store file in R2
+    // --- Store file in R2 ---
     await env.MEDIA.put(key, file.stream(), {
       httpMetadata: { contentType: file.type },
     });
 
-    // Save DB row
+    // --- Insert metadata in D1 ---
     await env.DB.prepare(
-      "INSERT INTO videos (slug, title, caption, section, r2_key, mime, status) VALUES (?, ?, ?, ?, ?, ?, ?)"
-    )
-      .bind(slug, title, caption, section, key, file.type, "uploaded")
-      .run();
+      `INSERT INTO videos (slug, title, caption, section, r2_key, mime, status, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, 'uploaded', datetime('now'))`
+    ).bind(
+      form.get("slug") || crypto.randomUUID(),
+      form.get("title") || "Untitled",
+      form.get("caption") || "",
+      form.get("section") || "news",
+      key,
+      file.type || "video/mp4"
+    ).run();
 
+    // --- Build public URL safely (strip newline/slash) ---
+    const base = (env.R2_PUBLIC_BASE || "").trim().replace(/\/$/, "");
     return Response.json({
       ok: true,
       key,
-      public_url: `${env.R2_PUBLIC_BASE}/${key}`,
+      public_url: `${base}/${key}`,
     });
   } catch (err: any) {
-    return new Response("Server error: " + err.message, { status: 500 });
+    return new Response("Server error: " + (err.message || String(err)), {
+      status: 500,
+    });
   }
 }

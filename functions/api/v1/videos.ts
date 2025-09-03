@@ -1,90 +1,146 @@
-export async function onRequestGet({ request, env }) {
-  try {
-    const url = new URL(request.url);
-    const status = url.searchParams.get("status");
-    const section = url.searchParams.get("section");
-    const limit = parseInt(url.searchParams.get("limit") || "12", 10);
+/// <reference types="@cloudflare/workers-types" />
 
-    let query = "SELECT id, slug, title, caption, section, r2_key, mime, status, created_at FROM videos WHERE 1=1";
-    const binds: any[] = [];
+// --- Environment bindings available to this Worker ---
+type EnvWithVars = {
+  DB: D1Database;          // Cloudflare D1 Database
+  MEDIA: R2Bucket;         // Cloudflare R2 bucket binding
+  R2_PUBLIC_BASE?: "https://pub-cebff8a701df40d5852164373722153e.r2.dev"; // Public R2 base URL (set in Pages > Environment variables)
+  ADMIN_SECRET?: string;   // Secret token for admin-only actions
+};
 
-    if (status) {
-      query += " AND status = ?";
-      binds.push(status);
-    }
-    if (section) {
-      query += " AND section = ?";
-      binds.push(section);
-    }
+//
+// GET /api/v1/videos?status=uploaded&limit=12&section=news
+// - Lists videos with optional filters.
+// - Always rebuilds `public_url` from r2_key + R2_PUBLIC_BASE to avoid broken DB values.
+//
+export async function onRequestGet({ request, env }: { request: Request; env: EnvWithVars }) {
+  const url = new URL(request.url);
+  const status = url.searchParams.get("status") ?? "uploaded";
+  const limit = Math.min(parseInt(url.searchParams.get("limit") || "24", 10), 50);
+  const section = url.searchParams.get("section");
 
-    query += " ORDER BY created_at DESC LIMIT ?";
-    binds.push(limit);
+  // --- Build query (exclude seeded rows) ---
+  let query = `SELECT id, slug, title, caption, section, description,
+                      r2_key, mime, poster_key, captions_key, status, created_at
+               FROM videos
+               WHERE status = ? AND is_seed = 0`;
+  if (section) query += ` AND section = ?`;
+  query += ` ORDER BY datetime(created_at) DESC LIMIT ?`;
 
-    const { results } = await env.DB.prepare(query).bind(...binds).all();
+  // --- Execute query ---
+  const stmt = section
+    ? await env.DB.prepare(query).bind(status, section, limit).all()
+    : await env.DB.prepare(query).bind(status, limit).all();
 
-    // Attach public URLs
-    const items = results.map((row: any) => ({
-      ...row,
-      public_url: `${env.R2_PUBLIC_BASE}/${row.r2_key}`,
-    }));
+  // --- Base URL for public assets (strip trailing slash, trim newlines) ---
+  const base = (env.R2_PUBLIC_BASE || "").trim().replace(/\/$/, "");
 
-    return Response.json({ items });
-  } catch (err: any) {
-    return new Response("Server error: " + err.message, { status: 500 });
-  }
+  // --- Map results: always rebuild URLs cleanly ---
+  const items = (stmt.results || []).map((row: any) => ({
+    ...row,
+    public_url: row.r2_key ? `${base}/${row.r2_key}` : null,
+    poster_url: row.poster_key ? `${base}/${row.poster_key}` : null,
+  }));
+
+  return Response.json({ items });
 }
 
-export async function onRequestPost({ request, env }) {
-  try {
-    const data = await request.json();
-    const { slug, title, caption, section, r2_key, mime, status } = data;
+//
+// POST /api/v1/videos
+// - Handles direct multipart/form-data upload.
+// - Stores file in R2 and metadata in D1.
+// - Returns clean public_url.
+//
+export async function onRequestPost({ request, env }: { request: Request; env: EnvWithVars }) {
+  const formData = await request.formData();
+  const file = formData.get("file") as File;
 
-    if (!slug || !r2_key) {
-      return new Response("Missing slug or r2_key", { status: 400 });
-    }
+  // --- Validation: require a file ---
+  if (!(file instanceof File)) {
+    return Response.json({ ok: false, error: "Missing file" }, { status: 400 });
+  }
 
-    await env.DB.prepare(
-      "INSERT INTO videos (slug, title, caption, section, r2_key, mime, status) VALUES (?, ?, ?, ?, ?, ?, ?)"
-    )
-      .bind(slug, title, caption, section, r2_key, mime, status || "uploaded")
-      .run();
+  // --- Extract metadata from form ---
+  const title = (formData.get("title") as string) || "Untitled";
+  const caption = (formData.get("caption") as string) || "";
+  const section = (formData.get("section") as string) || "news";
+  const slug = (formData.get("slug") as string) || crypto.randomUUID();
+  const mime = file.type || "video/mp4";
 
-    return Response.json({
-      ok: true,
-      public_url: `${env.R2_PUBLIC_BASE}/${r2_key}`,
+  // --- Build key: media/videos/YYYY-MM/uuid.ext ---
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const ext = (file.name.split(".").pop() || "mp4").toLowerCase();
+  const key = `media/videos/${year}-${month}/${crypto.randomUUID()}.${ext}`;
+
+  // --- Upload file to R2 ---
+  await env.MEDIA.put(key, file.stream(), {
+    httpMetadata: {
+      contentType: mime,
+      cacheControl: "public, max-age=31536000, immutable",
+    },
+  });
+
+  // --- Insert metadata into D1 ---
+  await env.DB.prepare(
+    `INSERT INTO videos (slug, title, caption, section, r2_key, mime, status, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, 'uploaded', datetime('now'))`
+  ).bind(slug, title, caption, section, key, mime).run();
+
+  // --- Build public URL safely ---
+  const base = (env.R2_PUBLIC_BASE || "").trim().replace(/\/$/, "");
+  return Response.json({
+    ok: true,
+    slug,
+    key,
+    public_url: `${base}/${key}`,
+    mime,
+    title,
+    caption,
+    section,
+  });
+}
+
+//
+// DELETE /api/v1/videos
+// - Deletes both R2 object and DB row.
+// - Requires Authorization header: Bearer ADMIN_SECRET
+// - Body: { id, slug } (at least one required)
+//
+export async function onRequestDelete({ request, env }: { request: Request; env: EnvWithVars }) {
+  // --- Auth check ---
+  const auth = request.headers.get("Authorization");
+  if (auth !== `Bearer ${env.ADMIN_SECRET}`) {
+    return new Response(JSON.stringify({ ok: false, error: "Forbidden" }), {
+      status: 403,
+      headers: { "Content-Type": "application/json" },
     });
-  } catch (err: any) {
-    return new Response("Server error: " + err.message, { status: 500 });
   }
-}
 
-export async function onRequestDelete({ request, env }) {
-  try {
-    const data = await request.json();
-    const { id } = data;
-    if (!id) return new Response("Missing video ID", { status: 400 });
-
-    // Look up row
-    const { results } = await env.DB.prepare(
-      "SELECT r2_key FROM videos WHERE id = ?"
-    )
-      .bind(id)
-      .all();
-
-    if (!results.length) {
-      return new Response("Video not found", { status: 404 });
-    }
-
-    const r2Key = results[0].r2_key;
-
-    // Delete from R2
-    await env.MEDIA.delete(r2Key);
-
-    // Delete from DB
-    await env.DB.prepare("DELETE FROM videos WHERE id = ?").bind(id).run();
-
-    return Response.json({ ok: true });
-  } catch (err: any) {
-    return new Response("Server error: " + err.message, { status: 500 });
+  // --- Parse body ---
+  const body: any = await request.json().catch(() => ({}));
+  const { id, slug } = body;
+  if (!id && !slug) {
+    return Response.json({ ok: false, error: "Missing id or slug" }, { status: 400 });
   }
+
+  // --- Lookup row in DB ---
+  const lookup = id
+    ? await env.DB.prepare("SELECT id, slug, r2_key FROM videos WHERE id = ?").bind(id).first()
+    : await env.DB.prepare("SELECT id, slug, r2_key FROM videos WHERE slug = ?").bind(slug).first();
+
+  if (!lookup) {
+    return Response.json({ ok: false, error: "Video not found" }, { status: 404 });
+  }
+
+  // --- Delete from R2 if exists ---
+  if (lookup.r2_key) {
+    await env.MEDIA.delete(String(lookup.r2_key));
+  }
+
+  // --- Delete from DB ---
+  await env.DB.prepare("DELETE FROM videos WHERE id = ?").bind(lookup.id).run();
+
+  return Response.json({ ok: true, deleted: lookup });
 }
