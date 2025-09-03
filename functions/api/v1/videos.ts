@@ -110,6 +110,8 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
 // - Body: { id, slug } (at least one required)
 //
 export async function onRequestDelete({ request, env }: { request: Request; env: EnvWithVars }) {
+console.log("DEBUG R2_PUBLIC_BASE:", env.R2_PUBLIC_BASE);
+
   // --- Auth check ---
   const auth = request.headers.get("Authorization");
   if (auth !== `Bearer ${env.ADMIN_SECRET}`) {
@@ -117,6 +119,7 @@ export async function onRequestDelete({ request, env }: { request: Request; env:
       status: 403,
       headers: { "Content-Type": "application/json" },
     });
+    
   }
 
   // --- Parse body ---
