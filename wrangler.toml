@@ -21,4 +21,4 @@ bucket_name = "sln-media"
 
 [vars]
 # Use your Public Development URL + bucket name (no trailing slash)
-R2_PUBLIC_BASE = "https://pub-cebff8a701df40d5852164373722153e.r2.dev"
+R2_PUBLIC_BASE = "https://pub-cebff8a701df40d5852164373722153e.r2.dev/sln-media"
