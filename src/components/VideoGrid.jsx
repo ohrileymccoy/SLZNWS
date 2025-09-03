@@ -102,32 +102,29 @@ export default function VideoGrid({ adminMode = false }) {
           />
 
           {/* Admin controls */}
-          {adminMode && (
-            <>
-              {/* Section dropdown */}
-              <div className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition">
-                <select
-                  className="px-2 py-1 rounded bg-neutral-800 border border-neutral-600 text-xs text-white"
-                  value={v.section || "news"}
-                  onChange={(e) => updateSection(v.slug, e.target.value)}
-                >
-                  {SECTIONS.map((s) => (
-                    <option key={s} value={s}>
-                      {s[0].toUpperCase() + s.slice(1)}
-                    </option>
-                  ))}
-                </select>
-              </div>
+{adminMode && (
+  <div className="mt-2 flex items-center justify-between">
+    <select
+      className="px-2 py-1 rounded bg-neutral-800 border border-neutral-600 text-xs text-white"
+      value={v.section || "news"}
+      onChange={(e) => updateSection(v.slug, e.target.value)}
+    >
+      {SECTIONS.map((s) => (
+        <option key={s} value={s}>
+          {s[0].toUpperCase() + s.slice(1)}
+        </option>
+      ))}
+    </select>
 
-              {/* Delete button */}
-              <button
-                onClick={() => handleDelete(v)}
-                className="absolute top-2 right-2 px-2 py-1 text-xs rounded bg-red-600 text-white opacity-0 group-hover:opacity-100 transition"
-              >
-                🗑 Delete
-              </button>
-            </>
-          )}
+    <button
+      onClick={() => handleDelete(v)}
+      className="px-2 py-1 text-xs rounded bg-red-600 text-white hover:bg-red-700 transition"
+    >
+      🗑 Delete
+    </button>
+  </div>
+)}
+
         </li>
       ))}
     </ul>
