@@ -161,34 +161,8 @@ function FeaturedPage() {
   );
 }
 
-function ArticlePage() {
-  const { slug } = useParams();   // here slug is actually videoId for now
-  const [video, setVideo] = useState(null);
 
-  useEffect(() => {
-    async function fetchVideo() {
-      const res = await fetch(`/api/v1/videos?id=${slug}`);
-      const data = await res.json();
-      if (data.ok && data.items.length > 0) {
-        setVideo(data.items[0]);
-      }
-    }
-    fetchVideo();
-  }, [slug]);
 
-  if (!video) return <p className="text-neutral-400 p-6">Loading…</p>;
-
-  return (
-    <div className="max-w-3xl mx-auto py-10 space-y-6">
-      <video src={video.public_url} controls className="w-full rounded-xl" poster={video.poster_key || undefined} />
-      <h1 className="text-2xl font-bold">{video.title}</h1>
-      <p className="text-neutral-400">{video.caption}</p>
-
-      {/* Full comment thread here */}
-      <Comments videoId={video.id} />
-    </div>
-  );
-}
 
 function NotFound({ message = "We couldn't find that." }) {
   return (
