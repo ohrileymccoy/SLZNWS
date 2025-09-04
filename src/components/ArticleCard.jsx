@@ -1,3 +1,5 @@
+import Comments from "./Comments.jsx";
+
 export default function ArticleCard({
   title,
   href,              // link when NOT a video
@@ -7,6 +9,7 @@ export default function ArticleCard({
   posterUrl,         // optional poster for video
   caption,           // 👈 merged: short text under title
   footer,            // optional footer area
+  videoId,
 }) {
   const isVideo = !!videoUrl;
 
@@ -39,9 +42,22 @@ export default function ArticleCard({
             {eyebrow}
           </div>
         )}
-        {title && <h3 className="text-sm font-semibold line-clamp-2">{title}</h3>}
-        {caption && <p className="text-xs text-neutral-400 mt-1">{caption}</p>}
-        {footer && <div className="mt-2 text-xs text-neutral-500">{footer}</div>}
+        {title && (
+          <h3 className="text-sm font-semibold line-clamp-2">{title}</h3>
+        )}
+        {caption && (
+          <p className="text-xs text-neutral-400 mt-1">{caption}</p>
+        )}
+        {footer && (
+          <div className="mt-2 text-xs text-neutral-500">{footer}</div>
+        )}
+
+        {/* 👇 Add comments here if it's a video */}
+        {isVideo && videoId && (
+          <div className="mt-3">
+            <Comments videoId={videoId} />
+          </div>
+        )}
       </div>
     </div>
   );
