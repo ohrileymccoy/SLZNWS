@@ -14,6 +14,8 @@ import AdminPage from "./pages/AdminPage.jsx";
 import Feed from "./components/Feed.jsx";
 import Submit from "./pages/Submit.jsx";
 import slnLogo from "./assets/logo.png";
+import Comments from "./components/Comments.jsx";
+import ArticlePage from "./pages/ArticlePage.jsx";
 
 /**
  * SLN — Routing + UX Shell (Phase 6–7, JS version)
@@ -42,7 +44,7 @@ function AppShell() {
           <Route path="/" element={<HomePage />} />
           <Route path="/section/:section" element={<SectionPage />} />
           <Route path="/featured" element={<FeaturedPage />} />
-          <Route path="/article/:slug" element={<ArticlePage />} />
+          <Route path="/article/:id" element={<ArticlePage />} />
           <Route path="*" element={<NotFound />} />
           <Route path="/submit" element={<Submit />} />
           <Route path="/admin" element={<AdminPage />} />
@@ -160,24 +162,31 @@ function FeaturedPage() {
 }
 
 function ArticlePage() {
-  const { slug } = useParams();
+  const { slug } = useParams();   // here slug is actually videoId for now
+  const [video, setVideo] = useState(null);
+
+  useEffect(() => {
+    async function fetchVideo() {
+      const res = await fetch(`/api/v1/videos?id=${slug}`);
+      const data = await res.json();
+      if (data.ok && data.items.length > 0) {
+        setVideo(data.items[0]);
+      }
+    }
+    fetchVideo();
+  }, [slug]);
+
+  if (!video) return <p className="text-neutral-400 p-6">Loading…</p>;
+
   return (
-    <article className="py-10">
-      <div className="grid gap-6">
-        <div className="aspect-[16/9] w-full rounded-2xl bg-neutral-900 border border-neutral-800" />
-        <div className="space-y-2">
-          <span className="uppercase tracking-wider text-xs text-neutral-400">News • 8 min read</span>
-          <h1 className="text-2xl md:text-3xl font-semibold">{(slug || "Story").replace(/-/g, " ")}</h1>
-          <p className="text-neutral-300">By Staff • Just now</p>
-        </div>
-        <div className="prose prose-invert max-w-none">
-          <p>
-            Reader view placeholder. In Phase 9 this renders sanitized markdown/Rich Text from the API
-            and locks hero image aspect ratio to avoid CLS.
-          </p>
-        </div>
-      </div>
-    </article>
+    <div className="max-w-3xl mx-auto py-10 space-y-6">
+      <video src={video.public_url} controls className="w-full rounded-xl" poster={video.poster_key || undefined} />
+      <h1 className="text-2xl font-bold">{video.title}</h1>
+      <p className="text-neutral-400">{video.caption}</p>
+
+      {/* Full comment thread here */}
+      <Comments videoId={video.id} />
+    </div>
   );
 }
 

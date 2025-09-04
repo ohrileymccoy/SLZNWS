@@ -52,6 +52,7 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
 export async function onRequestGet({ request, env }: { request: Request; env: Env }) {
   const url = new URL(request.url);
   const video_id = url.searchParams.get("video_id");
+  const limit = Number(url.searchParams.get("limit") || "0");
 
   if (!video_id) {
     return new Response(JSON.stringify({ ok: false, error: "Missing video_id" }), {
@@ -60,9 +61,12 @@ export async function onRequestGet({ request, env }: { request: Request; env: En
     });
   }
 
-  const rows = await env.DB.prepare(
-    "SELECT id, username, body, created_at FROM comments WHERE video_id = ? ORDER BY created_at DESC"
-  ).bind(video_id).all();
+  const sql =
+    limit === 1
+      ? "SELECT id, username, body, created_at FROM comments WHERE video_id = ? ORDER BY created_at DESC LIMIT 1"
+      : "SELECT id, username, body, created_at FROM comments WHERE video_id = ? ORDER BY created_at DESC";
+
+  const rows = await env.DB.prepare(sql).bind(video_id).all();
 
   return new Response(JSON.stringify({ ok: true, comments: rows.results || [] }), {
     headers: { "Content-Type": "application/json" },
