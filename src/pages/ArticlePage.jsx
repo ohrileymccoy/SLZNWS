@@ -7,22 +7,23 @@ export default function ArticlePage() {
   const [video, setVideo] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function fetchVideo() {
-      try {
-        const res = await fetch(`/api/v1/videos?id=${id}`);
-        const data = await res.json();
-        if (data.ok && data.items.length > 0) {
-          setVideo(data.items[0]);
-        }
-      } catch (err) {
-        console.error("Failed to fetch video:", err);
-      } finally {
-        setLoading(false);
+useEffect(() => {
+  async function fetchVideo() {
+    try {
+      const res = await fetch(`/api/v1/videos?id=${id}`);
+      const data = await res.json();
+      if (data.ok && data.item) {
+        setVideo(data.item); // single object now
       }
+    } catch (err) {
+      console.error("Failed to fetch video:", err);
+    } finally {
+      setLoading(false);
     }
-    fetchVideo();
-  }, [id]);
+  }
+  fetchVideo();
+}, [id]);
+
 
   if (loading) {
     return <p className="text-neutral-400 p-6">Loading…</p>;
@@ -35,11 +36,12 @@ export default function ArticlePage() {
   return (
     <div className="max-w-3xl mx-auto py-10 space-y-6">
       <video
-        src={video.public_url}
-        controls
-        className="w-full rounded-xl"
-        poster={video.poster_key || undefined}
-      />
+  src={video.public_url}
+  controls
+  className="w-full rounded-xl"
+  poster={video.poster_url || undefined}
+/>
+
       <h1 className="text-2xl font-bold">{video.title}</h1>
       {video.caption && <p className="text-neutral-400">{video.caption}</p>}
 
