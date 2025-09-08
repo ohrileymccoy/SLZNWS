@@ -6,29 +6,43 @@ export default function Comments({ videoId }) {
   const [body, setBody] = useState("");
 
   async function fetchComments() {
-  try {
-    const res = await fetch(`/api/v1/comments?video_id=${videoId}`);
-    const data = await res.json();
-    if (data.ok) {
-      setComments(data.comments);
-    } else {
-      console.error("Failed to load comments:", data.error);
+    try {
+      const res = await fetch(`/api/v1/comments?video_id=${videoId}`);
+      const data = await res.json();
+      if (data.ok) {
+        setComments(data.comments);
+      } else {
+        console.error("Failed to load comments:", data.error);
+      }
+    } catch (err) {
+      console.error("Network error:", err);
     }
-  } catch (err) {
-    console.error("Network error:", err);
   }
-}
-
 
   async function handleSubmit(e) {
     e.preventDefault();
-    await fetch("/api/v1/comments", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ video_id: videoId, username, body }),
-    });
-    setBody("");
-    fetchComments();
+    try {
+      const res = await fetch("/api/v1/comments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          video_id: Number(videoId), // ensure numeric ID
+          username,
+          body,
+        }),
+      });
+      const data = await res.json();
+
+      if (data.ok && data.comment) {
+        // Optimistically prepend new comment to state
+        setComments((prev) => [data.comment, ...prev]);
+        setBody("");
+      } else {
+        console.error("Failed to post comment:", data.error);
+      }
+    } catch (err) {
+      console.error("Network error submitting comment:", err);
+    }
   }
 
   useEffect(() => {
@@ -64,7 +78,10 @@ export default function Comments({ videoId }) {
 
       <ul className="space-y-3">
         {comments.map((c) => (
-          <li key={c.id} className="p-3 bg-neutral-900 rounded border border-neutral-800">
+          <li
+            key={c.id}
+            className="p-3 bg-neutral-900 rounded border border-neutral-800"
+          >
             <p className="text-sm text-neutral-400">
               {c.username} — {new Date(c.created_at).toLocaleString()}
             </p>

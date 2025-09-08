@@ -34,11 +34,14 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
     const safeUser = sanitize(username);
     const safeBody = sanitize(body);
 
-    await env.DB.prepare(
-      "INSERT INTO comments (video_id, username, body) VALUES (?, ?, ?)"
-    ).bind(video_id, safeUser, safeBody).run();
+    // Insert and immediately return the row
+    const newComment = await env.DB.prepare(
+      "INSERT INTO comments (video_id, username, body) VALUES (?, ?, ?) RETURNING id, username, body, created_at"
+    )
+      .bind(Number(video_id), safeUser, safeBody)
+      .first();
 
-    return new Response(JSON.stringify({ ok: true }), {
+    return new Response(JSON.stringify({ ok: true, comment: newComment }), {
       headers: { "Content-Type": "application/json" },
     });
   } catch (err) {
@@ -48,6 +51,7 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
     });
   }
 }
+
 
 export async function onRequestGet({ request, env }: { request: Request; env: Env }) {
   const url = new URL(request.url);
@@ -69,6 +73,23 @@ export async function onRequestGet({ request, env }: { request: Request; env: En
   const rows = await env.DB.prepare(sql).bind(video_id).all();
 
   return new Response(JSON.stringify({ ok: true, comments: rows.results || [] }), {
+    headers: { "Content-Type": "application/json" },
+  });
+}
+
+export async function onRequestDelete({ request, env }: { request: Request; env: Env }) {
+  const body = (await request.json().catch(() => ({}))) as { id?: number };
+
+  if (!body.id) {
+    return new Response(JSON.stringify({ ok: false, error: "Missing id" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  await env.DB.prepare("DELETE FROM comments WHERE id = ?").bind(body.id).run();
+
+  return new Response(JSON.stringify({ ok: true, deleted: body.id }), {
     headers: { "Content-Type": "application/json" },
   });
 }
