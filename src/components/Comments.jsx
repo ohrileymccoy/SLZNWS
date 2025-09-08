@@ -20,30 +20,35 @@ export default function Comments({ videoId }) {
   }
 
   async function handleSubmit(e) {
-    e.preventDefault();
-    try {
-      const res = await fetch("/api/v1/comments", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          video_id: Number(videoId), // ensure numeric ID
-          username,
-          body,
-        }),
-      });
-      const data = await res.json();
+  e.preventDefault();
+  console.log("Submitting comment…", { videoId, username, body });
 
-      if (data.ok && data.comment) {
-        // Optimistically prepend new comment to state
-        setComments((prev) => [data.comment, ...prev]);
-        setBody("");
-      } else {
-        console.error("Failed to post comment:", data.error);
-      }
-    } catch (err) {
-      console.error("Network error submitting comment:", err);
+  try {
+    const res = await fetch("/api/v1/comments", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        video_id: Number(videoId),
+        username,
+        body,
+      }),
+    });
+
+    console.log("Response status:", res.status);
+    const data = await res.json();
+    console.log("Response JSON:", data);
+
+    if (data.ok && data.comment) {
+      setComments((prev) => [data.comment, ...prev]);
+      setBody("");
+      console.log("Comment added:", data.comment);
+    } else {
+      console.error("Failed to post comment:", data.error);
     }
+  } catch (err) {
+    console.error("Network error submitting comment:", err);
   }
+}
 
   useEffect(() => {
     fetchComments();
