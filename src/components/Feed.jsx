@@ -23,13 +23,17 @@ export default function Feed({ section = null }) {
   return (
     <div className="mx-auto max-w-3xl px-4">
       {items.map((it) => (
-        <ArticleCard
-          key={it.id}
-          title={it.title}
-          eyebrow={it.section}
-          videoUrl={it.public_url}   // tells ArticleCard to render <video>
-          caption={it.caption}
-        />
+     <ArticleCard
+  key={it.id}
+  title={it.title}
+  eyebrow={it.section}
+  videoUrl={it.public_url}
+  posterUrl={it.poster_key}
+  caption={it.caption}
+  footer={`Uploaded ${new Date(it.created_at).toLocaleDateString()}`}
+  videoId={it.id}   // 👈 pass the DB id
+/>
+
       ))}
     </div>
   );

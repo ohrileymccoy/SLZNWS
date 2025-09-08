@@ -46,7 +46,8 @@ export async function handleList(
     href: null,
   }));
 
-  return new Response(JSON.stringify({ items }), {
-    headers: { "Content-Type": "application/json" },
-  });
+ return new Response(
+  JSON.stringify({ ok: true, items }),
+  { headers: { "Content-Type": "application/json" } }
+);
 }

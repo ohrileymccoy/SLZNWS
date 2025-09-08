@@ -8,5 +8,5 @@
     "types": ["@cloudflare/workers-types", "vite/client"],
     "skipLibCheck": true
   },
-  "include": ["src"]
+  "include": ["src", "functions/api/v1/list.ts"]
 }

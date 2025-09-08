@@ -5,7 +5,7 @@ export interface Env {
 }
 
 import { handleUpload } from "./api/v1/upload";
-import { handleList }   from "./api/v1/list";
+import { handleList }   from "../functions/api/v1/list";
 import { handleDelete } from "./api/v1/delete";
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
