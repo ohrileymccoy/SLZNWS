@@ -255,11 +255,12 @@ useEffect(() => {
             key={it.id}
             className="snap-start min-w-[160px] bg-neutral-900/60 border border-neutral-800 rounded-2xl overflow-hidden"
           >
-            <img
-              src={it.src}
-              alt={it.name}
-              className="w-full h-40 object-cover"
-            />
+           <img
+  src={it.public_url}
+  alt={it.name}
+  className="w-full h-40 object-cover"
+/>
+
             <div className="p-2 text-center">
               <p className="text-sm text-neutral-300">{it.name}</p>
             </div>
