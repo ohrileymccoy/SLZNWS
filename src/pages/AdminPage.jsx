@@ -2,6 +2,8 @@
 import { useState } from "react";
 import UploadVideo from "../components/UploadVideo.jsx";
 import VideoGrid from "../components/VideoGrid.jsx";
+import UploadMugshot from "../components/UploadMugshot.jsx"; // ⬅️ new import
+
 
 export default function AdminPage() {
   const [refreshNonce, setRefreshNonce] = useState(0); // force re-mount of VideoGrid to refetch
@@ -33,7 +35,11 @@ export default function AdminPage() {
               </button>
             </div>
           </div>
-
+{/* Upload mugshots (new) */}
+        <section>
+          <h2 className="text-xl font-semibold mb-3">Upload Mugshot</h2>
+          <UploadMugshot />
+        </section>
           {/* adminMode enables delete + section controls inside the grid */}
           <VideoGrid key={refreshNonce} adminMode />
         </section>

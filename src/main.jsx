@@ -15,6 +15,9 @@ import Feed from "./components/Feed.jsx";
 import Submit from "./pages/Submit.jsx";
 import slnLogo from "./assets/logo.png";
 import ArticlePage from "./pages/ArticlePage.jsx";
+import MugshotPage from "./pages/MugshotPage.jsx";
+
+
 
 /**
  * SLN — Routing + UX Shell (Phase 6–7, JS version)
@@ -42,6 +45,8 @@ function AppShell() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/admin" element={<AdminPage />} />
+          
+          <Route path="/mugshot" element={<MugshotPage />} />
           <Route path="/section/:section" element={<SectionPage />} />
           <Route path="/featured" element={<FeaturedPage />} />
           <Route path="/article/:id" element={<ArticlePage />} />
@@ -197,33 +202,75 @@ function KPIBand() {
   );
 }
 
-function FeaturedRail({ onOpen }) {
-  const items = [
-    { slug: "riverwalk-ribbon-cutting", title: "Ribbon-Cutting Brings New Life to Riverwalk" },
-    { slug: "friday-night-football-returns", title: "Friday Night Football Returns Under the Lights" },
-    { slug: "art-festival-brings-crowds-riverfront", title: "Art Festival Brings Crowds to Riverfront" },
-  ];
+function FeaturedRail() {
+  const scrollRef = useRef(null);
+
+  // Temporary static mugshot list (replace with DB/API later)
+  const [items, setItems] = useState([]);
+
+useEffect(() => {
+  async function load() {
+    try {
+      const res = await fetch("/api/v1/mugshots/list");
+      const json = await res.json();
+      setItems(json.items || []);
+    } catch (err) {
+      console.error("Failed to load mugshots:", err);
+    }
+  }
+  load();
+}, []);
+  // Auto-scroll ticker effect
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    const interval = setInterval(() => {
+      if (!el) return;
+      el.scrollBy({ left: 180, behavior: "smooth" }); // adjust width
+
+      // reset when end reached
+      if (el.scrollLeft + el.clientWidth >= el.scrollWidth - 5) {
+        setTimeout(() => {
+          el.scrollTo({ left: 0, behavior: "smooth" });
+        }, 1500);
+      }
+    }, 2500); // every 2.5s
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <section className="mb-8">
       <div className="flex items-end justify-between mb-3">
-        <PageTitle title="Featured" eyebrow="Curated" compact />
-        <Link to="/featured" className="text-sm text-neutral-400 hover:text-neutral-200">View all</Link>
+        <h2 className="text-lg font-semibold text-neutral-200">Mugshot Ticker</h2>
       </div>
-      <div className="grid gap-3 md:grid-cols-3">
+
+      <div
+        ref={scrollRef}
+        className="flex overflow-x-auto gap-3 pb-2 snap-x scroll-smooth scrollbar-hide"
+      >
         {items.map((it) => (
-          <button
-            key={it.slug}
-            onClick={() => onOpen(it.slug)}
-            className="group text-left rounded-2xl bg-neutral-900/60 border border-neutral-800 p-4 hover:border-neutral-700 transition-colors"
+          <div
+            key={it.id}
+            className="snap-start min-w-[160px] bg-neutral-900/60 border border-neutral-800 rounded-2xl overflow-hidden"
           >
-            <h3 className="font-medium group-hover:text-white">{it.title}</h3>
-            <p className="text-sm text-neutral-400 mt-1">Editor pick</p>
-          </button>
+            <img
+              src={it.src}
+              alt={it.name}
+              className="w-full h-40 object-cover"
+            />
+            <div className="p-2 text-center">
+              <p className="text-sm text-neutral-300">{it.name}</p>
+            </div>
+          </div>
         ))}
       </div>
     </section>
   );
 }
+
+export default FeaturedRail;
 
 function SectionTabs() {
   const location = useLocation();
