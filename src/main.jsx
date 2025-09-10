@@ -245,28 +245,27 @@ useEffect(() => {
       <div className="flex items-end justify-between mb-3">
         <h2 className="text-lg font-semibold text-neutral-200">Mugshot Ticker</h2>
       </div>
-
-      <div
-        ref={scrollRef}
-        className="flex overflow-x-auto gap-3 pb-2 snap-x scroll-smooth scrollbar-hide"
-      >
-        {items.map((it) => (
-          <div
-            key={it.id}
-            className="snap-start min-w-[160px] bg-neutral-900/60 border border-neutral-800 rounded-2xl overflow-hidden"
-          >
-           <img
-  src={it.public_url}
-  alt={it.name}
-  className="w-full h-40 object-cover"
-/>
-
-            <div className="p-2 text-center">
-              <p className="text-sm text-neutral-300">{it.name}</p>
-            </div>
-          </div>
-        ))}
+<div
+  ref={scrollRef}
+  className="flex overflow-x-hidden gap-3 pb-2 snap-none"
+>
+  {/* render the list twice */}
+  {[...items, ...items].map((it, idx) => (
+    <div
+      key={idx}
+      className="min-w-[160px] bg-neutral-900/60 border border-neutral-800 rounded-2xl overflow-hidden"
+    >
+      <img
+        src={it.public_url}
+        alt={it.name}
+        className="w-full h-40 object-cover"
+      />
+      <div className="p-2 text-center">
+        <p className="text-sm text-neutral-300">{it.name}</p>
       </div>
+    </div>
+  ))}
+</div>
     </section>
   );
 }
