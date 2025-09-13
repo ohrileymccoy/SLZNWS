@@ -2,23 +2,27 @@
 import { useEffect, useState } from "react";
 import ArticleCard from "./ArticleCard.jsx";
 
-// Allowed section values
-const SECTIONS = ["news", "culture", "sports"];
+// Keep in sync with backend allowed values
+const SECTIONS = ["news", "culture", "sports", "featured"];
 
 export default function VideoGrid({ adminMode = false }) {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Load videos from API (align with Feed: use RELATIVE path)
+  // Load videos from API (public vs admin)
   useEffect(() => {
     async function load() {
       try {
         setLoading(true);
         setError(null);
 
-        // Default status is 'uploaded' server-side; just cap the list
-        const res = await fetch(`/api/v1/videos?limit=12`);
+        const qs = new URLSearchParams({
+          limit: adminMode ? "50" : "12",
+        });
+        if (adminMode) qs.set("all", "true"); // admin sees unpublished
+
+        const res = await fetch(`/api/v1/videos?${qs.toString()}`);
         if (!res.ok) throw new Error(`API ${res.status}`);
 
         const json = await res.json();
@@ -31,9 +35,9 @@ export default function VideoGrid({ adminMode = false }) {
       }
     }
     load();
-  }, []);
+  }, [adminMode]);
 
-  // Update section (admin only)
+  // Admin: change section
   async function updateSection(slug, newSection) {
     try {
       const res = await fetch("/api/v1/videos/update_section", {
@@ -45,10 +49,8 @@ export default function VideoGrid({ adminMode = false }) {
         body: JSON.stringify({ slug, section: newSection }),
       });
       const out = await res.json();
-      if (!out.ok) {
-        alert(out.error || "Failed to update section");
-        return;
-      }
+      if (!out.ok) return alert(out.error || "Failed to update section");
+
       setVideos((prev) =>
         prev.map((v) => (v.slug === slug ? { ...v, section: newSection } : v))
       );
@@ -57,7 +59,31 @@ export default function VideoGrid({ adminMode = false }) {
     }
   }
 
-  // Delete (admin only)
+  // Admin: approve for publication
+  async function handleApprove(slug) {
+    try {
+      const res = await fetch("/api/v1/videos/approve", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_ADMIN_SECRET}`,
+        },
+        body: JSON.stringify({ slug }),
+      });
+      const out = await res.json();
+      if (!out.ok) return alert(out.error || "Failed to approve");
+
+      setVideos((prev) =>
+        prev.map((v) =>
+          v.slug === slug ? { ...v, is_published: 1, status: "ready" } : v
+        )
+      );
+    } catch (err) {
+      alert("Approve failed: " + err.message);
+    }
+  }
+
+  // Admin: delete video
   async function handleDelete(video) {
     if (!confirm("Delete this video?")) return;
     try {
@@ -87,46 +113,74 @@ export default function VideoGrid({ adminMode = false }) {
 
   return (
     <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {videos.map((v) => (
-        <li key={v.id} className="relative group">
-          <ArticleCard
-            title={v.title || v.slug}
-            eyebrow={v.section || "Video"}
-            videoUrl={v.public_url}
-            // Resilient to either backend shape
-            posterUrl={v.poster_url || v.poster_key || undefined}
-            caption={v.caption}
-            mime={v.mime}
-            // CRITICAL: match Feed so /article/:id keeps working
-            videoId={v.id}
-            onDelete={adminMode ? () => handleDelete(v) : undefined}
-          />
+      {videos.map((v) => {
+        const published = Number(v.is_published) === 1 || v.is_published === true;
+        const ready = (v.status || "").toLowerCase() === "ready";
 
-          {/* Admin controls */}
-          {adminMode && (
-            <div className="mt-2 flex items-center justify-between">
-              <select
-                className="px-2 py-1 rounded bg-neutral-800 border border-neutral-600 text-xs text-white"
-                value={v.section || "news"}
-                onChange={(e) => updateSection(v.slug, e.target.value)}
+        return (
+          <li key={v.id} className="relative group">
+            {/* Moderation badge (admin only) */}
+            {adminMode && (
+              <span
+                className={`absolute z-10 top-2 right-2 px-2 py-0.5 rounded text-[10px] border
+                  ${
+                    published
+                      ? "bg-green-900/40 border-green-700 text-green-300"
+                      : "bg-yellow-900/40 border-yellow-700 text-yellow-300"
+                  }`}
               >
-                {SECTIONS.map((s) => (
-                  <option key={s} value={s}>
-                    {s[0].toUpperCase() + s.slice(1)}
-                  </option>
-                ))}
-              </select>
+                {published ? "Published" : "Pending"}
+              </span>
+            )}
 
-              <button
-                onClick={() => handleDelete(v)}
-                className="px-2 py-1 text-xs rounded bg-red-600 text-white hover:bg-red-700 transition"
-              >
-                🗑 Delete
-              </button>
-            </div>
-          )}
-        </li>
-      ))}
+            <ArticleCard
+              title={v.title || v.slug}
+              eyebrow={v.section || "Video"}
+              videoUrl={v.public_url}
+              posterUrl={v.poster_url || v.poster_key || undefined}
+              caption={v.caption}
+              mime={v.mime}
+              // Keep /article/:id route working
+              videoId={v.id}
+              onDelete={adminMode ? () => handleDelete(v) : undefined}
+            />
+
+            {/* Admin controls */}
+            {adminMode && (
+              <div className="mt-2 flex items-center justify-between gap-2">
+                <select
+                  className="px-2 py-1 rounded bg-neutral-800 border border-neutral-600 text-xs text-white"
+                  value={v.section || "news"}
+                  onChange={(e) => updateSection(v.slug, e.target.value)}
+                >
+                  {SECTIONS.map((s) => (
+                    <option key={s} value={s}>
+                      {s[0].toUpperCase() + s.slice(1)}
+                    </option>
+                  ))}
+                </select>
+
+                <div className="flex gap-2">
+                  {(!published || !ready) && (
+                    <button
+                      onClick={() => handleApprove(v.slug)}
+                      className="px-2 py-1 text-xs rounded bg-green-600 text-white hover:bg-green-700 transition"
+                    >
+                      ✅ Approve
+                    </button>
+                  )}
+                  <button
+                    onClick={() => handleDelete(v)}
+                    className="px-2 py-1 text-xs rounded bg-red-600 text-white hover:bg-red-700 transition"
+                  >
+                    🗑 Delete
+                  </button>
+                </div>
+              </div>
+            )}
+          </li>
+        );
+      })}
     </ul>
   );
 }
