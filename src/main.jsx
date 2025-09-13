@@ -63,38 +63,52 @@ function AppShell() {
 function Header() {
   const location = useLocation();
   const isActive = (path) => location.pathname === path;
+
   return (
     <header className="sticky top-0 z-40 backdrop-blur supports-[backdrop-filter]:bg-neutral-950/70 border-b border-neutral-800">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        
+        {/* Brand */}
+        <Link to="/" className="group flex items-center gap-2">
+          <img
+            src={slnLogo}
+            alt="Sleazy News Logo"
+            className="h-7 w-7 object-contain"
+          />
+          <span className="font-semibold tracking-wide">
+            Sleazy <span className="text-neutral-400">News</span>
+          </span>
+        </Link>
 
+        {/* Nav + CTA split */}
+        <div className="flex items-center gap-6 w-full justify-center">
+          {/* Left nav group */}
+          <nav className="flex flex-wrap items-center gap-2">
+            <NavLink to="/" label="Home" active={isActive("/")} />
+            <NavLink to="/section/news" label="News" active={isActive("/section/news")} />
+            <NavLink to="/section/culture" label="Culture" active={isActive("/section/culture")} />
+            <NavLink to="/section/sports" label="Sports" active={isActive("/section/sports")} />
+            <NavLink to="/featured" label="Featured" active={isActive("/featured")} />
+          </nav>
 
-<Link to="/" className="group flex items-center gap-2">
-  <img
-    src={slnLogo}
-    alt="Sleazy News Logo"
-    className="h-7 w-7 object-contain"
-  />
-  <span className="font-semibold tracking-wide">
-    Sleazy <span className="text-neutral-400">News</span>
-  </span>
-</Link>
-
-        <nav className="flex flex-wrap items-center justify-center gap-2 w-full overflow-x-hidden">
-  <NavLink to="/" label="Home" active={isActive("/")} />
-  <NavLink to="/section/news" label="News" active={isActive("/section/news")} />
-  <NavLink to="/section/culture" label="Culture" active={isActive("/section/culture")} />
-  <NavLink to="/section/sports" label="Sports" active={isActive("/section/sports")} />
-  <NavLink to="/featured" label="Featured" active={isActive("/featured")} />
-
-  {/* New public submit link */}
-  <NavLink to="/submit" label="Submit" active={isActive("/submit")} />
-</nav>
-
-
+          {/* Submit CTA offset to the right */}
+          <Link
+            to="/submit"
+            className="ml-4 flex items-center gap-1 rounded-[4px] bg-[#0430FC] hover:bg-[#0625a6]
+                       text-white text-sm font-medium px-4 py-2 transition active:scale-95"
+          >
+            Submit Video
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"
+                 className="h-4 w-4 fill-current">
+              <path d="M17 15V8H15V15H8V17H15V24H17V17H24V15H17Z" />
+            </svg>
+          </Link>
+        </div>
       </div>
     </header>
   );
 }
+
 
 function NavLink({ to, label, active }) {
   return (

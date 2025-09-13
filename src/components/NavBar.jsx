@@ -31,9 +31,17 @@ export default function NavBar() {
           </span>
 
           {/* New public upload link */}
-          <Link to="/submit" className="hover:text-white block">
-          Submit
-          </Link>
+          <Link
+  to="/submit"
+  className="flex items-center gap-1 rounded-[4px] bg-[#0430FC] hover:bg-[#0625a6] 
+             text-white text-sm font-medium px-4 py-2 transition active:scale-95"
+>
+  Submit Video
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" 
+       className="h-4 w-4 fill-current">
+    <path d="M17 15V8H15V15H8V17H15V24H17V17H24V15H17Z" />
+  </svg>
+</Link>
 
 
           {/* Admin stays hidden from nav to avoid public exposure */}
