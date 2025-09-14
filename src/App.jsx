@@ -11,7 +11,7 @@ function App() {
 
   return (
     <Layout>
-      {/* 🔹 TOS modal here */}
+      {/* 🔹 TOS modal is mounted at the very top of the app */}
       <TOSModal />
 
       <div className="min-h-screen bg-neutral-950 text-neutral-100 p-10">
