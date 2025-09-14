@@ -32,10 +32,16 @@ export default function NavBar() {
 
           {/* Submit Video button */}
           <Link
-            to="/submit"
-            className="flex items-center gap-1 rounded-[4px] bg-[#0430FC] hover:bg-[#0625a6] 
-                       text-white text-sm font-medium px-3 py-1.5 transition active:scale-95"
-          >
+  to="/submit"
+  className="flex items-center gap-1 rounded-[4px] bg-[#0430FC] hover:bg-[#0625a6] 
+             text-white font-medium 
+             text-xs px-2 py-1 
+             sm:text-sm sm:px-3 sm:py-1.5 
+             transition active:scale-95"
+>
+               <span className="hidden xs:inline">Submit Video</span>
+
+
             Submit Video
             <svg
               xmlns="http://www.w3.org/2000/svg"
