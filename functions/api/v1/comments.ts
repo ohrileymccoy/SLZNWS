@@ -1,6 +1,6 @@
 /// <reference types="@cloudflare/workers-types" />
 
-type Env = { DB: D1Database };
+type Env = { DB: D1Database; ADMIN_SECRET?: string };
 
 type CommentPayload = {
   video_id: number;
@@ -36,10 +36,11 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
     const safeUser = sanitize(username);
     const safeBody = sanitize(body);
 
-    // Insert and return row in one step
     const newComment = await env.DB.prepare(
-      "INSERT INTO comments (video_id, username, body) VALUES (?, ?, ?) RETURNING id, username, body, created_at"
-    ).bind(Number(video_id), safeUser, safeBody).first();
+      "INSERT INTO comments (video_id, username, body) VALUES (?, ?, ?) RETURNING id, video_id, username, body, created_at"
+    )
+      .bind(Number(video_id), safeUser, safeBody)
+      .first();
 
     return new Response(JSON.stringify({ ok: true, comment: newComment }), {
       headers: { "Content-Type": "application/json" },
@@ -52,27 +53,41 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
   }
 }
 
-// --- GET /api/v1/comments?video_id=123&limit=1 ---
-// Fetches comments for a video (limit=1 = preview)
+// --- GET /api/v1/comments ---
+// Public: requires video_id
+// Admin: if no video_id, requires ADMIN_SECRET and returns all comments
 export async function onRequestGet({ request, env }: { request: Request; env: Env }) {
   try {
     const url = new URL(request.url);
-    const video_id = url.searchParams.get("video_id");
+    const videoId = url.searchParams.get("video_id");
     const limit = Number(url.searchParams.get("limit") || "0");
 
-    if (!video_id) {
-      return new Response(JSON.stringify({ ok: false, error: "Missing video_id" }), {
-        status: 400,
+    // Admin mode: no video_id provided
+    if (!videoId) {
+      const auth = request.headers.get("Authorization");
+      if (auth !== `Bearer ${env.ADMIN_SECRET}`) {
+        return new Response(JSON.stringify({ ok: false, error: "Forbidden" }), {
+          status: 403,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
+      const rows = await env.DB.prepare(
+        "SELECT id, video_id, username, body, created_at FROM comments ORDER BY created_at DESC"
+      ).all();
+
+      return new Response(JSON.stringify({ ok: true, comments: rows.results || [] }), {
         headers: { "Content-Type": "application/json" },
       });
     }
 
+    // Public mode: must provide video_id
     const sql =
       limit === 1
         ? "SELECT id, username, body, created_at FROM comments WHERE video_id = ? ORDER BY created_at DESC LIMIT 1"
         : "SELECT id, username, body, created_at FROM comments WHERE video_id = ? ORDER BY created_at DESC";
 
-    const rows = await env.DB.prepare(sql).bind(Number(video_id)).all();
+    const rows = await env.DB.prepare(sql).bind(Number(videoId)).all();
 
     return new Response(JSON.stringify({ ok: true, comments: rows.results || [] }), {
       headers: { "Content-Type": "application/json" },
@@ -86,9 +101,17 @@ export async function onRequestGet({ request, env }: { request: Request; env: En
 }
 
 // --- DELETE /api/v1/comments ---
-// Deletes a comment by id
+// Deletes a comment by id (admin only)
 export async function onRequestDelete({ request, env }: { request: Request; env: Env }) {
   try {
+    const auth = request.headers.get("Authorization");
+    if (auth !== `Bearer ${env.ADMIN_SECRET}`) {
+      return new Response(JSON.stringify({ ok: false, error: "Forbidden" }), {
+        status: 403,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
     const body = (await request.json().catch(() => ({}))) as { id?: number };
 
     if (!body.id) {
