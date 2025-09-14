@@ -59,29 +59,29 @@ export default function VideoGrid({ adminMode = false }) {
     }
   }
 
-  // Admin: approve for publication
-  async function handleApprove(slug) {
-    try {
-      const res = await fetch("/api/v1/videos/approve", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_ADMIN_SECRET}`,
-        },
-        body: JSON.stringify({ slug }),
-      });
-      const out = await res.json();
-      if (!out.ok) return alert(out.error || "Failed to approve");
+// Admin: approve for publication
+async function handleApprove(slug) {
+  try {
+    const res = await fetch("/api/v1/videos/approve", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+      },
+      body: JSON.stringify({ slug }),
+    });
+    const out = await res.json();
+    if (!out.ok) return alert(out.error || "Failed to approve");
 
-      setVideos((prev) =>
-        prev.map((v) =>
-          v.slug === slug ? { ...v, is_published: 1, status: "ready" } : v
-        )
-      );
-    } catch (err) {
-      alert("Approve failed: " + err.message);
-    }
+    setVideos((prev) =>
+      prev.map((v) =>
+        v.slug === slug ? { ...v, is_published: 1, status: "ready" } : v
+      )
+    );
+  } catch (err) {
+    alert("Approve failed: " + (err instanceof Error ? err.message : String(err)));
   }
+}
 
   // Admin: delete video
 async function handleDelete(video) {

@@ -1,4 +1,14 @@
-export async function onRequestPost({ request, env }) {
+/// <reference types="@cloudflare/workers-types" />
+
+interface Env {
+  DB: D1Database;
+  MEDIA: R2Bucket;
+  R2_PUBLIC_BASE: string;
+}
+
+export async function onRequestPost(
+  { request, env }: { request: Request; env: Env }
+): Promise<Response> {
   try {
     const form = await request.formData();
     const file = form.get("file") as File;
@@ -20,8 +30,8 @@ export async function onRequestPost({ request, env }) {
 
     // --- Insert metadata in D1 ---
     await env.DB.prepare(
-      `INSERT INTO videos (slug, title, caption, section, r2_key, mime, status, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, 'uploaded', datetime('now'))`
+      `INSERT INTO videos (slug, title, caption, section, r2_key, mime, status, is_published, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, 'uploaded', 0, datetime('now'))`
     ).bind(
       form.get("slug") || crypto.randomUUID(),
       form.get("title") || "Untitled",

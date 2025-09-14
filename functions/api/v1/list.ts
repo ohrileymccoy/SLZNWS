@@ -1,17 +1,19 @@
 /// <reference types="@cloudflare/workers-types" />
 
 // Build-time/env var comes from wrangler.toml [vars]
-type EnvWithVars = {
+interface EnvWithVars {
   DB: D1Database;
   R2_PUBLIC_BASE?: string;
-};
+}
 
 export async function handleList(
   request: Request,
   env: EnvWithVars
 ): Promise<Response> {
   const url = new URL(request.url);
-  const status = url.searchParams.get("status") ?? "uploaded";
+
+  // Default public feed → only show approved (ready) videos
+  const status = url.searchParams.get("status") ?? "ready";
   const limit = Math.min(parseInt(url.searchParams.get("limit") || "24", 10), 50);
   const section = url.searchParams.get("section");
   const includeUnpublished = url.searchParams.get("all") === "true"; // admin override
@@ -22,28 +24,33 @@ export async function handleList(
                FROM videos
                WHERE is_seed = 0`;
 
-  // Public: only published + matching status
+  // Public vs admin logic
   if (!includeUnpublished) {
+    // Public: only published + ready
     query += ` AND is_published = 1 AND status = ?`;
   } else {
-    // Admin: see all, regardless of is_published
-    query += status ? ` AND status = ?` : ``;
+    // Admin: see all; only filter by status if explicitly passed
+    if (url.searchParams.has("status")) {
+      query += ` AND status = ?`;
+    }
   }
 
   if (section) query += ` AND section = ?`;
   query += ` ORDER BY datetime(created_at) DESC LIMIT ?`;
 
+  // Bind params depending on section/status
   const stmt = section
     ? await env.DB.prepare(query).bind(
-        includeUnpublished ? status : status, // keep status param consistent
+        status,
         section,
         limit
       ).all()
     : await env.DB.prepare(query).bind(
-        includeUnpublished ? status : status,
+        status,
         limit
       ).all();
 
+  // Base URL for public R2 access
   const isLocal = url.hostname === "127.0.0.1" || url.hostname === "localhost";
   const base = isLocal
     ? "http://127.0.0.1:8787/r2"
@@ -61,4 +68,3 @@ export async function handleList(
     headers: { "Content-Type": "application/json" },
   });
 }
-
