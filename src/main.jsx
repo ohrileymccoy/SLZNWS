@@ -160,21 +160,6 @@ function NavLink({ to, label, active }) {
   );
 }
 
-function NavLink({ to, label, active }) {
-  return (
-    <Link
-      to={to}
-      className={clsx(
-        "px-2 py-1 sm:px-3 sm:py-1.5 rounded-xl transition-colors border text-xs sm:text-sm",
-        active ? "bg-neutral-800/80 border-neutral-700" : "bg-neutral-900/40 border-transparent hover:border-neutral-700"
-      )}
-    >
-      {label}
-    </Link>
-  );
-}
-
-
 
 function Footer() {
   return (
