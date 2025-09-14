@@ -16,6 +16,7 @@ import Submit from "./pages/Submit.jsx";
 import slnLogo from "./assets/logo.png";
 import ArticlePage from "./pages/ArticlePage.jsx";
 import MugshotPage from "./pages/MugshotPage.jsx";
+import TOSModal from "./components/TOSModal";
 
 
 
@@ -40,25 +41,27 @@ function clsx(...xs) {
 function AppShell() {
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100">
+      {/* 🔹 Terms of Service modal overlays the whole app */}
+      <TOSModal />
+
       <Header />
       <main className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 pb-24">
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/SSHadmin" element={<SecureAdmin />} />
-          
           <Route path="/mugshot" element={<MugshotPage />} />
           <Route path="/section/:section" element={<SectionPage />} />
           <Route path="/featured" element={<FeaturedPage />} />
           <Route path="/article/:id" element={<ArticlePage />} />
           <Route path="*" element={<NotFound />} />
           <Route path="/submit" element={<Submit />} />
-          
         </Routes>
       </main>
       <Footer />
     </div>
   );
 }
+
 
 function Header() {
   const location = useLocation();
