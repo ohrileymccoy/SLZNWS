@@ -63,6 +63,7 @@ function AppShell() {
 function Header() {
   const location = useLocation();
   const isActive = (path) => location.pathname === path;
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <header className="sticky top-0 z-40 backdrop-blur supports-[backdrop-filter]:bg-neutral-950/70 border-b border-neutral-800">
@@ -80,8 +81,8 @@ function Header() {
           </span>
         </Link>
 
-        {/* Center: Nav pills */}
-        <nav className="flex-1 flex justify-center items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar whitespace-nowrap">
+        {/* Center: Pills (desktop only) */}
+        <nav className="hidden md:flex flex-1 justify-center items-center gap-2">
           <NavLink to="/" label="Home" active={isActive("/")} />
           <NavLink to="/section/news" label="News" active={isActive("/section/news")} />
           <NavLink to="/section/culture" label="Culture" active={isActive("/section/culture")} />
@@ -89,27 +90,75 @@ function Header() {
           <NavLink to="/featured" label="Featured" active={isActive("/featured")} />
         </nav>
 
-        {/* Right: Submit CTA */}
-        <Link
-          to="/submit"
-          className="flex-shrink-0 flex items-center gap-1 rounded-[4px] 
-                     bg-[#0430FC] hover:bg-[#0625a6]
-                     text-white font-medium 
-                     text-xs px-2 py-1
-                     sm:text-sm sm:px-3 sm:py-1.5
-                     transition active:scale-95"
-        >
-          Submit Video
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"
-               className="h-3 w-3 fill-current sm:h-4 sm:w-4">
-            <path d="M17 15V8H15V15H8V17H15V24H17V17H24V15H17Z" />
-          </svg>
-        </Link>
+        {/* Right cluster: Hamburger (mobile only) + Submit button */}
+        <div className="flex items-center gap-2">
+          {/* Hamburger only on mobile */}
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="md:hidden p-2 rounded bg-neutral-800 hover:bg-neutral-700"
+            aria-label="Toggle menu"
+          >
+            {/* 3-line icon */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 text-white"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+
+          {/* Submit button (never changes) */}
+          <Link
+            to="/submit"
+            className="flex-shrink-0 flex items-center gap-1 rounded-[4px] 
+                       bg-[#0430FC] hover:bg-[#0625a6]
+                       text-white font-medium 
+                       text-xs px-2 py-1
+                       sm:text-sm sm:px-3 sm:py-1.5
+                       transition active:scale-95"
+          >
+            Submit Video
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"
+                 className="h-3 w-3 fill-current sm:h-4 sm:w-4">
+              <path d="M17 15V8H15V15H8V17H15V24H17V17H24V15H17Z" />
+            </svg>
+          </Link>
+        </div>
       </div>
+
+      {/* Mobile dropdown menu */}
+      {menuOpen && (
+        <div className="md:hidden bg-neutral-950 border-t border-neutral-800">
+          <nav className="flex flex-col px-4 py-3 space-y-2">
+            <NavLink to="/" label="Home" active={isActive("/")} />
+            <NavLink to="/section/news" label="News" active={isActive("/section/news")} />
+            <NavLink to="/section/culture" label="Culture" active={isActive("/section/culture")} />
+            <NavLink to="/section/sports" label="Sports" active={isActive("/section/sports")} />
+            <NavLink to="/featured" label="Featured" active={isActive("/featured")} />
+          </nav>
+        </div>
+      )}
     </header>
   );
 }
 
+function NavLink({ to, label, active }) {
+  return (
+    <Link
+      to={to}
+      className={`px-3 py-1.5 rounded-xl text-sm transition-colors border 
+        ${active
+          ? "bg-neutral-800/80 border-neutral-700"
+          : "bg-neutral-900/40 border-transparent hover:border-neutral-700"}`}
+    >
+      {label}
+    </Link>
+  );
+}
 
 function NavLink({ to, label, active }) {
   return (
