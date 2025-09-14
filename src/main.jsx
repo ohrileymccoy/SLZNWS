@@ -10,7 +10,7 @@ import {
   useLocation,
 } from "react-router-dom";
 import "./index.css";
-import AdminPage from "./pages/AdminPage.jsx";
+import SecureAdmin from "./pages/SecureAdmin.jsx";
 import Feed from "./components/Feed.jsx";
 import Submit from "./pages/Submit.jsx";
 import slnLogo from "./assets/logo.png";
