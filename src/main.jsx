@@ -44,7 +44,7 @@ function AppShell() {
       <main className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 pb-24">
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/admin" element={<AdminPage />} />
+          <Route path="/SSHadmin" element={<SecureAdmin />} />
           
           <Route path="/mugshot" element={<MugshotPage />} />
           <Route path="/section/:section" element={<SectionPage />} />
