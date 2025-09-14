@@ -1,17 +1,19 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'        // nav uses <Link>
+import { Link } from 'react-router-dom'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
-import { SITE } from './config/site'           // brand config
+import { SITE } from './config/site'
 import TOSModal from "./components/TOSModal";
-
 
 function App() {
   const [count, setCount] = useState(0)
 
   return (
     <Layout>
+      {/* 🔹 TOS modal here */}
+      <TOSModal />
+
       <div className="min-h-screen bg-neutral-950 text-neutral-100 p-10">
         <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-6">
           <div className="flex items-center gap-6">
@@ -45,16 +47,6 @@ function App() {
     </Layout>
   )
 }
-function App() {
-  return (
-    <Layout>
-      <TOSModal />
-      <div className="min-h-screen bg-neutral-950 text-neutral-100 p-10">
-        {/* rest of your existing content */}
-      </div>
-    </Layout>
-  );
-}
 
 function Layout({ children }) {
   return (
@@ -64,7 +56,6 @@ function Layout({ children }) {
           <span className="text-[#DCFC04]">{SITE.name}</span>
         </h1>
         <nav className="space-x-4 text-sm">
-          {/* use query params so these work without creating new routes yet */}
           <Link to="/?section=news" className="hover:underline">News</Link>
           <Link to="/?section=culture" className="hover:underline">Culture</Link>
           <Link to="/?section=sports" className="hover:underline">Sports</Link>
