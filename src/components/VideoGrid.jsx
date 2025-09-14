@@ -84,27 +84,28 @@ export default function VideoGrid({ adminMode = false }) {
   }
 
   // Admin: delete video
-  async function handleDelete(video) {
-    if (!confirm("Delete this video?")) return;
-    try {
-      const res = await fetch("/api/v1/videos/delete", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_ADMIN_SECRET}`,
-        },
-        body: JSON.stringify({ id: video.id, slug: video.slug }),
-      });
-      const json = await res.json();
-      if (json.ok) {
-        setVideos((prev) => prev.filter((v) => v.id !== video.id));
-      } else {
-        alert("Delete failed: " + (json.error || "Unknown error"));
-      }
-    } catch (err) {
-      alert("Delete failed: " + err.message);
+async function handleDelete(video) {
+  if (!confirm("Delete this video?")) return;
+  try {
+    const res = await fetch("/api/v1/videos/delete", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+      },
+      body: JSON.stringify({ id: video.id, slug: video.slug }),
+    });
+    const json = await res.json();
+    if (json.ok) {
+      setVideos((prev) => prev.filter((v) => v.id !== video.id));
+    } else {
+      alert("Delete failed: " + (json.error || "Unknown error"));
     }
+  } catch (err) {
+    alert("Delete failed: " + (err instanceof Error ? err.message : String(err)));
   }
+}
+
 
   // --- Render states ---
   if (loading) return <p className="text-sm text-neutral-400">Loading…</p>;
