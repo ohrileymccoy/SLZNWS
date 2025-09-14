@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 export default function NavBar() {
   return (
     <nav className="w-full border-b border-neutral-800 bg-neutral-950/80 backdrop-blur">
-      <div className="flex items-center justify-between px-3 py-3">
+      <div className="flex items-center justify-between px-3 py-3 whitespace-nowrap overflow-hidden">
         {/* Brand */}
         <Link
           to="/"
@@ -27,14 +27,16 @@ export default function NavBar() {
           {/* Desktop Submit Video button */}
           <Link
             to="/submit"
-            className="flex items-center gap-1 rounded-[4px] bg-[#0430FC] hover:bg-[#0625a6]
-                       text-white text-sm font-medium px-3 py-1.5 transition active:scale-95"
+            className="flex-shrink-0 flex items-center gap-1 rounded-[4px] bg-[#0430FC] hover:bg-[#0625a6]
+                       text-white font-medium text-xs px-2 py-1
+                       sm:text-sm sm:px-3 sm:py-1.5
+                       transition active:scale-95"
           >
-            Submit Video
+            <span className="hidden xs:inline">Submit Video</span>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 32 32"
-              className="h-4 w-4 fill-current"
+              className="h-3 w-3 fill-current sm:h-4 sm:w-4"
             >
               <path d="M17 15V8H15V15H8V17H15V24H17V17H24V15H17Z" />
             </svg>
@@ -63,10 +65,10 @@ export default function NavBar() {
           Sports
         </span>
 
-        {/* 👇 Slimmed-down Mobile Submit button */}
+        {/* Slimmed-down Mobile Submit button */}
         <Link
           to="/submit"
-          className="flex items-center gap-1 rounded bg-[#0430FC] hover:bg-[#0625a6]
+          className="flex-shrink-0 flex items-center gap-1 rounded bg-[#0430FC] hover:bg-[#0625a6]
                      text-white text-[10px] font-medium px-2 py-1 transition active:scale-95"
         >
           Submit
