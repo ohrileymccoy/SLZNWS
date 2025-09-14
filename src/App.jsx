@@ -4,6 +4,8 @@ import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 import { SITE } from './config/site'           // brand config
+import TOSModal from "./components/TOSModal";
+
 
 function App() {
   const [count, setCount] = useState(0)
@@ -42,6 +44,16 @@ function App() {
       </div>
     </Layout>
   )
+}
+function App() {
+  return (
+    <Layout>
+      <TOSModal />
+      <div className="min-h-screen bg-neutral-950 text-neutral-100 p-10">
+        {/* rest of your existing content */}
+      </div>
+    </Layout>
+  );
 }
 
 function Layout({ children }) {
