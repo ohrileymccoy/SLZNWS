@@ -1,6 +1,7 @@
 // src/pages/SecureAdmin.jsx
 import { useState } from "react";
-import AdminPage from "./AdminPage.jsx";
+import AdminPage from "../pages/AdminPage.jsx";
+
 
 export default function SecureAdmin() {
   const [token, setToken] = useState(localStorage.getItem("adminToken") || "");
