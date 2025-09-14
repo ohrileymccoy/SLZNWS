@@ -66,22 +66,18 @@ function Header() {
 
   return (
     <header className="sticky top-0 z-40 backdrop-blur supports-[backdrop-filter]:bg-neutral-950/70 border-b border-neutral-800">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        
+      {/* grid: brand | nav (1fr) | button */}
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 h-16 grid grid-cols-[auto,1fr,auto] items-center gap-2">
         {/* Brand */}
         <Link to="/" className="group flex items-center gap-2">
-          <img
-            src={slnLogo}
-            alt="Sleazy News Logo"
-            className="h-7 w-7 object-contain"
-          />
+          <img src={slnLogo} alt="Sleazy News Logo" className="h-7 w-7 object-contain" />
           <span className="font-semibold tracking-wide">
             Sleazy <span className="text-neutral-400">News</span>
           </span>
         </Link>
 
-        {/* Nav in the center */}
-        <nav className="flex flex-wrap items-center gap-2 justify-center flex-1">
+        {/* Center nav: NEVER wrap; scroll horizontally if needed */}
+        <nav className="min-w-0 overflow-x-auto no-scrollbar whitespace-nowrap flex items-center justify-center gap-1.5 sm:gap-2">
           <NavLink to="/" label="Home" active={isActive("/")} />
           <NavLink to="/section/news" label="News" active={isActive("/section/news")} />
           <NavLink to="/section/culture" label="Culture" active={isActive("/section/culture")} />
@@ -89,25 +85,18 @@ function Header() {
           <NavLink to="/featured" label="Featured" active={isActive("/featured")} />
         </nav>
 
-        {/* Submit CTA on the far right */}
-       <Link
-  to="/submit"
-  className="ml-4 flex-shrink-0 flex items-center gap-1 rounded-[4px] 
-             bg-[#0430FC] hover:bg-[#0625a6]
-             text-white font-medium 
-             text-xs px-2 py-1
-             sm:text-sm sm:px-3 sm:py-1.5
-             transition active:scale-95"
->
-  <span className="inline">Submit Video</span>
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 32 32"
-    className="h-3 w-3 fill-current sm:h-4 sm:w-4"
-  >
-    <path d="M17 15V8H15V15H8V17H15V24H17V17H24V15H17Z" />
-  </svg>
-</Link>
+        {/* Submit button pinned right */}
+        <Link
+          to="/submit"
+          className="ml-2 flex-shrink-0 flex items-center gap-1 rounded-[4px]
+                     bg-[#0430FC] hover:bg-[#0625a6] text-white font-medium
+                     text-xs px-2 py-1 sm:text-sm sm:px-3 sm:py-1.5 transition active:scale-95"
+        >
+          Submit Video
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="h-3 w-3 fill-current sm:h-4 sm:w-4">
+            <path d="M17 15V8H15V15H8V17H15V24H17V17H24V15H17Z" />
+          </svg>
+        </Link>
       </div>
     </header>
   );
@@ -119,15 +108,16 @@ function NavLink({ to, label, active }) {
     <Link
       to={to}
       className={clsx(
-        "px-3 py-1.5 rounded-xl text-sm transition-colors",
-        "border border-transparent hover:border-neutral-700",
-        active ? "bg-neutral-800/80" : "bg-neutral-900/40"
+        "px-2 py-1 sm:px-3 sm:py-1.5 rounded-xl transition-colors border text-xs sm:text-sm",
+        active ? "bg-neutral-800/80 border-neutral-700" : "bg-neutral-900/40 border-transparent hover:border-neutral-700"
       )}
     >
       {label}
     </Link>
   );
 }
+
+
 
 function Footer() {
   return (
