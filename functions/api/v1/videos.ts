@@ -1,27 +1,29 @@
 /// <reference types="@cloudflare/workers-types" />
 
 // --- Environment bindings available to this Worker ---
-type EnvWithVars = {
+interface EnvWithVars {
   DB: D1Database;
   MEDIA: R2Bucket;
   R2_PUBLIC_BASE?: string;
   ADMIN_SECRET?: string;
-};
+}
 
 //
 // GET /api/v1/videos
-// - List mode: /api/v1/videos?status=uploaded&limit=12&section=news
+// - List mode: /api/v1/videos?limit=12&section=news
 // - Single mode: /api/v1/videos?id=123
 //
-export async function onRequestGet({ request, env }: { request: Request; env: EnvWithVars }) {
+export async function onRequestGet(
+  { request, env }: { request: Request; env: EnvWithVars }
+): Promise<Response> {
   const url = new URL(request.url);
 
-  // --- Check for single-video mode ---
+  // --- Single-video mode ---
   const id = url.searchParams.get("id");
   if (id) {
     const row = await env.DB.prepare(
       `SELECT id, slug, title, caption, section, description,
-              r2_key, mime, poster_key, captions_key, status, created_at
+              r2_key, mime, poster_key, captions_key, status, created_at, is_published
        FROM videos
        WHERE id = ?`
     ).bind(id).first();
@@ -40,21 +42,31 @@ export async function onRequestGet({ request, env }: { request: Request; env: En
     return Response.json({ ok: true, item });
   }
 
-  // --- Otherwise, list mode ---
-  const status = url.searchParams.get("status") ?? "uploaded";
-  const limit = Math.min(parseInt(url.searchParams.get("limit") || "24", 10), 50);
+  // --- List mode ---
   const section = url.searchParams.get("section");
+  const limit = Math.min(parseInt(url.searchParams.get("limit") || "24", 10), 50);
+  const includeUnpublished = url.searchParams.get("all") === "true"; // admin override
 
   let query = `SELECT id, slug, title, caption, section, description,
-                      r2_key, mime, poster_key, captions_key, status, created_at
+                      r2_key, mime, poster_key, captions_key, status, created_at, is_published
                FROM videos
-               WHERE status = ? AND is_seed = 0`;
+               WHERE is_seed = 0`;
+
+  if (includeUnpublished) {
+    // Admin: see everything
+  } else {
+    // Public: only approved + ready
+    query += ` AND is_published = 1 AND status = 'ready'`;
+  }
+
   if (section) query += ` AND section = ?`;
   query += ` ORDER BY datetime(created_at) DESC LIMIT ?`;
 
-  const stmt = section
-    ? await env.DB.prepare(query).bind(status, section, limit).all()
-    : await env.DB.prepare(query).bind(status, limit).all();
+  const bindings: any[] = [];
+  if (section) bindings.push(section);
+  bindings.push(limit);
+
+  const stmt = await env.DB.prepare(query).bind(...bindings).all();
 
   const base = (env.R2_PUBLIC_BASE || "").trim().replace(/\/$/, "");
   const items = (stmt.results || []).map((row: any) => ({
@@ -69,8 +81,11 @@ export async function onRequestGet({ request, env }: { request: Request; env: En
 //
 // POST /api/v1/videos
 // - Handles direct multipart/form-data upload.
+// - Always creates video as pending approval.
 //
-export async function onRequestPost({ request, env }: { request: Request; env: EnvWithVars }) {
+export async function onRequestPost(
+  { request, env }: { request: Request; env: EnvWithVars }
+): Promise<Response> {
   const formData = await request.formData();
   const file = formData.get("file") as File;
 
@@ -98,8 +113,8 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
   });
 
   await env.DB.prepare(
-    `INSERT INTO videos (slug, title, caption, section, r2_key, mime, status, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, 'uploaded', datetime('now'))`
+    `INSERT INTO videos (slug, title, caption, section, r2_key, mime, status, is_published, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, 'uploaded', 0, datetime('now'))`
   ).bind(slug, title, caption, section, key, mime).run();
 
   const base = (env.R2_PUBLIC_BASE || "").trim().replace(/\/$/, "");
@@ -118,8 +133,11 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
 //
 // DELETE /api/v1/videos
 // - Deletes both R2 object and DB row.
+// - Requires admin token.
 //
-export async function onRequestDelete({ request, env }: { request: Request; env: EnvWithVars }) {
+export async function onRequestDelete(
+  { request, env }: { request: Request; env: EnvWithVars }
+): Promise<Response> {
   const auth = request.headers.get("Authorization");
   if (auth !== `Bearer ${env.ADMIN_SECRET}`) {
     return new Response(JSON.stringify({ ok: false, error: "Forbidden" }), {

@@ -1,6 +1,5 @@
 /// <reference types="@cloudflare/workers-types" />
 
-// Build-time/env var comes from wrangler.toml [vars]
 interface EnvWithVars {
   DB: D1Database;
   R2_PUBLIC_BASE?: string;
@@ -12,8 +11,6 @@ export async function handleList(
 ): Promise<Response> {
   const url = new URL(request.url);
 
-  // Default public feed → only show approved (ready) videos
-  const status = url.searchParams.get("status") ?? "ready";
   const limit = Math.min(parseInt(url.searchParams.get("limit") || "24", 10), 50);
   const section = url.searchParams.get("section");
   const includeUnpublished = url.searchParams.get("all") === "true"; // admin override
@@ -24,33 +21,28 @@ export async function handleList(
                FROM videos
                WHERE is_seed = 0`;
 
-  // Public vs admin logic
-  if (!includeUnpublished) {
-    // Public: only published + ready
-    query += ` AND is_published = 1 AND status = ?`;
-  } else {
-    // Admin: see all; only filter by status if explicitly passed
+  if (includeUnpublished) {
+    // Admin view: see everything
     if (url.searchParams.has("status")) {
       query += ` AND status = ?`;
     }
+  } else {
+    // Public view: only approved videos
+    query += ` AND is_published = 1 AND status = 'ready'`;
   }
 
   if (section) query += ` AND section = ?`;
   query += ` ORDER BY datetime(created_at) DESC LIMIT ?`;
 
-  // Bind params depending on section/status
-  const stmt = section
-    ? await env.DB.prepare(query).bind(
-        status,
-        section,
-        limit
-      ).all()
-    : await env.DB.prepare(query).bind(
-        status,
-        limit
-      ).all();
+  const bindings: any[] = [];
+  if (includeUnpublished && url.searchParams.has("status")) {
+    bindings.push(url.searchParams.get("status"));
+  }
+  if (section) bindings.push(section);
+  bindings.push(limit);
 
-  // Base URL for public R2 access
+  const stmt = await env.DB.prepare(query).bind(...bindings).all();
+
   const isLocal = url.hostname === "127.0.0.1" || url.hostname === "localhost";
   const base = isLocal
     ? "http://127.0.0.1:8787/r2"
