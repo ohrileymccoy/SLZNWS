@@ -44,7 +44,7 @@ export default function VideoGrid({ adminMode = false }) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_ADMIN_SECRET}`,
+          Authorization: `Bearer ${import.meta.env.ADMIN_SECRET}`,
         },
         body: JSON.stringify({ slug, section: newSection }),
       });
