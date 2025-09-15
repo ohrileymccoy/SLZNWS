@@ -13,7 +13,7 @@ function sanitize(input: string) {
 }
 
 // --- POST /api/v1/comments ---
-// Inserts a new comment and returns it
+// Inserts a new comment (public)
 export async function onRequestPost({ request, env }: { request: Request; env: Env }) {
   try {
     const data = (await request.json()) as Partial<CommentPayload>;
@@ -54,16 +54,16 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
 }
 
 // --- GET /api/v1/comments ---
-// Public: requires video_id
-// Admin: if no video_id, requires ADMIN_SECRET and returns all comments
+// Public: requires ?video_id=123
+// Admin: if no video_id, requires ADMIN_SECRET and returns all comments w/ video info
 export async function onRequestGet({ request, env }: { request: Request; env: Env }) {
   try {
     const url = new URL(request.url);
     const videoId = url.searchParams.get("video_id");
     const limit = Number(url.searchParams.get("limit") || "0");
 
-    // Admin mode: no video_id provided
     if (!videoId) {
+      // --- Admin mode ---
       const auth = request.headers.get("Authorization");
       if (auth !== `Bearer ${env.ADMIN_SECRET}`) {
         return new Response(JSON.stringify({ ok: false, error: "Forbidden" }), {
@@ -73,7 +73,11 @@ export async function onRequestGet({ request, env }: { request: Request; env: En
       }
 
       const rows = await env.DB.prepare(
-        "SELECT id, video_id, username, body, created_at FROM comments ORDER BY created_at DESC"
+        `SELECT c.id, c.video_id, v.slug, v.title,
+                c.username, c.body, c.created_at
+         FROM comments c
+         LEFT JOIN videos v ON c.video_id = v.id
+         ORDER BY c.created_at DESC`
       ).all();
 
       return new Response(JSON.stringify({ ok: true, comments: rows.results || [] }), {
@@ -81,7 +85,7 @@ export async function onRequestGet({ request, env }: { request: Request; env: En
       });
     }
 
-    // Public mode: must provide video_id
+    // --- Public mode ---
     const sql =
       limit === 1
         ? "SELECT id, username, body, created_at FROM comments WHERE video_id = ? ORDER BY created_at DESC LIMIT 1"

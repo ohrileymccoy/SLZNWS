@@ -13,7 +13,7 @@ import "./index.css";
 import SecureAdmin from "./components/SecureAdmin.jsx";
 import Feed from "./components/Feed.jsx";
 import Submit from "./pages/Submit.jsx";
-import slnLogo from "./assets/logo.png";
+import slnLogo from "./assets/preview.png";
 import ArticlePage from "./pages/ArticlePage.jsx";
 import MugshotPage from "./pages/MugshotPage.jsx";
 import TOSModal from "./components/TOSModal";
