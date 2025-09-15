@@ -260,71 +260,78 @@ function KPIBand() {
 
 function FeaturedRail() {
   const scrollRef = useRef(null);
-
-  // Temporary static mugshot list (replace with DB/API later)
   const [items, setItems] = useState([]);
 
-useEffect(() => {
-  async function load() {
-    try {
-      const res = await fetch("/api/v1/mugshots/list");
-      const json = await res.json();
-      setItems(json.items || []);
-    } catch (err) {
-      console.error("Failed to load mugshots:", err);
+  useEffect(() => {
+    async function load() {
+      try {
+        const res = await fetch("/api/v1/mugshots/list");
+        const json = await res.json();
+        setItems(json.items || []);
+      } catch (err) {
+        console.error("Failed to load mugshots:", err);
+      }
     }
-  }
-  load();
-}, []);
-  // Auto-scroll ticker effect
+    load();
+  }, []);
+
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
 
-    const interval = setInterval(() => {
+    let frame;
+    const speed = 0.5; // pixels per frame
+    function tick() {
       if (!el) return;
-      el.scrollBy({ left: 180, behavior: "smooth" }); // adjust width
 
-      // reset when end reached
-      if (el.scrollLeft + el.clientWidth >= el.scrollWidth - 5) {
-        setTimeout(() => {
-          el.scrollTo({ left: 0, behavior: "smooth" });
-        }, 1500);
+      el.scrollLeft += speed;
+
+      // when we near the end of the list, jump back halfway
+      // so it looks continuous without snapping
+      if (el.scrollLeft >= el.scrollWidth / 2) {
+        el.scrollLeft = 0;
       }
-    }, 2500); // every 2.5s
 
-    return () => clearInterval(interval);
-  }, []);
+      frame = requestAnimationFrame(tick);
+    }
+
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [items]);
 
   return (
     <section className="mb-8">
       <div className="flex items-end justify-between mb-3">
         <h2 className="text-lg font-semibold text-neutral-200">Mugshot Ticker</h2>
       </div>
-<div
-  ref={scrollRef}
-  className="flex overflow-x-hidden gap-3 pb-2 snap-none"
->
-  {/* render the list twice */}
-  {[...items, ...items].map((it, idx) => (
-    <div
-      key={idx}
-      className="min-w-[160px] bg-neutral-900/60 border border-neutral-800 rounded-2xl overflow-hidden"
-    >
-      <img
-        src={it.public_url}
-        alt={it.name}
-        className="w-full h-40 object-cover"
-      />
-      <div className="p-2 text-center">
-        <p className="text-sm text-neutral-300">{it.name}</p>
+      <div
+        ref={scrollRef}
+        className="flex overflow-x-hidden gap-3 pb-2 snap-none"
+        style={{ scrollBehavior: "auto" }} // disable smooth snap
+      >
+        {/* repeat list 10x so it feels endless */}
+        {Array.from({ length: 10 }).map((_, repeatIdx) =>
+          items.map((it, idx) => (
+            <div
+              key={`${repeatIdx}-${idx}`}
+              className="min-w-[160px] bg-neutral-900/60 border border-neutral-800 rounded-2xl overflow-hidden"
+            >
+              <img
+                src={it.public_url}
+                alt={it.name}
+                className="w-full h-40 object-cover"
+              />
+              <div className="p-2 text-center">
+                <p className="text-sm text-neutral-300">{it.name}</p>
+              </div>
+            </div>
+          ))
+        )}
       </div>
-    </div>
-  ))}
-</div>
     </section>
   );
 }
+
 
 export default FeaturedRail;
 
