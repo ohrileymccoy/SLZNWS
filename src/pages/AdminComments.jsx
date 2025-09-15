@@ -6,24 +6,27 @@ export default function AdminComments() {
   const [error, setError] = useState("");
 
   async function fetchAllComments() {
-    try {
-      setLoading(true);
-      setError("");
-      // Fetch all comments (no video_id filter)
-      const res = await fetch("/api/v1/comments?video_id=0"); 
-      const data = await res.json();
+  try {
+    setLoading(true);
+    setError("");
+    const res = await fetch("/api/v1/comments", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("adminToken")}`, // 🔒 admin required
+      },
+    });
+    const data = await res.json();
 
-      if (data.ok) {
-        setComments(data.comments || []);
-      } else {
-        setError(data.error || "Failed to load comments");
-      }
-    } catch (err) {
-      setError(err.message || "Network error");
-    } finally {
-      setLoading(false);
+    if (data.ok) {
+      setComments(data.comments || []);
+    } else {
+      setError(data.error || "Failed to load comments");
     }
+  } catch (err) {
+    setError(err.message || "Network error");
+  } finally {
+    setLoading(false);
   }
+}
 
   async function handleDelete(id) {
     if (!confirm("Delete this comment?")) return;
