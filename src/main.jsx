@@ -80,7 +80,7 @@ function Header() {
     className="h-full w-auto object-contain" // fills navbar height
   />
   <span className="font-semibold tracking-wide text-lg group-hover:text-blue-400 transition">
-    Sleazy <span className="text-neutral-400">News</span>
+    S.L. <span className="text-neutral-400">N</span>
   </span>
 </Link>
 
