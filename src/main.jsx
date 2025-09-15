@@ -301,9 +301,24 @@ function FeaturedRail() {
 
   return (
     <section className="mb-8">
-      <div className="flex items-end justify-between mb-3">
-        <h2 className="text-lg font-semibold text-neutral-200">Mugshot Ticker</h2>
-      </div>
+      <div className="flex items-center justify-between mb-3 relative group">
+  <h2
+    className="relative text-lg font-semibold text-neutral-100 border-b-2 border-transparent pb-1 
+               group-hover:border-blue-500 transition-all duration-300"
+  >
+    <span
+      className="relative z-10 group-hover:text-white transition-colors duration-300"
+    >
+      Mugshot Ticker
+    </span>
+
+    {/* bubble background that fades/scales in behind the text */}
+    <span
+      className="absolute inset-0 rounded-lg bg-blue-600/80 shadow-lg opacity-0 scale-90 
+                 group-hover:opacity-100 group-hover:scale-100 transition-all duration-300"
+    ></span>
+  </h2>
+</div>
       <div
         ref={scrollRef}
         className="flex overflow-x-hidden gap-3 pb-2 snap-none"
