@@ -37,27 +37,32 @@ export default function VideoGrid({ adminMode = false }) {
     load();
   }, [adminMode]);
 
-  // Admin: change section
-  async function updateSection(slug, newSection) {
-    try {
-      const res = await fetch("/api/v1/videos/update_section", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.ADMIN_SECRET}`,
-        },
-        body: JSON.stringify({ slug, section: newSection }),
-      });
-      const out = await res.json();
-      if (!out.ok) return alert(out.error || "Failed to update section");
+// Admin: change section
+async function updateSection(slug, newSection) {
+  try {
+    const res = await fetch("/api/v1/videos/update_section", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+      },
+      body: JSON.stringify({ slug, section: newSection }),
+    });
 
-      setVideos((prev) =>
-        prev.map((v) => (v.slug === slug ? { ...v, section: newSection } : v))
-      );
-    } catch (err) {
-      alert("Update failed: " + err.message);
+    const out = await res.json();
+    if (!out.ok) {
+      return alert(out.error || "Failed to update section");
     }
+
+    setVideos((prev) =>
+      prev.map((v) =>
+        v.slug === slug ? { ...v, section: newSection } : v
+      )
+    );
+  } catch (err) {
+    alert("Update failed: " + err.message);
   }
+}
 
 // Admin: approve for publication
 async function handleApprove(slug) {
