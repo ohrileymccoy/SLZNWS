@@ -72,13 +72,16 @@ function Header() {
     <header className="sticky top-0 z-40 backdrop-blur supports-[backdrop-filter]:bg-neutral-950/70 border-b border-neutral-800">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         
-        {/* Left: Logo */}
-        <Link to="/" className="group flex items-center gap-2 shrink-0 h-full">
+       {/* Left: Logo + Title */}
+<Link to="/" className="group flex items-center gap-2 shrink-0 h-full">
   <img
     src={slnLogo}
     alt="Sleazy News Logo"
-    className="h-full w-auto object-contain" // 👈 fills container height
+    className="h-full w-auto object-contain" // fills navbar height
   />
+  <span className="font-semibold tracking-wide text-lg group-hover:text-blue-400 transition">
+    Sleazy <span className="text-neutral-400">News</span>
+  </span>
 </Link>
 
 
