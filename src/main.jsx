@@ -77,7 +77,7 @@ function Header() {
           <img
             src={slnLogo}
             alt="Sleazy News Logo"
-            className="h-7 w-7 object-contain"
+            className="h-10 w-10 object-contain"
           />
           <span className="font-semibold tracking-wide">
             Sleazy <span className="text-neutral-400">News</span>
