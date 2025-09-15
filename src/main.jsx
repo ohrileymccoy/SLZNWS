@@ -238,17 +238,41 @@ function NotFound({ message = "We couldn't find that." }) {
 // -------------- Modules / Rails --------------
 
 function KPIBand() {
+  const [stats, setStats] = useState(null);
+
+  useEffect(() => {
+    async function loadStats() {
+      try {
+        const res = await fetch("/api/v1/videos/stats");
+        const json = await res.json();
+        if (json.ok) setStats(json.stats);
+      } catch (err) {
+        console.error("Failed to load stats", err);
+      }
+    }
+    loadStats();
+  }, []);
+
+  if (!stats) return null;
+
   const data = [
-    { label: "New today", value: "12" },
-    { label: "Sections", value: "3" },
-    { label: "Last updated", value: "Just now" },
+    { label: "New today", value: stats.newToday },
+    { label: "Total videos", value: stats.total },
+    {
+      label: "Last updated",
+      value: stats.lastUpdated
+        ? new Date(stats.lastUpdated).toLocaleTimeString()
+        : "—",
+    },
   ];
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
       {data.map((k) => (
         <div
           key={k.label}
-          className="rounded-2xl bg-neutral-900/60 border border-neutral-800 p-4 flex items-center justify-between"
+          className="rounded-2xl bg-neutral-900/60 border border-neutral-800 p-4 flex items-center justify-between 
+                     transition-transform duration-200 hover:scale-105 active:scale-95 cursor-pointer"
         >
           <span className="text-neutral-400 text-sm">{k.label}</span>
           <span className="text-lg font-semibold">{k.value}</span>
@@ -257,6 +281,7 @@ function KPIBand() {
     </div>
   );
 }
+
 
 function FeaturedRail() {
   const scrollRef = useRef(null);
@@ -301,20 +326,20 @@ function FeaturedRail() {
 
   return (
     <section className="mb-8">
-      <div className="flex items-center justify-between mb-3 relative group">
+    <div className="flex items-center justify-between mb-3 relative group">
   <h2
     className="relative text-lg font-semibold text-neutral-100 border-b-2 border-transparent pb-1 
-               group-hover:border-blue-500 transition-all duration-300"
+               group-hover:border-neutral-500 transition-all duration-300"
   >
     <span
       className="relative z-10 group-hover:text-white transition-colors duration-300"
     >
-      Mugshot Ticker
+      Local Mugshots
     </span>
 
-    {/* bubble background that fades/scales in behind the text */}
+    {/* grey bubble background */}
     <span
-      className="absolute inset-0 rounded-lg bg-blue-600/80 shadow-lg opacity-0 scale-90 
+      className="absolute inset-0 rounded-lg bg-neutral-800/80 shadow-lg opacity-0 scale-90 
                  group-hover:opacity-100 group-hover:scale-100 transition-all duration-300"
     ></span>
   </h2>
