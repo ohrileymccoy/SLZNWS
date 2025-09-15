@@ -1,6 +1,18 @@
 /// <reference types="@cloudflare/workers-types" />
 
-export async function onRequestPost({ request, env }) {
+// Define your bindings contract here
+interface Env {
+  DB: D1Database;
+  ADMIN_SECRET: string;
+}
+
+export async function onRequestPost({
+  request,
+  env,
+}: {
+  request: Request;
+  env: Env;
+}): Promise<Response> {
   // --- Auth check ---
   const auth = request.headers.get("Authorization");
   if (auth !== `Bearer ${env.ADMIN_SECRET}`) {
@@ -11,7 +23,7 @@ export async function onRequestPost({ request, env }) {
   }
 
   // --- Parse body safely ---
-  let body;
+  let body: any;
   try {
     body = await request.json();
   } catch {
@@ -39,7 +51,7 @@ export async function onRequestPost({ request, env }) {
     });
   }
 
-  // --- Update row (safe: no updated_at) ---
+  // --- Update row ---
   let result;
   try {
     result = await env.DB.prepare(
