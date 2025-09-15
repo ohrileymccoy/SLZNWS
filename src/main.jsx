@@ -73,16 +73,14 @@ function Header() {
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         
         {/* Left: Logo */}
-        <Link to="/" className="group flex items-center gap-2 shrink-0">
-          <img
-            src={slnLogo}
-            alt="Sleazy News Logo"
-            className="h-15 w-15 object-contain"
-          />
-          <span className="font-semibold tracking-wide">
-            Sleazy <span className="text-neutral-400">News</span>
-          </span>
-        </Link>
+        <Link to="/" className="group flex items-center gap-2 shrink-0 h-full">
+  <img
+    src={slnLogo}
+    alt="Sleazy News Logo"
+    className="h-full w-auto object-contain" // 👈 fills container height
+  />
+</Link>
+
 
         {/* Center: Pills (desktop only) */}
         <nav className="hidden md:flex flex-1 justify-center items-center gap-2">
