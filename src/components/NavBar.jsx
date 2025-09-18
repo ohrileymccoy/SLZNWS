@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import SubmitButtons from "./SubmitButtons";
 
 export default function NavBar() {
   return (
@@ -13,7 +14,7 @@ export default function NavBar() {
           Sleazy News (Beckley)
         </Link>
 
-        {/* Desktop nav + button (hidden on <768px) */}
+        {/* Desktop nav + buttons (hidden on <768px) */}
         <div className="hidden md:flex items-center gap-4 text-sm text-neutral-300">
           <Link to="/" className="hover:text-white">
             News
@@ -25,21 +26,8 @@ export default function NavBar() {
             Sports
           </span>
 
-          {/* Desktop Submit Video button */}
-          <Link
-            to="/submit"
-            className="flex-shrink-0 flex items-center gap-1 rounded-[4px] bg-[#0430FC] hover:bg-[#0625a6]
-                       text-white text-sm font-medium px-3 py-1.5 transition active:scale-95"
-          >
-            Submit Video
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 32 32"
-              className="h-4 w-4 fill-current"
-            >
-              <path d="M17 15V8H15V15H8V17H15V24H17V17H24V15H17Z" />
-            </svg>
-          </Link>
+          {/* Shared submit buttons */}
+          <SubmitButtons />
         </div>
       </div>
 
@@ -64,21 +52,8 @@ export default function NavBar() {
           Sports
         </span>
 
-        {/* Mobile Submit button */}
-        <Link
-          to="/submit"
-          className="flex-shrink-0 flex items-center gap-1 rounded bg-[#0430FC] hover:bg-[#0625a6]
-                     text-white text-[11px] font-medium px-2 py-1 transition active:scale-95"
-        >
-          Submit
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 32 32"
-            className="h-3 w-3 fill-current"
-          >
-            <path d="M17 15V8H15V15H8V17H15V24H17V17H24V15H17Z" />
-          </svg>
-        </Link>
+        {/* Shared submit buttons (mobile) */}
+        <SubmitButtons />
       </div>
     </nav>
   );

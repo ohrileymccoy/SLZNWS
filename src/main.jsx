@@ -17,8 +17,8 @@ import slnLogo from "./assets/preview.png";
 import ArticlePage from "./pages/ArticlePage.jsx";
 import MugshotPage from "./pages/MugshotPage.jsx";
 import TOSModal from "./components/TOSModal";
-
-
+import SubmitPhoto from "./pages/SubmitPhoto.jsx";
+import SubmitButtons from "./components/SubmitButtons";
 
 /**
  * SLN — Routing + UX Shell (Phase 6–7, JS version)
@@ -55,6 +55,7 @@ function AppShell() {
           <Route path="/article/:id" element={<ArticlePage />} />
           <Route path="*" element={<NotFound />} />
           <Route path="/submit" element={<Submit />} />
+          <Route path="/submit-photo" element={<SubmitPhoto />} />
         </Routes>
       </main>
       <Footer />
@@ -96,45 +97,31 @@ function Header() {
           <NavLink to="/featured" label="Featured" active={isActive("/featured")} />
         </nav>
 
-        {/* Right cluster: Hamburger (mobile only) + Submit button */}
-        <div className="flex items-center gap-2">
-          {/* Hamburger only on mobile */}
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="md:hidden p-2 rounded bg-neutral-800 hover:bg-neutral-700"
-            aria-label="Toggle menu"
-          >
-            {/* 3-line icon */}
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 text-white"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
+     {/* Right cluster: Hamburger (mobile only) + Submit buttons */}
+<div className="flex items-center gap-2">
+  {/* Hamburger only on mobile */}
+  <button
+    onClick={() => setMenuOpen(!menuOpen)}
+    className="md:hidden p-2 rounded bg-neutral-800 hover:bg-neutral-700"
+    aria-label="Toggle menu"
+  >
+    {/* 3-line icon */}
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      className="h-5 w-5 text-white"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+    </svg>
+  </button>
 
-          {/* Submit button (never changes) */}
-          <Link
-            to="/submit"
-            className="flex-shrink-0 flex items-center gap-1 rounded-[4px] 
-                       bg-[#0430FC] hover:bg-[#0625a6]
-                       text-white font-medium 
-                       text-xs px-2 py-1
-                       sm:text-sm sm:px-3 sm:py-1.5
-                       transition active:scale-95"
-          >
-            Submit Video
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"
-                 className="h-3 w-3 fill-current sm:h-4 sm:w-4">
-              <path d="M17 15V8H15V15H8V17H15V24H17V17H24V15H17Z" />
-            </svg>
-          </Link>
-        </div>
-      </div>
+  {/* Shared submit buttons */}
+  <SubmitButtons />
+</div>
+</div>
 
       {/* Mobile dropdown menu */}
       {menuOpen && (
