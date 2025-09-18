@@ -16,14 +16,21 @@ type PhotoRow = {
 
 export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   const url = new URL(request.url);
-  const id = url.searchParams.get("id");
-  if (!id) return Response.json({ error: "Missing id" }, { status: 400 });
+  const rawId = url.searchParams.get("id");
+
+  // Sanitize id → keep only numbers
+  const id = parseInt((rawId || "").replace(/\D/g, ""), 10);
+  if (!id || isNaN(id)) {
+    return Response.json({ error: "Invalid id" }, { status: 400 });
+  }
 
   const row = (await env.DB.prepare(
     "SELECT * FROM photos WHERE id = ? AND status = 'uploaded'"
   ).bind(id).first()) as PhotoRow | null;
 
-  if (!row) return Response.json({ error: "Not found" }, { status: 404 });
+  if (!row) {
+    return Response.json({ error: "Not found" }, { status: 404 });
+  }
 
   let photoUrls: string[] = [];
   try {

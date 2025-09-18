@@ -14,7 +14,7 @@ export default function PhotoPage() {
         const json = await res.json();
         setItem(json.item || null);
 
-        const relRes = await fetch("/api/v1/photos/list");
+        const relRes = await fetch("/api/v1/photos/list_photos");
         const relJson = await relRes.json();
         if (relJson.items) {
           setRelated(relJson.items.filter((p) => String(p.id) !== String(id)));
