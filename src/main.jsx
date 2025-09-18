@@ -19,7 +19,7 @@ import MugshotPage from "./pages/MugshotPage.jsx";
 import TOSModal from "./components/TOSModal";
 import SubmitPhoto from "./pages/SubmitPhoto.jsx";
 import SubmitButtons from "./components/SubmitButtons";
-
+import PhotoPage from "./pages/PhotoPage.jsx";
 /**
  * SLN — Routing + UX Shell (Phase 6–7, JS version)
  * - Routes: /, /section/:section, /featured, /article/:slug
