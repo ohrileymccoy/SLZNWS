@@ -56,6 +56,8 @@ function AppShell() {
           <Route path="*" element={<NotFound />} />
           <Route path="/submit" element={<Submit />} />
           <Route path="/submit-photo" element={<SubmitPhoto />} />
+          <Route path="/photo/:id" element={<PhotoPage />} />
+
         </Routes>
       </main>
       <Footer />
