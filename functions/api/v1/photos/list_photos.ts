@@ -10,7 +10,7 @@ type PhotoRow = {
   title: string;
   caption: string;
   section: string;
-  r2_keys: string;  // stored as JSON
+  r2_keys: string;  // stored as JSON array of keys
   created_at: string;
 };
 
@@ -20,15 +20,25 @@ export const onRequestGet: PagesFunction<Env> = async ({ env }) => {
   ).all<PhotoRow>();
 
   const base = env.R2_PUBLIC_BASE || "";
-  const items = results.map((row) => ({
-    id: row.id,
-    slug: row.slug,
-    title: row.title,
-    caption: row.caption,
-    section: row.section,
-    created_at: row.created_at,
-    photoUrls: JSON.parse(row.r2_keys).map((k: string) => `${base}/${k}`),
-  }));
+
+  const items = results.map((row) => {
+    let keys: string[] = [];
+    try {
+      keys = JSON.parse(row.r2_keys);
+    } catch {
+      keys = [];
+    }
+
+    return {
+      id: row.id,
+      slug: row.slug,
+      title: row.title,
+      caption: row.caption,
+      section: row.section,
+      created_at: row.created_at,
+      photoUrls: keys.map((k) => `${base}/${k}`),
+    };
+  });
 
   return Response.json({ items });
 };

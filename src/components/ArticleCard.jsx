@@ -3,16 +3,18 @@ import CommentPreview from "./CommentPreview.jsx";
 
 export default function ArticleCard({
   title,
-  href,              // optional link when NOT a video
-  eyebrow,           // tiny label above title
-  imageUrl,          // fallback image (when not a video)
-  videoUrl,          // if present, render <video>
-  posterUrl,         // optional poster for video
-  caption,           // short text under title
-  footer,            // optional footer area
-  videoId,
+  eyebrow,       // section label
+  caption,       // description text
+  footer,        // footer text (uploaded date)
+  videoUrl,      // if present → video post
+  posterUrl,     // video poster
+  videoId,       // DB id for video (used in comment preview)
+  photoUrls,     // array of photo URLs for photo post
+  photoId,       // DB id for photo
+  id,            // generic fallback id
 }) {
   const isVideo = !!videoUrl;
+  const isPhoto = !!photoUrls && photoUrls.length > 0;
 
   const CardInner = (
     <div className="rounded-2xl border border-neutral-800 bg-neutral-900/60 hover:border-neutral-700 transition-colors overflow-hidden">
@@ -27,13 +29,20 @@ export default function ArticleCard({
           >
             <source src={videoUrl} type="video/mp4" />
           </video>
+        ) : isPhoto ? (
+          <div className="grid grid-cols-2 gap-1 w-full h-full object-cover p-1">
+            {photoUrls.map((url, i) => (
+              <img
+                key={i}
+                src={url}
+                alt={title || `photo-${i}`}
+                className="w-full h-full object-cover rounded"
+                loading="lazy"
+              />
+            ))}
+          </div>
         ) : (
-          <img
-            src={imageUrl}
-            alt={title || ""}
-            className="w-full h-full object-cover"
-            loading="lazy"
-          />
+          <div className="w-full h-full bg-neutral-800" />
         )}
       </div>
 
@@ -46,7 +55,10 @@ export default function ArticleCard({
 
         {title && (
           <h3 className="text-sm font-semibold line-clamp-2">
-            <Link to={`/article/${videoId}`} className="hover:underline">
+            <Link
+              to={`/article/${videoId || photoId || id}`}
+              className="hover:underline"
+            >
               {title}
             </Link>
           </h3>
@@ -54,7 +66,10 @@ export default function ArticleCard({
 
         {caption && (
           <p className="text-xs text-neutral-400 mt-1">
-            <Link to={`/article/${videoId}`} className="hover:underline">
+            <Link
+              to={`/article/${videoId || photoId || id}`}
+              className="hover:underline"
+            >
               {caption}
             </Link>
           </p>
@@ -64,20 +79,11 @@ export default function ArticleCard({
           <div className="mt-2 text-xs text-neutral-500">{footer}</div>
         )}
 
-        {/* Only show ONE preview comment in feed */}
+        {/* Only show comments for videos */}
         {isVideo && videoId && <CommentPreview videoId={videoId} />}
       </div>
     </div>
   );
-
-  // Don’t wrap playable video in a link (prevents weird click behavior)
-  if (!isVideo && href) {
-    return (
-      <a href={href} className="block">
-        {CardInner}
-      </a>
-    );
-  }
 
   return CardInner;
 }
