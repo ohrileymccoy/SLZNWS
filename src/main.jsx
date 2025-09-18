@@ -65,30 +65,46 @@ function AppShell() {
   );
 }
 
-
-function Header() {
+export function Header() {
   const location = useLocation();
   const isActive = (path) => location.pathname === path;
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const dropdownRef = useRef(null);
+
+  // close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setMenuOpen(false);
+      }
+    }
+    if (menuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [menuOpen]);
 
   return (
     <header className="sticky top-0 z-40 backdrop-blur supports-[backdrop-filter]:bg-neutral-950/70 border-b border-neutral-800">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         
-  {/* Left: Logo + Title */}
-<Link to="/" className="group flex items-center gap-2 shrink-0 h-full">
-  <img
-    src={slnLogo}
-    alt="Sleazy News Logo"
-    className="h-full w-auto object-contain" // fills navbar height
-  />
-  <span className="font-semibold tracking-wide text-lg transition-colors">
-    <span className="group-hover:text-blue-400 transition-colors">S.</span>
-    <span className="text-neutral-400 group-hover:text-blue-400 transition-colors">
-      L.N
-    </span>
-  </span>
-</Link>
+        {/* Left: Logo + Title */}
+        <Link to="/" className="group flex items-center gap-2 shrink-0 h-full">
+          <img
+            src={slnLogo}
+            alt="Sleazy News Logo"
+            className="h-full w-auto object-contain"
+          />
+          <span className="font-semibold tracking-wide text-lg transition-colors">
+            <span className="group-hover:text-blue-400 transition-colors">S.</span>
+            <span className="text-neutral-400 group-hover:text-blue-400 transition-colors">
+              L.N
+            </span>
+          </span>
+        </Link>
 
         {/* Center: Pills (desktop only) */}
         <nav className="hidden md:flex flex-1 justify-center items-center gap-2">
@@ -99,31 +115,28 @@ function Header() {
           <NavLink to="/featured" label="Featured" active={isActive("/featured")} />
         </nav>
 
-     {/* Right cluster: Hamburger (mobile only) + Submit buttons */}
-<div className="flex items-center gap-2">
-  {/* Hamburger only on mobile */}
-  <button
-    onClick={() => setMenuOpen(!menuOpen)}
-    className="md:hidden p-2 rounded bg-neutral-800 hover:bg-neutral-700"
-    aria-label="Toggle menu"
-  >
-    {/* 3-line icon */}
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      className="h-5 w-5 text-white"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth="2"
-    >
-      <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-    </svg>
-  </button>
+        {/* Right cluster: Hamburger (mobile only) + Submit buttons */}
+        <div className="flex items-center gap-2" ref={dropdownRef}>
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="md:hidden p-2 rounded bg-neutral-800 hover:bg-neutral-700"
+            aria-label="Toggle menu"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 text-white"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
 
-  {/* Shared submit buttons */}
-  <SubmitButtons />
-</div>
-</div>
+          <SubmitButtons />
+        </div>
+      </div>
 
       {/* Mobile dropdown menu */}
       {menuOpen && (
@@ -140,6 +153,7 @@ function Header() {
     </header>
   );
 }
+
 
 function NavLink({ to, label, active }) {
   return (
@@ -361,8 +375,6 @@ function FeaturedRail() {
   );
 }
 
-
-export default FeaturedRail;
 
 function SectionTabs() {
   const location = useLocation();
