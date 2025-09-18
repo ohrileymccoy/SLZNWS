@@ -184,4 +184,5 @@ export default function UploadPhoto() {
       )}
     </div>
   );
+  
 }
