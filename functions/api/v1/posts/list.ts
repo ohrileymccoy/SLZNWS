@@ -14,6 +14,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   const whereVideos = all ? "1=1" : "status='ready'";
   const wherePhotos = all ? "1=1" : "status='approved'";
 
+  // --- build SQL ---
   let query = `
     SELECT id, slug, title, caption, section, created_at,
            public_url, poster_key, 'video' as type,
@@ -21,7 +22,6 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     FROM videos
     WHERE ${whereVideos}
   `;
-
   if (section) query += ` AND section = ?`;
 
   query += `
@@ -32,7 +32,6 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     FROM photos
     WHERE ${wherePhotos}
   `;
-
   if (section) query += ` AND section = ?`;
 
   query += `
@@ -40,12 +39,13 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     LIMIT ?
   `;
 
-  // Bind params dynamically
+  // --- build params ---
   const params: any[] = [];
-  if (section) params.push(section);
-  if (section) params.push(section);
+  if (section) params.push(section); // for videos
+  if (section) params.push(section); // for photos
   params.push(limit);
 
+  // --- run query ---
   const { results } = await env.DB.prepare(query).bind(...params).all();
 
   // Map photos → proper URLs
