@@ -22,7 +22,8 @@ export default function VideoGrid({ adminMode = false }) {
         });
         if (adminMode) qs.set("all", "true"); // admin sees unpublished
 
-        const res = await fetch(`/api/v1/videos?${qs.toString()}`);
+        const res = await fetch(`/api/v1/posts/list?${qs.toString()}`);
+
         if (!res.ok) throw new Error(`API ${res.status}`);
 
         const json = await res.json();
@@ -38,71 +39,99 @@ export default function VideoGrid({ adminMode = false }) {
   }, [adminMode]);
 
 // Admin: change section
-async function updateSection(slug, newSection) {
+async function updateSection(post, newSection) {
   try {
-    const res = await fetch("/api/v1/videos/update_section", {
+    const isVideo = post.type === "video";
+    const endpoint = isVideo
+      ? "/api/v1/videos/update_section"
+      : "/api/v1/photos/update_section";
+
+    const body = isVideo
+      ? { slug: post.slug, section: newSection }
+      : { id: post.id, section: newSection };
+
+    const res = await fetch(endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
       },
-      body: JSON.stringify({ slug, section: newSection }),
+      body: JSON.stringify(body),
     });
 
     const out = await res.json();
-    if (!out.ok) {
-      return alert(out.error || "Failed to update section");
-    }
+    if (!out.ok) return alert(out.error || "Failed to update section");
 
     setVideos((prev) =>
       prev.map((v) =>
-        v.slug === slug ? { ...v, section: newSection } : v
+        v.id === post.id ? { ...v, section: newSection } : v
       )
     );
   } catch (err) {
-    alert("Update failed: " + err.message);
+    alert("Update failed: " + (err instanceof Error ? err.message : String(err)));
   }
 }
 
+
 // Admin: approve for publication
-async function handleApprove(slug) {
+async function handleApprove(post) {
+  const endpoint =
+    post.type === "video"
+      ? "/api/v1/videos/approve"
+      : "/api/v1/photos/approve_photos";
+
+  const body =
+    post.type === "video" ? { slug: post.slug } : { id: post.id };
+
   try {
-    const res = await fetch("/api/v1/videos/approve", {
+    const res = await fetch(endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
       },
-      body: JSON.stringify({ slug }),
+      body: JSON.stringify(body),
     });
     const out = await res.json();
     if (!out.ok) return alert(out.error || "Failed to approve");
 
     setVideos((prev) =>
       prev.map((v) =>
-        v.slug === slug ? { ...v, is_published: 1, status: "ready" } : v
+        v.id === post.id
+          ? { ...v, is_published: 1, status: "ready" }
+          : v
       )
     );
   } catch (err) {
     alert("Approve failed: " + (err instanceof Error ? err.message : String(err)));
   }
 }
+// Admin: delete post (video or photo)
+async function handleDelete(post) {
+  const isVideo = post.type === "video";
+  if (!confirm(`Delete this ${isVideo ? "video" : "photo"}?`)) return;
 
-  // Admin: delete video
-async function handleDelete(video) {
-  if (!confirm("Delete this video?")) return;
   try {
-    const res = await fetch("/api/v1/videos/delete", {
+    const endpoint = isVideo
+      ? "/api/v1/videos/delete"
+      : "/api/v1/photos/delete_photos";
+
+    const body = isVideo
+      ? { id: post.id, slug: post.slug }
+      : { id: post.id };
+
+    const res = await fetch(endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
       },
-      body: JSON.stringify({ id: video.id, slug: video.slug }),
+      body: JSON.stringify(body),
     });
+
     const json = await res.json();
     if (json.ok) {
-      setVideos((prev) => prev.filter((v) => v.id !== video.id));
+      setVideos((prev) => prev.filter((v) => v.id !== post.id));
     } else {
       alert("Delete failed: " + (json.error || "Unknown error"));
     }
@@ -110,7 +139,6 @@ async function handleDelete(video) {
     alert("Delete failed: " + (err instanceof Error ? err.message : String(err)));
   }
 }
-
 
   // --- Render states ---
   if (loading) return <p className="text-sm text-neutral-400">Loading…</p>;
@@ -140,36 +168,45 @@ async function handleDelete(video) {
             )}
 
             <ArticleCard
-              title={v.title || v.slug}
-              eyebrow={v.section || "Video"}
-              videoUrl={v.public_url}
-              posterUrl={v.poster_url || v.poster_key || undefined}
-              caption={v.caption}
-              mime={v.mime}
-              // Keep /article/:id route working
-              videoId={v.id}
-              onDelete={adminMode ? () => handleDelete(v) : undefined}
-            />
+  title={v.title || v.slug}
+  eyebrow={v.section || (v.type === "photo" ? "Photo" : "Video")}
+  caption={v.caption}
+  mime={v.mime}
+
+  // Video props
+  videoUrl={v.type === "video" ? v.public_url : undefined}
+  posterUrl={v.type === "video" ? (v.poster_url || v.poster_key) : undefined}
+  videoId={v.type === "video" ? v.id : undefined}
+
+  // Photo props
+  photoUrls={v.type === "photo" ? v.photoUrls : undefined}
+  photoId={v.type === "photo" ? v.id : undefined}
+
+  // Admin delete handler stays consistent
+  onDelete={adminMode ? () => handleDelete(v) : undefined}
+/>
 
             {/* Admin controls */}
             {adminMode && (
               <div className="mt-2 flex items-center justify-between gap-2">
                 <select
-                  className="px-2 py-1 rounded bg-neutral-800 border border-neutral-600 text-xs text-white"
-                  value={v.section || "news"}
-                  onChange={(e) => updateSection(v.slug, e.target.value)}
-                >
-                  {SECTIONS.map((s) => (
-                    <option key={s} value={s}>
-                      {s[0].toUpperCase() + s.slice(1)}
-                    </option>
-                  ))}
-                </select>
+  className="px-2 py-1 rounded bg-neutral-800 border border-neutral-600 text-xs text-white"
+  value={v.section || "news"}
+  onChange={(e) => updateSection(v, e.target.value)} // pass whole post now
+>
+  {SECTIONS.map((s) => (
+    <option key={s} value={s}>
+      {s[0].toUpperCase() + s.slice(1)}
+    </option>
+  ))}
+</select>
+
 
                 <div className="flex gap-2">
                   {(!published || !ready) && (
                     <button
-                      onClick={() => handleApprove(v.slug)}
+                      onClick={() => handleApprove(v)}
+
                       className="px-2 py-1 text-xs rounded bg-green-600 text-white hover:bg-green-700 transition"
                     >
                       ✅ Approve
