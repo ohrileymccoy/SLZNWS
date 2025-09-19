@@ -1,99 +1,114 @@
+// src/components/Comments.jsx
 import { useEffect, useState } from "react";
 
-export default function Comments({ videoId }) {
+export default function Comments({ videoId, photoId }) {
   const [comments, setComments] = useState([]);
   const [username, setUsername] = useState("");
   const [body, setBody] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  async function fetchComments() {
+  // Load comments
+  useEffect(() => {
+    async function load() {
+      try {
+        const qs = new URLSearchParams();
+        if (videoId) qs.set("video_id", videoId);
+        if (photoId) qs.set("photo_id", photoId);
+
+        const res = await fetch(`/api/v1/comments?${qs.toString()}`);
+        const data = await res.json();
+        if (data.ok) setComments(data.comments || []);
+      } catch (err) {
+        console.error("Failed to load comments:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, [videoId, photoId]);
+
+  // Submit comment
+  async function handleSubmit(e) {
+    e.preventDefault();
+    console.log("Submitting comment…", { videoId, photoId, username, body });
+
     try {
-      const res = await fetch(`/api/v1/comments?video_id=${videoId}`);
+      const res = await fetch("/api/v1/comments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          video_id: videoId || null,
+          photo_id: photoId || null,
+          username,
+          body,
+        }),
+      });
       const data = await res.json();
+      console.log("Response status:", res.status);
+      console.log("Response JSON:", data);
+
       if (data.ok) {
-        setComments(data.comments);
+        setComments((prev) => [data.comment, ...prev]);
+        setBody("");
       } else {
-        console.error("Failed to load comments:", data.error);
+        alert("Failed to post comment: " + (data.error || "Unknown error"));
       }
     } catch (err) {
-      console.error("Network error:", err);
+      console.error("Failed to post comment:", err);
     }
   }
-
-  async function handleSubmit(e) {
-  e.preventDefault();
-  console.log("Submitting comment…", { videoId, username, body });
-
-  try {
-    const res = await fetch("/api/v1/comments", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        video_id: Number(videoId),
-        username,
-        body,
-      }),
-    });
-
-    console.log("Response status:", res.status);
-    const data = await res.json();
-    console.log("Response JSON:", data);
-
-    if (data.ok && data.comment) {
-      setComments((prev) => [data.comment, ...prev]);
-      setBody("");
-      console.log("Comment added:", data.comment);
-    } else {
-      console.error("Failed to post comment:", data.error);
-    }
-  } catch (err) {
-    console.error("Network error submitting comment:", err);
-  }
-}
-
-  useEffect(() => {
-    fetchComments();
-  }, [videoId]);
 
   return (
-    <div className="mt-6 space-y-4">
-      <form onSubmit={handleSubmit} className="space-y-2">
+    <section className="mt-6">
+      <h2 className="text-lg font-semibold mb-2">Comments</h2>
+
+      <form onSubmit={handleSubmit} className="mb-4 space-y-2">
         <input
+          type="text"
+          placeholder="Your name"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          placeholder="Username"
+          className="w-full px-3 py-2 rounded bg-neutral-900 border border-neutral-700 text-sm"
           required
-          className="w-full px-3 py-2 rounded bg-neutral-900 border border-neutral-700"
-          maxLength={32}
         />
         <textarea
+          placeholder="Write a comment…"
           value={body}
           onChange={(e) => setBody(e.target.value)}
-          placeholder="Say something..."
+          className="w-full px-3 py-2 rounded bg-neutral-900 border border-neutral-700 text-sm"
+          rows={3}
           required
-          className="w-full px-3 py-2 rounded bg-neutral-900 border border-neutral-700"
-          maxLength={1000}
         />
         <button
           type="submit"
-          className="px-4 py-2 bg-neutral-800 border border-neutral-700 rounded hover:bg-neutral-700"
+          className="px-3 py-1 rounded bg-blue-600 hover:bg-blue-700 text-white text-sm"
         >
           Post
         </button>
       </form>
 
-      <ul className="space-y-3">
-        {comments.map((c) => (
-          <li
-            key={c.id}
-            className="p-3 bg-neutral-900 rounded border border-neutral-800"
-          >
-            <p className="text-sm text-neutral-400">
-              {c.username} — {new Date(c.created_at).toLocaleString()}
-            </p>
-            <p>{c.body}</p>
-          </li>
-        ))}
-      </ul>
-    </div>
+      {loading ? (
+        <p className="text-neutral-400">Loading comments…</p>
+      ) : comments.length === 0 ? (
+        <p className="text-neutral-400">No comments yet.</p>
+      ) : (
+        <ul className="space-y-3">
+          {comments.map((c) => (
+            <li
+              key={c.id}
+              className="p-2 bg-neutral-900 rounded border border-neutral-800"
+            >
+              <p className="text-sm font-semibold text-neutral-300">
+                {c.username}
+              </p>
+              <p className="text-sm text-neutral-400">{c.body}</p>
+              <p className="text-xs text-neutral-500">
+                {new Date(c.created_at).toLocaleString()}
+              </p>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }
