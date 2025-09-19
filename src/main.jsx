@@ -331,21 +331,21 @@ function FeaturedRail() {
     <section className="mb-8">
     <div className="flex items-center justify-between mb-3 relative group">
   <h2
-    className="relative text-lg font-semibold text-neutral-100 border-b-2 border-transparent pb-1 
-               group-hover:border-neutral-500 transition-all duration-300"
+  className="relative text-lg font-semibold text-neutral-100 pb-1
+             transition-all duration-300"
+>
+  <span
+    className="relative z-10 group-hover:text-white transition-colors duration-300"
   >
-    <span
-      className="relative z-10 group-hover:text-white transition-colors duration-300"
-    >
-      Local Mugshots
-    </span>
+    Local Mugshots
+  </span>
 
-    {/* grey bubble background */}
-    <span
-      className="absolute inset-0 rounded-lg bg-neutral-800/80 shadow-lg opacity-0 scale-90 
-                 group-hover:opacity-100 group-hover:scale-100 transition-all duration-300"
-    ></span>
-  </h2>
+  {/* grey bubble background */}
+  <span
+    className="absolute inset-0 rounded-lg bg-neutral-800/80 shadow-lg opacity-0 scale-90 
+               group-hover:opacity-100 group-hover:scale-100 transition-all duration-300"
+  ></span>
+</h2>
 </div>
       <div
         ref={scrollRef}
