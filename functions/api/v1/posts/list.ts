@@ -8,66 +8,60 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   const url = new URL(request.url);
   const limit = Number(url.searchParams.get("limit") || 50);
   const all = url.searchParams.get("all") === "true"; // admin sees unpublished
+  const section = url.searchParams.get("section");   // 👈 section param
 
   // Only show approved/published unless admin
   const whereVideos = all ? "1=1" : "status='ready'";
   const wherePhotos = all ? "1=1" : "status='approved'";
 
-  const query = `
-    SELECT * FROM (
-      SELECT 
-        id,
-        slug,
-        title,
-        caption,
-        section,
-        created_at,
-        r2_key AS media_url,     -- unified column
-        poster_key,
-        'video' AS type,
-        status,
-        is_published
-      FROM videos
-      WHERE ${whereVideos}
+  let query = `
+    SELECT id, slug, title, caption, section, created_at,
+           public_url, poster_key, 'video' as type,
+           status, is_published
+    FROM videos
+    WHERE ${whereVideos}
+  `;
 
-      UNION ALL
+  if (section) query += ` AND section = ?`;
 
-      SELECT 
-        id,
-        slug,
-        title,
-        caption,
-        section,
-        created_at,
-        r2_keys AS media_url,    -- JSON array of photo keys
-        NULL AS poster_key,
-        'photo' AS type,
-        status,
-        0 AS is_published
-      FROM photos
-      WHERE ${wherePhotos}
-    )
-    ORDER BY datetime(created_at) DESC
+  query += `
+    UNION ALL
+    SELECT id, slug, title, caption, section, created_at,
+           r2_keys as public_url, NULL as poster_key, 'photo' as type,
+           status, 0 as is_published
+    FROM photos
+    WHERE ${wherePhotos}
+  `;
+
+  if (section) query += ` AND section = ?`;
+
+  query += `
+    ORDER BY created_at DESC
     LIMIT ?
   `;
 
-  const { results } = await env.DB.prepare(query).bind(limit).all();
+  // Bind params dynamically
+  const params: any[] = [];
+  if (section) params.push(section);
+  if (section) params.push(section);
+  params.push(limit);
 
+  const { results } = await env.DB.prepare(query).bind(...params).all();
+
+  // Map photos → proper URLs
   const base = env.R2_PUBLIC_BASE || "";
   const items = results.map((row: any) => {
     if (row.type === "photo") {
       let photoUrls: string[] = [];
       try {
-        const keys: string[] = JSON.parse(row.media_url);
+        const keys: string[] = JSON.parse(row.public_url);
         photoUrls = keys.map((k) => `${base}/${k}`);
       } catch {
         photoUrls = [];
       }
       return { ...row, photoUrls };
-    } else {
-      // normalize to what frontend already expects
-      return { ...row, public_url: `${base}/${row.media_url}` };
     }
+    return row;
   });
 
   return Response.json({ items });
