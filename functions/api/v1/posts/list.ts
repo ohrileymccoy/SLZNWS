@@ -15,24 +15,43 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     const wherePhotos = all ? "1=1" : "status='approved'";
 
     const query = `
-      SELECT * FROM (
-        SELECT id, slug, title, caption, section, created_at,
-               public_url, poster_key, 'video' as type,
-               status, is_published
-        FROM videos
-        WHERE ${whereVideos}
+  SELECT * FROM (
+    SELECT 
+      id, 
+      slug, 
+      title, 
+      caption, 
+      section, 
+      created_at,
+      r2_key AS public_url,   -- 👈 FIX: videos table has r2_key, not public_url
+      poster_key, 
+      'video' AS type,
+      status, 
+      is_published
+    FROM videos
+    WHERE ${whereVideos}
 
-        UNION ALL
+    UNION ALL
 
-        SELECT id, slug, title, caption, section, created_at,
-               r2_keys as public_url, NULL as poster_key, 'photo' as type,
-               status, 0 as is_published
-        FROM photos
-        WHERE ${wherePhotos}
-      )
-      ORDER BY created_at DESC
-      LIMIT ?
-    `;
+    SELECT 
+      id, 
+      slug, 
+      title, 
+      caption, 
+      section, 
+      created_at,
+      r2_keys AS public_url,  -- 👈 photos table has r2_keys (JSON array)
+      NULL AS poster_key, 
+      'photo' AS type,
+      status, 
+      0 AS is_published
+    FROM photos
+    WHERE ${wherePhotos}
+  )
+  ORDER BY datetime(created_at) DESC
+  LIMIT ?
+`;
+
 
     const { results } = await env.DB.prepare(query).bind(limit).all();
 
