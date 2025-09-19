@@ -1,15 +1,8 @@
-import { useVideos } from "../hooks/useVideos";
-import { usePhotos } from "../hooks/usePhotos";
+import { usePosts } from "../hooks/usePosts";
 import ArticleCard from "./ArticleCard";
 
 export default function Feed({ section = null }) {
-  const { items: videoItems, loading: loadingVideos } = useVideos({ section });
-  const { items: photoItems, loading: loadingPhotos } = usePhotos({ section });
-
-  const loading = loadingVideos || loadingPhotos;
-  const merged = [...videoItems, ...photoItems].sort(
-    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-  );
+  const { items, loading, error } = usePosts({ section });
 
   if (loading) {
     return (
@@ -19,7 +12,15 @@ export default function Feed({ section = null }) {
     );
   }
 
-  if (!merged.length) {
+  if (error) {
+    return (
+      <div className="mx-auto max-w-3xl px-4">
+        <p className="text-red-400">Error: {error}</p>
+      </div>
+    );
+  }
+
+  if (!items.length) {
     return (
       <div className="mx-auto max-w-3xl px-4">
         <p className="text-neutral-400">No posts found.</p>
@@ -29,8 +30,8 @@ export default function Feed({ section = null }) {
 
   return (
     <div className="mx-auto max-w-3xl px-4">
-      {merged.map((it) =>
-        it.videoUrl || it.public_url ? (
+      {items.map((it) =>
+        it.type === "video" ? (
           <ArticleCard
             key={`video-${it.id}`}
             title={it.title}
@@ -48,7 +49,7 @@ export default function Feed({ section = null }) {
             eyebrow={it.section}
             caption={it.caption}
             footer={`Uploaded ${new Date(it.created_at).toLocaleDateString()}`}
-            photoUrls={it.photoUrls} // 👈 added for photo sets
+            photoUrls={it.photoUrls}
             photoId={it.id}
           />
         )
