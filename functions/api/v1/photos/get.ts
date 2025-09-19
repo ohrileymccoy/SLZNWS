@@ -24,9 +24,10 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     return Response.json({ error: "Invalid id" }, { status: 400 });
   }
 
-  const row = (await env.DB.prepare(
-    "SELECT * FROM photos WHERE id = ? AND status = 'uploaded'"
-  ).bind(id).first()) as PhotoRow | null;
+ const row = (await env.DB.prepare(
+  "SELECT * FROM photos WHERE id = ? AND status IN ('uploaded', 'approved', 'ready')"
+).bind(id).first()) as PhotoRow | null;
+
 
   if (!row) {
     return Response.json({ error: "Not found" }, { status: 404 });

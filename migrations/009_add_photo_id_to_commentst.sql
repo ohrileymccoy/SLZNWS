@@ -1,0 +1,1 @@
+ALTER TABLE comments ADD COLUMN photo_id INTEGER;

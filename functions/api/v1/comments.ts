@@ -3,7 +3,8 @@
 type Env = { DB: D1Database; ADMIN_SECRET?: string };
 
 type CommentPayload = {
-  video_id: number;
+  video_id?: number;
+  photo_id?: number;
   username: string;
   body: string;
 };
@@ -17,9 +18,9 @@ function sanitize(input: string) {
 export async function onRequestPost({ request, env }: { request: Request; env: Env }) {
   try {
     const data = (await request.json()) as Partial<CommentPayload>;
-    const { video_id, username, body } = data;
+    const { video_id, photo_id, username, body } = data;
 
-    if (!video_id || !username || !body) {
+    if ((!video_id && !photo_id) || !username || !body) {
       return new Response(JSON.stringify({ ok: false, error: "Missing fields" }), {
         status: 400,
         headers: { "Content-Type": "application/json" },
@@ -37,9 +38,11 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
     const safeBody = sanitize(body);
 
     const newComment = await env.DB.prepare(
-      "INSERT INTO comments (video_id, username, body) VALUES (?, ?, ?) RETURNING id, video_id, username, body, created_at"
+      `INSERT INTO comments (video_id, photo_id, username, body)
+       VALUES (?, ?, ?, ?)
+       RETURNING id, video_id, photo_id, username, body, created_at`
     )
-      .bind(Number(video_id), safeUser, safeBody)
+      .bind(video_id || null, photo_id || null, safeUser, safeBody)
       .first();
 
     return new Response(JSON.stringify({ ok: true, comment: newComment }), {
@@ -54,15 +57,16 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
 }
 
 // --- GET /api/v1/comments ---
-// Public: requires ?video_id=123
-// Admin: if no video_id, requires ADMIN_SECRET and returns all comments w/ video info
+// Public: requires ?video_id=123 OR ?photo_id=456
+// Admin: if neither, requires ADMIN_SECRET and returns all comments
 export async function onRequestGet({ request, env }: { request: Request; env: Env }) {
   try {
     const url = new URL(request.url);
     const videoId = url.searchParams.get("video_id");
+    const photoId = url.searchParams.get("photo_id");
     const limit = Number(url.searchParams.get("limit") || "0");
 
-    if (!videoId) {
+    if (!videoId && !photoId) {
       // --- Admin mode ---
       const auth = request.headers.get("Authorization");
       if (auth !== `Bearer ${env.ADMIN_SECRET}`) {
@@ -73,10 +77,13 @@ export async function onRequestGet({ request, env }: { request: Request; env: En
       }
 
       const rows = await env.DB.prepare(
-        `SELECT c.id, c.video_id, v.slug, v.title,
+        `SELECT c.id, c.video_id, c.photo_id,
+                v.slug as video_slug, v.title as video_title,
+                p.slug as photo_slug, p.title as photo_title,
                 c.username, c.body, c.created_at
          FROM comments c
          LEFT JOIN videos v ON c.video_id = v.id
+         LEFT JOIN photos p ON c.photo_id = p.id
          ORDER BY c.created_at DESC`
       ).all();
 
@@ -86,12 +93,22 @@ export async function onRequestGet({ request, env }: { request: Request; env: En
     }
 
     // --- Public mode ---
-    const sql =
-      limit === 1
-        ? "SELECT id, username, body, created_at FROM comments WHERE video_id = ? ORDER BY created_at DESC LIMIT 1"
-        : "SELECT id, username, body, created_at FROM comments WHERE video_id = ? ORDER BY created_at DESC";
+    let query = "SELECT id, username, body, created_at FROM comments WHERE 1=1";
+    const params: any[] = [];
 
-    const rows = await env.DB.prepare(sql).bind(Number(videoId)).all();
+    if (videoId) {
+      query += " AND video_id = ?";
+      params.push(Number(videoId));
+    }
+    if (photoId) {
+      query += " AND photo_id = ?";
+      params.push(Number(photoId));
+    }
+
+    query += " ORDER BY created_at DESC";
+    if (limit === 1) query += " LIMIT 1";
+
+    const rows = await env.DB.prepare(query).bind(...params).all();
 
     return new Response(JSON.stringify({ ok: true, comments: rows.results || [] }), {
       headers: { "Content-Type": "application/json" },

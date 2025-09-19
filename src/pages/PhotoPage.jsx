@@ -1,5 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
+import Comments from "../components/Comments.jsx"; // ✅ reuse same Comments component
 
 export default function PhotoPage() {
   const { id } = useParams();
@@ -14,6 +15,7 @@ export default function PhotoPage() {
         const json = await res.json();
         setItem(json.item || null);
 
+        // grab related
         const relRes = await fetch("/api/v1/photos/list_photos");
         const relJson = await relRes.json();
         if (relJson.items) {
@@ -38,18 +40,18 @@ export default function PhotoPage() {
 
   if (!item) {
     return (
-      <div className="max-w-3xl mx-auto px-4 py-10 text-neutral-400">
+      <div className="max-w-3xl mx-auto px-4 py-10 text-red-400">
         Photo not found.
       </div>
     );
   }
 
   return (
-    <article className="max-w-3xl mx-auto px-4 py-6">
-      <h1 className="text-2xl font-bold mb-2">{item.title}</h1>
-      {item.caption && (
-        <p className="text-neutral-400 mb-4">{item.caption}</p>
-      )}
+    <article className="max-w-3xl mx-auto px-4 py-6 space-y-6">
+      <header>
+        <h1 className="text-2xl font-bold mb-2">{item.title}</h1>
+        {item.caption && <p className="text-neutral-400 mb-4">{item.caption}</p>}
+      </header>
 
       <div className="grid gap-2 sm:grid-cols-2 mb-6">
         {item.photoUrls.map((url, i) => (
@@ -62,9 +64,12 @@ export default function PhotoPage() {
         ))}
       </div>
 
-      <div className="text-xs text-neutral-500 mb-10">
+      <div className="text-xs text-neutral-500">
         Uploaded {new Date(item.created_at).toLocaleString()}
       </div>
+
+      {/* 🔹 Add comments, mirroring ArticlePage */}
+      <Comments photoId={item.id} />
 
       {related.length > 0 && (
         <section>
