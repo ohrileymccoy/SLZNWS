@@ -20,11 +20,20 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       return Response.json({ ok: false, error: "Missing id" }, { status: 400 });
     }
 
+    // ✅ Mark photo as approved for publishing
     await env.DB.prepare(
-      "UPDATE photos SET status = 'approved' WHERE id = ?"
+      `UPDATE photos
+         SET status = 'approved'
+       WHERE id = ?`
     ).bind(body.id).run();
 
-    return Response.json({ ok: true });
+    // Optionally return the updated row (consistency with videos/approve)
+    const updated = await env.DB.prepare(
+      `SELECT id, slug, title, caption, section, created_at, status
+         FROM photos WHERE id = ?`
+    ).bind(body.id).first();
+
+    return Response.json({ ok: true, item: updated });
   } catch (err: any) {
     return Response.json(
       { ok: false, error: err.message || "Server error" },
