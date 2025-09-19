@@ -114,42 +114,45 @@ export function Header() {
           <NavLink to="/section/sports" label="Sports" active={isActive("/section/sports")} />
           <NavLink to="/featured" label="Featured" active={isActive("/featured")} />
         </nav>
+{/* Right cluster: Hamburger (mobile only) + Submit buttons */}
+<div className="flex items-center gap-2" ref={dropdownRef}>
+  <button
+    onClick={() => setMenuOpen(!menuOpen)}
+    className="md:hidden p-2 rounded bg-neutral-800 hover:bg-neutral-700"
+    aria-label="Toggle menu"
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      className="h-5 w-5 text-white"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+    </svg>
+  </button>
 
-        {/* Right cluster: Hamburger (mobile only) + Submit buttons */}
-        <div className="flex items-center gap-2" ref={dropdownRef}>
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="md:hidden p-2 rounded bg-neutral-800 hover:bg-neutral-700"
-            aria-label="Toggle menu"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 text-white"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
+  <SubmitButtons />
+</div>
+</div>
 
-          <SubmitButtons />
-        </div>
-      </div>
-
-      {/* Mobile dropdown menu */}
-      {menuOpen && (
-        <div className="md:hidden bg-neutral-950 border-t border-neutral-800">
-          <nav className="flex flex-col px-4 py-3 space-y-2">
-            <NavLink to="/" label="Home" active={isActive("/")} />
-            <NavLink to="/section/news" label="News" active={isActive("/section/news")} />
-            <NavLink to="/section/culture" label="Culture" active={isActive("/section/culture")} />
-            <NavLink to="/section/sports" label="Sports" active={isActive("/section/sports")} />
-            <NavLink to="/featured" label="Featured" active={isActive("/featured")} />
-          </nav>
-        </div>
-      )}
+{/* Mobile dropdown menu */}
+{menuOpen && (
+  <div
+    className="md:hidden bg-neutral-950 border-t border-neutral-800"
+    ref={dropdownRef} // 👈 add the ref here too
+  >
+    <nav className="flex flex-col px-4 py-3 space-y-2">
+      <NavLink to="/" label="Home" active={isActive("/")} />
+      <NavLink to="/section/news" label="News" active={isActive("/section/news")} />
+      <NavLink to="/section/culture" label="Culture" active={isActive("/section/culture")} />
+      <NavLink to="/section/sports" label="Sports" active={isActive("/section/sports")} />
+      <NavLink to="/featured" label="Featured" active={isActive("/featured")} />
+    </nav>
+  </div>
+)}
+      
     </header>
   );
 }
