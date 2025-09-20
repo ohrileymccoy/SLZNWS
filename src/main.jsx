@@ -1,3 +1,4 @@
+// src/main.jsx
 import { StrictMode, useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import {
@@ -9,6 +10,7 @@ import {
   useParams,
   useLocation,
 } from "react-router-dom";
+
 import "./index.css";
 import SecureAdmin from "./components/SecureAdmin.jsx";
 import Feed from "./components/Feed.jsx";
@@ -20,7 +22,14 @@ import TOSModal from "./components/TOSModal";
 import SubmitPhoto from "./pages/SubmitPhoto.jsx";
 import SubmitButtons from "./components/SubmitButtons";
 import PhotoPage from "./pages/PhotoPage.jsx";
-import { SECTION_LABELS, SECTION_ORDER } from "./constants/sections"; // ✅ new source of truth
+
+// ✅ Centralized section config (single source of truth)
+const SECTIONS = [
+  { key: "news", label: "News" },
+  { key: "culture", label: "Culture" },
+  { key: "sports", label: "Sports" },
+  { key: "featured", label: "Featured" },
+];
 
 const brand = {
   primary: "#0430FC",
@@ -30,6 +39,8 @@ const brand = {
 function clsx(...xs) {
   return xs.filter(Boolean).join(" ");
 }
+
+// ------------------ App Shell ------------------
 
 function AppShell() {
   return (
@@ -55,12 +66,16 @@ function AppShell() {
   );
 }
 
+// ------------------ Header ------------------
+
 export function Header() {
   const location = useLocation();
-  const isActive = (path) => location.pathname === path;
   const [menuOpen, setMenuOpen] = useState(false);
   const dropdownRef = useRef(null);
 
+  const isActive = (path) => location.pathname === path;
+
+  // close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(e) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -76,7 +91,7 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 backdrop-blur supports-[backdrop-filter]:bg-neutral-950/70 border-b border-neutral-800">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        {/* Logo */}
+        {/* Left: Logo + Title */}
         <Link to="/" className="group flex items-center gap-2 shrink-0 h-full">
           <img src={slnLogo} alt="Sleazy News Logo" className="h-full w-auto object-contain" />
           <span className="font-semibold tracking-wide text-lg transition-colors">
@@ -85,24 +100,24 @@ export function Header() {
           </span>
         </Link>
 
-        {/* Desktop nav */}
+        {/* Center: Nav (desktop only) */}
         <nav className="hidden md:flex flex-1 justify-center items-center gap-2">
           <NavLink to="/" label="Home" active={isActive("/")} />
-          {SECTION_ORDER.map((key) => (
+          {SECTIONS.map((s) => (
             <NavLink
-              key={key}
-              to={key === "featured" ? "/featured" : `/section/${key}`}
-              label={SECTION_LABELS[key]}
+              key={s.key}
+              to={s.key === "featured" ? "/featured" : `/section/${s.key}`}
+              label={s.label}
               active={
-                key === "featured"
+                s.key === "featured"
                   ? isActive("/featured")
-                  : isActive(`/section/${key}`)
+                  : isActive(`/section/${s.key}`)
               }
             />
           ))}
         </nav>
 
-        {/* Right cluster */}
+        {/* Right cluster: hamburger + submit */}
         <div className="flex items-center gap-2" ref={dropdownRef}>
           <button
             onClick={() => setMenuOpen(!menuOpen)}
@@ -123,15 +138,15 @@ export function Header() {
         <div className="md:hidden bg-neutral-950 border-t border-neutral-800" ref={dropdownRef}>
           <nav className="flex flex-col px-4 py-3 space-y-2">
             <NavLink to="/" label="Home" active={isActive("/")} />
-            {SECTION_ORDER.map((key) => (
+            {SECTIONS.map((s) => (
               <NavLink
-                key={key}
-                to={key === "featured" ? "/featured" : `/section/${key}`}
-                label={SECTION_LABELS[key]}
+                key={s.key}
+                to={s.key === "featured" ? "/featured" : `/section/${s.key}`}
+                label={s.label}
                 active={
-                  key === "featured"
+                  s.key === "featured"
                     ? isActive("/featured")
-                    : isActive(`/section/${key}`)
+                    : isActive(`/section/${s.key}`)
                 }
               />
             ))}
@@ -156,6 +171,8 @@ function NavLink({ to, label, active }) {
     </Link>
   );
 }
+
+// ------------------ Footer ------------------
 
 function Footer() {
   return (
@@ -188,24 +205,23 @@ function HomePage() {
 function SectionPage() {
   const { section } = useParams();
   const sectionKey = (section || "").toLowerCase();
-  const valid = SECTION_ORDER.includes(sectionKey);
+  const valid = SECTIONS.some((s) => s.key === sectionKey);
 
   if (!valid) return <NotFound message="Unknown section." />;
 
+  const sectionObj = SECTIONS.find((s) => s.key === sectionKey);
   return (
     <div className="py-8">
-      <PageTitle
-        title={SECTION_LABELS[sectionKey] || sectionKey}
-        eyebrow="Section"
-      />
+      <PageTitle title={sectionObj.label} eyebrow="Section" />
       <Feed section={sectionKey} />
     </div>
   );
 }
+
 function FeaturedPage() {
   return (
     <div className="py-8">
-      <PageTitle title={SECTION_LABELS.featured} eyebrow="Curated" />
+      <PageTitle title="Featured" eyebrow="Curated" />
       <Feed section="featured" />
     </div>
   );
@@ -221,25 +237,124 @@ function NotFound({ message = "We couldn't find that." }) {
   );
 }
 
-// ------------------ Tabs ------------------
+// ------------------ Modules ------------------
+
+function KPIBand() {
+  const [stats, setStats] = useState(null);
+
+  useEffect(() => {
+    async function loadStats() {
+      try {
+        const res = await fetch("/api/v1/videos/stats");
+        const json = await res.json();
+        if (json.ok) setStats(json.stats);
+      } catch (err) {
+        console.error("Failed to load stats", err);
+      }
+    }
+    loadStats();
+  }, []);
+
+  if (!stats) return null;
+
+  const data = [
+    { label: "New today", value: stats.newToday },
+    { label: "Total videos", value: stats.total },
+    { label: "Last updated", value: stats.lastUpdated ? new Date(stats.lastUpdated).toLocaleTimeString() : "—" },
+  ];
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+      {data.map((k) => (
+        <div
+          key={k.label}
+          className="rounded-2xl bg-neutral-900/60 border border-neutral-800 p-4 flex items-center justify-between 
+                     transition-transform duration-200 hover:scale-105 active:scale-95 cursor-pointer"
+        >
+          <span className="text-neutral-400 text-sm">{k.label}</span>
+          <span className="text-lg font-semibold">{k.value}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function FeaturedRail() {
+  const scrollRef = useRef(null);
+  const [items, setItems] = useState([]);
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const res = await fetch("/api/v1/mugshots/list");
+        const json = await res.json();
+        setItems(json.items || []);
+      } catch (err) {
+        console.error("Failed to load mugshots:", err);
+      }
+    }
+    load();
+  }, []);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    let frame;
+    const speed = 0.5;
+    function tick() {
+      if (!el) return;
+      el.scrollLeft += speed;
+      if (el.scrollLeft >= el.scrollWidth / 2) {
+        el.scrollLeft = 0;
+      }
+      frame = requestAnimationFrame(tick);
+    }
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [items]);
+
+  return (
+    <section className="mb-8">
+      <div className="flex items-center justify-between mb-3 relative group">
+        <h2 className="relative text-lg font-semibold text-neutral-100 pb-1 transition-all duration-300">
+          <span className="relative z-10 group-hover:text-white">Local Mugshots</span>
+          <span className="absolute inset-0 rounded-lg bg-neutral-800/80 shadow-lg opacity-0 scale-90 
+                           group-hover:opacity-100 group-hover:scale-100 transition-all duration-300"></span>
+        </h2>
+      </div>
+      <div ref={scrollRef} className="flex overflow-x-hidden gap-3 pb-2 snap-none" style={{ scrollBehavior: "auto" }}>
+        {Array.from({ length: 10 }).map((_, repeatIdx) =>
+          items.map((it, idx) => (
+            <div
+              key={`${repeatIdx}-${idx}`}
+              className="min-w-[160px] bg-neutral-900/60 border border-neutral-800 rounded-2xl overflow-hidden"
+            >
+              <img src={it.public_url} alt={it.name} className="w-full h-40 object-cover" />
+              <div className="p-2 text-center">
+                <p className="text-sm text-neutral-300">{it.name}</p>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </section>
+  );
+}
 
 function SectionTabs() {
   const location = useLocation();
-  const tabs = [
-  { label: "All", to: "/" },
-  { label: SECTION_LABELS.news, to: "/section/news" },
-  { label: SECTION_LABELS.culture, to: "/section/culture" },
-  { label: SECTION_LABELS.sports, to: "/section/sports" },
-];
+  const tabs = [{ label: "All", to: "/" }, ...SECTIONS.filter((s) => s.key !== "featured")];
+
   return (
     <div className="mb-4 flex flex-wrap gap-2">
       {tabs.map((t) => (
         <Link
-          key={t.to}
-          to={t.to}
+          key={t.key || t.to}
+          to={t.to || `/section/${t.key}`}
           className={clsx(
             "px-3 py-1.5 rounded-2xl border text-sm",
-            location.pathname === t.to
+            location.pathname === (t.to || `/section/${t.key}`)
               ? "border-neutral-700 bg-neutral-900/60"
               : "border-neutral-800 bg-neutral-900/30 hover:border-neutral-700"
           )}
@@ -251,7 +366,18 @@ function SectionTabs() {
   );
 }
 
-// ------------------ (rest unchanged: KPIBand, FeaturedRail, FeedScaffold, etc.) ------------------
+function PageTitle({ title, eyebrow, compact }) {
+  return (
+    <div className={clsx("mb-4", compact && "mb-2")}>
+      {eyebrow && (
+        <div className="uppercase tracking-widest text-[10px] text-neutral-400">{eyebrow}</div>
+      )}
+      <h2 className="text-xl md:text-2xl font-semibold">{title}</h2>
+    </div>
+  );
+}
+
+// ------------------ Mount ------------------
 
 function Root() {
   return (
