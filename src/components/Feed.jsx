@@ -4,7 +4,7 @@ import ArticleCard from "./ArticleCard";
 
 export default function Feed({ section = null }) {
   const { items, loading, error } = usePosts({ section });
-  const [sortBy, setSortBy] = useState("date"); // "date" | "type"
+  const [filter, setFilter] = useState("newest"); // "newest" | "photos" | "videos"
 
   if (loading) {
     return (
@@ -30,35 +30,35 @@ export default function Feed({ section = null }) {
     );
   }
 
-  // 🔑 Sorting logic lives here
-  let sorted = [...items];
-  if (sortBy === "date") {
-    sorted.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-  } else if (sortBy === "type") {
-    sorted.sort((a, b) => {
-      if (a.type === b.type) {
-        return new Date(b.created_at) - new Date(a.created_at);
-      }
-      return a.type === "video" ? -1 : 1; // videos before photos
-    });
+  // 🔑 Filter + sort logic
+  let filtered = [...items];
+
+  if (filter === "photos") {
+    filtered = filtered.filter((it) => it.type === "photo");
+  } else if (filter === "videos") {
+    filtered = filtered.filter((it) => it.type === "video");
   }
+
+  // Always sort newest first
+  filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
   return (
     <div className="mx-auto max-w-3xl px-4">
-      {/* Sort controls */}
+      {/* Filter controls */}
       <div className="flex justify-end mb-4">
-        <label className="text-sm text-neutral-400 mr-2">Sort by:</label>
+        <label className="text-sm text-neutral-400 mr-2">Show:</label>
         <select
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
           className="rounded-lg bg-neutral-900 border border-neutral-700 px-2 py-1 text-sm text-neutral-200"
         >
-          <option value="date">Newest</option>
-          <option value="type">Type</option>
+          <option value="newest">Newest</option>
+          <option value="videos">Videos only</option>
+          <option value="photos">Photos only</option>
         </select>
       </div>
 
-      {sorted.map((it) =>
+      {filtered.map((it) =>
         it.type === "video" ? (
           <ArticleCard
             key={`video-${it.id}`}
