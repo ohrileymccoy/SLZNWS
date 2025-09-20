@@ -1,11 +1,10 @@
 import { useRef, useState } from "react";
 
 export default function UploadVideo({ simple = false }) {
-
   const fileInputRef = useRef(null);
   const [file, setFile] = useState(null);
   const [title, setTitle] = useState("");
-  const [caption, setCaption] = useState("");
+  const [text, setText] = useState("");           // renamed caption → text
   const [section, setSection] = useState("news");
   const [uploading, setUploading] = useState(false);
   const [status, setStatus] = useState(null); // { ok, msg, url }
@@ -36,56 +35,47 @@ export default function UploadVideo({ simple = false }) {
   }
 
   async function onUploadClick() {
-  if (!file) {
-    setStatus({ ok: false, msg: "Pick a file first." });
-    return;
+    if (!file) {
+      setStatus({ ok: false, msg: "Pick a file first." });
+      return;
+    }
+
+    const safeTitle = title?.trim() || file.name.replace(/\.[^.]+$/, "");
+    const slug = slugify(safeTitle) || slugify(file.name.replace(/\.[^.]+$/, ""));
+
+    setUploading(true);
+    setStatus(null);
+
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      form.append("title", safeTitle);
+      form.append("slug", slug);
+      form.append("caption", text);   // backend still expects "caption"
+      form.append("section", section);
+
+      const res = await fetch("/api/v1/upload_url", {
+        method: "POST",
+        body: form,
+      });
+      if (!res.ok) throw new Error("Upload failed");
+
+      const json = await res.json();
+
+      setStatus({ ok: true, msg: "Uploaded!", url: json.public_url });
+
+      // reset
+      setFile(null);
+      setTitle("");
+      setText("");
+      setSection("news");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    } catch (err) {
+      setStatus({ ok: false, msg: err.message || String(err) });
+    } finally {
+      setUploading(false);
+    }
   }
-
-  const safeTitle = title?.trim() || file.name.replace(/\.[^.]+$/, "");
-  const slug =
-    slugify(safeTitle) || slugify(file.name.replace(/\.[^.]+$/, ""));
-
-  setUploading(true);
-  setStatus(null);
-
-  try {
-    // STEP 1: build form data for upload
-    const form = new FormData();
-    form.append("file", file);
-    form.append("title", safeTitle);
-    form.append("slug", slug);
-    form.append("caption", caption);
-    form.append("section", section);
-
-    // STEP 2: send file + metadata directly to backend
-    // backend handles env.MEDIA.put() + DB insert
-    const res = await fetch("/api/v1/upload_url", {
-      method: "POST",
-      body: form,
-    });
-    if (!res.ok) throw new Error("Upload failed");
-
-    // STEP 3: parse backend response (includes public_url)
-    const json = await res.json();
-
-    // STEP 4: update UI with success message + link
-    setStatus({ ok: true, msg: "Uploaded!", url: json.public_url });
-
-    // STEP 5: reset form state
-    setFile(null);
-    setTitle("");
-    setCaption("");
-    setSection("news");
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  } catch (err) {
-    // Handle errors gracefully
-    setStatus({ ok: false, msg: err.message || String(err) });
-  } finally {
-    // Always clear "Uploading…" spinner
-    setUploading(false);
-  }
-}
-
 
   return (
     <div className="rounded-2xl border border-neutral-800 bg-neutral-900/60 p-4">
@@ -103,36 +93,38 @@ export default function UploadVideo({ simple = false }) {
         className="w-full rounded-xl bg-neutral-900 border border-neutral-800 px-3 py-2 outline-none focus:border-neutral-600 mb-4"
       />
 
-     {/* Caption */}
-{!simple && (
-  <>
-    <label className="block text-xs text-neutral-400 mb-1">Caption</label>
-    <input
-      type="text"
-      value={caption}
-      onChange={(e) => setCaption(e.target.value)}
-      placeholder="Short description"
-      className="w-full rounded-xl bg-neutral-900 border border-neutral-800 px-3 py-2 outline-none focus:border-neutral-600 mb-4"
-    />
-  </>
-)}
+      {/* Text (renamed from caption) */}
+      {!simple && (
+        <>
+          <label className="block text-xs text-neutral-400 mb-1">
+            Text
+          </label>
+          <textarea
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Write something…"
+            rows={4}
+            className="w-full rounded-xl bg-neutral-900 border border-neutral-800 px-3 py-2 outline-none focus:border-neutral-600 mb-4 resize-y"
+          />
+        </>
+      )}
 
-{/* Section */}
-{!simple && (
-  <>
-    <label className="block text-xs text-neutral-400 mb-1">Section</label>
-    <select
-      value={section}
-      onChange={(e) => setSection(e.target.value)}
-      className="w-full rounded-xl bg-neutral-900 border border-neutral-800 px-3 py-2 outline-none focus:border-neutral-600 mb-4"
-    >
-      <option value="news">News</option>
-      <option value="culture">Culture</option>
-      <option value="sports">Sports</option>
-      <option value="featured">Featured</option>
-    </select>
-  </>
-)}
+      {/* Section */}
+      {!simple && (
+        <>
+          <label className="block text-xs text-neutral-400 mb-1">Section</label>
+          <select
+            value={section}
+            onChange={(e) => setSection(e.target.value)}
+            className="w-full rounded-xl bg-neutral-900 border border-neutral-800 px-3 py-2 outline-none focus:border-neutral-600 mb-4"
+          >
+            <option value="news">News</option>
+            <option value="culture">Culture</option>
+            <option value="sports">Sports</option>
+            <option value="featured">Featured</option>
+          </select>
+        </>
+      )}
 
       {/* File + buttons */}
       <div className="flex flex-wrap items-center gap-3">
@@ -185,8 +177,7 @@ export default function UploadVideo({ simple = false }) {
           {status.msg}
           {status.ok && status.url && (
             <>
-              {" "}
-              —{" "}
+              {" — "}
               <a
                 className="underline"
                 href={status.url}
@@ -201,8 +192,7 @@ export default function UploadVideo({ simple = false }) {
       )}
 
       <p className="mt-3 text-xs text-neutral-500">
-        Tip: We auto-slugify from Title or filename. Works best with H.264/AAC
-        MP4.
+        Tip: We auto-slugify from Title or filename. Works best with H.264/AAC MP4.
       </p>
     </div>
   );

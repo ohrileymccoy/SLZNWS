@@ -4,7 +4,7 @@ export default function UploadPhoto() {
   const fileInputRef = useRef(null);
   const [files, setFiles] = useState([]);
   const [title, setTitle] = useState("");
-  const [caption, setCaption] = useState("");
+  const [text, setText] = useState("");           // renamed caption → text
   const [section, setSection] = useState("news");
   const [uploading, setUploading] = useState(false);
   const [status, setStatus] = useState(null); // { ok, msg, urls }
@@ -47,10 +47,9 @@ export default function UploadPhoto() {
       files.forEach((f) => form.append("files", f));
       form.append("title", safeTitle);
       form.append("slug", slug);
-      form.append("caption", caption);
+      form.append("caption", text);   // backend still expects "caption"
       form.append("section", section);
 
-      // 👇 matches functions/api/v1/photos/upload_photos.ts
       const res = await fetch("/api/v1/photos/upload_photos", {
         method: "POST",
         body: form,
@@ -63,7 +62,7 @@ export default function UploadPhoto() {
       // Reset state
       setFiles([]);
       setTitle("");
-      setCaption("");
+      setText("");
       setSection("news");
       if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (err) {
@@ -87,14 +86,14 @@ export default function UploadPhoto() {
         className="w-full rounded-xl bg-neutral-900 border border-neutral-800 px-3 py-2 outline-none focus:border-neutral-600 mb-4"
       />
 
-      {/* Caption */}
-      <label className="block text-xs text-neutral-400 mb-1">Caption</label>
-      <input
-        type="text"
-        value={caption}
-        onChange={(e) => setCaption(e.target.value)}
-        placeholder="Short description"
-        className="w-full rounded-xl bg-neutral-900 border border-neutral-800 px-3 py-2 outline-none focus:border-neutral-600 mb-4"
+      {/* Text (renamed from caption) */}
+      <label className="block text-xs text-neutral-400 mb-1">Text</label>
+      <textarea
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        placeholder="Write something…"
+        rows={4}
+        className="w-full rounded-xl bg-neutral-900 border border-neutral-800 px-3 py-2 outline-none focus:border-neutral-600 mb-4 resize-y"
       />
 
       {/* Section */}
@@ -151,7 +150,9 @@ export default function UploadPhoto() {
       {files.length > 0 && (
         <ul className="mt-3 text-xs text-neutral-400 space-y-1 max-h-32 overflow-y-auto">
           {files.map((f, i) => (
-            <li key={i}>{f.name} ({Math.round(f.size / 1024)} KB)</li>
+            <li key={i}>
+              {f.name} ({Math.round(f.size / 1024)} KB)
+            </li>
           ))}
         </ul>
       )}
@@ -184,5 +185,4 @@ export default function UploadPhoto() {
       )}
     </div>
   );
-  
 }
