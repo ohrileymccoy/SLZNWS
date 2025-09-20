@@ -5,7 +5,7 @@ import CommentPreview from "./CommentPreview.jsx";
 export default function ArticleCard({
   title,
   eyebrow,
-  caption,
+  caption,   // keep as caption for now (backend + feed logic compatibility)
   footer,
   videoUrl,
   posterUrl,
@@ -76,6 +76,7 @@ export default function ArticleCard({
           )}
         </div>
       ) : (
+        // Placeholder background if no media
         <div className="w-full h-full bg-neutral-800" />
       )}
 
@@ -96,17 +97,15 @@ export default function ArticleCard({
         )}
 
         {caption && (
-          <p className="text-xs text-neutral-400 mt-1">
-            <Link to={linkTarget} className="hover:underline">
-              {caption}
-            </Link>
-          </p>
+          // Plain preview text — no longer wrapped in <Link>
+          <p className="text-xs text-neutral-400 mt-1">{caption}</p>
         )}
 
         {footer && (
           <div className="mt-2 text-xs text-neutral-500">{footer}</div>
         )}
 
+        {/* Show preview comments only for videos */}
         {isVideo && videoId && <CommentPreview videoId={videoId} />}
       </div>
     </div>
