@@ -55,9 +55,18 @@ export default function UploadVideo({ simple = false }) {
       form.append("section", section);
 
       const res = await fetch("/api/v1/upload_url", {
-        method: "POST",
-        body: form,
-      });
+  method: "POST",
+  headers: {
+    Authorization: `Bearer ${localStorage.getItem("adminToken") || ""}`,
+  },
+  body: form,
+});
+if (res.status === 401) {
+  setStatus({ ok: false, msg: "Session expired. Please re-enter admin password." });
+  // Optionally redirect:
+  // window.location.href = "/admin-login";
+  return;
+}
       if (!res.ok) throw new Error("Upload failed");
 
       const json = await res.json();
