@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { SECTION_ORDER, SECTION_LABELS } from "../constants/sections";
 
 export default function UploadPhoto() {
   const fileInputRef = useRef(null);
