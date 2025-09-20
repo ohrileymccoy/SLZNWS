@@ -49,48 +49,50 @@ export default function UploadMugshot() {
     >
       <h3 className="text-lg font-semibold">Upload Mugshot</h3>
 
+      {/* Name bubble */}
       <div>
-        <label className="block text-sm text-neutral-400 mb-1">
-          Name / Label
-        </label>
+        <label className="block text-xs text-neutral-400 mb-1">Name / Label</label>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full rounded-lg border border-neutral-700 bg-neutral-950 p-2 text-sm"
+          className="w-full rounded-xl bg-neutral-900 border border-neutral-800 px-3 py-2 text-sm outline-none focus:border-neutral-600"
           placeholder="John Doe"
           required
         />
       </div>
 
+      {/* File bubble */}
       <div>
-        <label className="block text-sm text-neutral-400 mb-1">
-          Photo File
-        </label>
+        <label className="block text-xs text-neutral-400 mb-1">Photo File</label>
         <input
           type="file"
           accept="image/*"
           onChange={(e) => setFile(e.target.files[0])}
-          className="w-full text-sm"
+          className="block w-full text-sm text-neutral-300 file:mr-4 file:rounded-lg file:border-0 file:bg-neutral-800 file:px-3 file:py-2 file:text-sm file:text-neutral-200 hover:file:bg-neutral-700"
           required
         />
       </div>
 
+      {/* Bubble-style submit */}
       <button
         type="submit"
         disabled={loading}
-        className="px-4 py-2 rounded-lg bg-neutral-800 border border-neutral-700 hover:border-neutral-600 transition text-sm"
+        className="w-full px-4 py-2 rounded-xl bg-neutral-800 border border-neutral-700 hover:border-neutral-600 text-sm font-medium text-neutral-200 transition disabled:opacity-50"
       >
-        {loading ? "Uploading…" : "Upload"}
+        {loading ? "Uploading…" : "Upload Mugshot"}
       </button>
 
+      {/* Status message */}
       {message && <p className="text-sm mt-2">{message}</p>}
+
+      {/* Navigation bubble */}
       <Link
-  to="/mugshot"
-  className="inline-block mt-4 text-sm text-neutral-400 hover:text-neutral-200 underline"
->
-  Go to Moderation Panel
-</Link>
+        to="/mugshot"
+        className="inline-block mt-4 px-3 py-1.5 rounded-lg bg-neutral-800/60 border border-neutral-700 hover:border-neutral-600 text-xs text-neutral-300 transition"
+      >
+        Go to Moderation Panel
+      </Link>
     </form>
   );
 }

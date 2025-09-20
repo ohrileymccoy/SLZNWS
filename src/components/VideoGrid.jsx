@@ -1,9 +1,7 @@
 // src/components/VideoGrid.jsx
 import { useEffect, useState } from "react";
 import ArticleCard from "./ArticleCard.jsx";
-
-// Keep in sync with backend allowed values
-const SECTIONS = ["news", "culture", "sports", "featured"];
+import { SECTION_ORDER, SECTION_LABELS } from "../constants/sections";
 
 export default function VideoGrid({ adminMode = false }) {
   const [videos, setVideos] = useState([]);
@@ -154,7 +152,7 @@ export default function VideoGrid({ adminMode = false }) {
         const isVideo = v.type === "video";
         const isPhoto = v.type === "photo";
 
-        // ✅ Corrected badge logic
+        // ✅ Badge logic
         const published = isVideo
           ? Number(v.is_published) === 1 ||
             v.is_published === true ||
@@ -179,7 +177,7 @@ export default function VideoGrid({ adminMode = false }) {
 
             <ArticleCard
               title={v.title || v.slug}
-              eyebrow={v.section || (v.type === "photo" ? "Photo" : "Video")}
+              eyebrow={SECTION_LABELS[v.section] || v.section || (isPhoto ? "Photo" : "Video")}
               caption={v.caption}
               mime={v.mime}
               // Video props
@@ -201,9 +199,9 @@ export default function VideoGrid({ adminMode = false }) {
                   value={v.section || "news"}
                   onChange={(e) => updateSection(v, e.target.value)}
                 >
-                  {SECTIONS.map((s) => (
-                    <option key={s} value={s}>
-                      {s[0].toUpperCase() + s.slice(1)}
+                  {SECTION_ORDER.map((key) => (
+                    <option key={key} value={key}>
+                      {SECTION_LABELS[key]}
                     </option>
                   ))}
                 </select>

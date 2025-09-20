@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { SECTION_ORDER, SECTION_LABELS } from "../constants/sections";
 
 export default function UploadVideo({ simple = false }) {
   const fileInputRef = useRef(null);
@@ -127,10 +128,11 @@ if (res.status === 401) {
             onChange={(e) => setSection(e.target.value)}
             className="w-full rounded-xl bg-neutral-900 border border-neutral-800 px-3 py-2 outline-none focus:border-neutral-600 mb-4"
           >
-            <option value="news">News</option>
-            <option value="culture">Culture</option>
-            <option value="sports">Sports</option>
-            <option value="featured">Featured</option>
+           {SECTION_ORDER.map((key) => (
+  <option key={key} value={key}>
+    {SECTION_LABELS[key]}
+  </option>
+))}
           </select>
         </>
       )}

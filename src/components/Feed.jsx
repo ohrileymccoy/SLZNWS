@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { usePosts } from "../hooks/usePosts";
 import ArticleCard from "./ArticleCard";
+import { SECTION_LABELS } from "../constants/sections";
+
 
 export default function Feed({ section = null }) {
   const { items, loading, error } = usePosts({ section });
@@ -58,30 +60,31 @@ export default function Feed({ section = null }) {
         </select>
       </div>
 
-      {filtered.map((it) =>
-        it.type === "video" ? (
-          <ArticleCard
-            key={`video-${it.id}`}
-            title={it.title}
-            eyebrow={it.section}
-            videoUrl={it.public_url}
-            posterUrl={it.poster_key}
-            caption={it.caption}
-            footer={`Uploaded ${new Date(it.created_at).toLocaleDateString()}`}
-            videoId={it.id}
-          />
-        ) : (
-          <ArticleCard
-            key={`photo-${it.id}`}
-            title={it.title}
-            eyebrow={it.section}
-            caption={it.caption}
-            footer={`Uploaded ${new Date(it.created_at).toLocaleDateString()}`}
-            photoUrls={it.photoUrls}
-            photoId={it.id}
-          />
-        )
-      )}
+    {filtered.map((it) =>
+  it.type === "video" ? (
+    <ArticleCard
+      key={`video-${it.id}`}
+      title={it.title}
+      eyebrow={SECTION_LABELS[it.section] || it.section}
+      videoUrl={it.public_url}
+      posterUrl={it.poster_key}
+      caption={it.caption}
+      footer={`Uploaded ${new Date(it.created_at).toLocaleDateString()}`}
+      videoId={it.id}
+    />
+  ) : (
+    <ArticleCard
+      key={`photo-${it.id}`}
+      title={it.title}
+      eyebrow={SECTION_LABELS[it.section] || it.section}
+      caption={it.caption}
+      footer={`Uploaded ${new Date(it.created_at).toLocaleDateString()}`}
+      photoUrls={it.photoUrls}
+      photoId={it.id}
+    />
+  )
+)}
+
     </div>
   );
 }
