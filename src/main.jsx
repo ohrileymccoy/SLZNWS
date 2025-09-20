@@ -22,14 +22,7 @@ import TOSModal from "./components/TOSModal";
 import SubmitPhoto from "./pages/SubmitPhoto.jsx";
 import SubmitButtons from "./components/SubmitButtons";
 import PhotoPage from "./pages/PhotoPage.jsx";
-
-// ✅ Centralized section config (single source of truth)
-const SECTIONS = [
-  { key: "news", label: "News" },
-  { key: "culture", label: "Culture" },
-  { key: "sports", label: "Sports" },
-  { key: "featured", label: "Featured" },
-];
+import { SECTION_LABELS, SECTION_ORDER } from "./constants/sections"; // ✅ single source of truth
 
 const brand = {
   primary: "#0430FC",
@@ -75,7 +68,6 @@ export function Header() {
 
   const isActive = (path) => location.pathname === path;
 
-  // close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(e) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -100,24 +92,24 @@ export function Header() {
           </span>
         </Link>
 
-        {/* Center: Nav (desktop only) */}
+        {/* Center: Nav (desktop) */}
         <nav className="hidden md:flex flex-1 justify-center items-center gap-2">
           <NavLink to="/" label="Home" active={isActive("/")} />
-          {SECTIONS.map((s) => (
+          {SECTION_ORDER.map((key) => (
             <NavLink
-              key={s.key}
-              to={s.key === "featured" ? "/featured" : `/section/${s.key}`}
-              label={s.label}
+              key={key}
+              to={key === "featured" ? "/featured" : `/section/${key}`}
+              label={SECTION_LABELS[key]}
               active={
-                s.key === "featured"
+                key === "featured"
                   ? isActive("/featured")
-                  : isActive(`/section/${s.key}`)
+                  : isActive(`/section/${key}`)
               }
             />
           ))}
         </nav>
 
-        {/* Right cluster: hamburger + submit */}
+        {/* Right: mobile toggle + submit */}
         <div className="flex items-center gap-2" ref={dropdownRef}>
           <button
             onClick={() => setMenuOpen(!menuOpen)}
@@ -138,15 +130,15 @@ export function Header() {
         <div className="md:hidden bg-neutral-950 border-t border-neutral-800" ref={dropdownRef}>
           <nav className="flex flex-col px-4 py-3 space-y-2">
             <NavLink to="/" label="Home" active={isActive("/")} />
-            {SECTIONS.map((s) => (
+            {SECTION_ORDER.map((key) => (
               <NavLink
-                key={s.key}
-                to={s.key === "featured" ? "/featured" : `/section/${s.key}`}
-                label={s.label}
+                key={key}
+                to={key === "featured" ? "/featured" : `/section/${key}`}
+                label={SECTION_LABELS[key]}
                 active={
-                  s.key === "featured"
+                  key === "featured"
                     ? isActive("/featured")
-                    : isActive(`/section/${s.key}`)
+                    : isActive(`/section/${key}`)
                 }
               />
             ))}
@@ -205,14 +197,13 @@ function HomePage() {
 function SectionPage() {
   const { section } = useParams();
   const sectionKey = (section || "").toLowerCase();
-  const valid = SECTIONS.some((s) => s.key === sectionKey);
+  const valid = SECTION_ORDER.includes(sectionKey);
 
   if (!valid) return <NotFound message="Unknown section." />;
 
-  const sectionObj = SECTIONS.find((s) => s.key === sectionKey);
   return (
     <div className="py-8">
-      <PageTitle title={sectionObj.label} eyebrow="Section" />
+      <PageTitle title={SECTION_LABELS[sectionKey]} eyebrow="Section" />
       <Feed section={sectionKey} />
     </div>
   );
@@ -221,7 +212,7 @@ function SectionPage() {
 function FeaturedPage() {
   return (
     <div className="py-8">
-      <PageTitle title="Featured" eyebrow="Curated" />
+      <PageTitle title={SECTION_LABELS.featured} eyebrow="Curated" />
       <Feed section="featured" />
     </div>
   );
@@ -232,7 +223,9 @@ function NotFound({ message = "We couldn't find that." }) {
     <div className="py-24 text-center">
       <h2 className="text-xl font-semibold mb-2">404 — Not Found</h2>
       <p className="text-neutral-400 mb-6">{message}</p>
-      <Link to="/" className="px-4 py-2 rounded-xl bg-neutral-800 border border-neutral-700">Back to Home</Link>
+      <Link to="/" className="px-4 py-2 rounded-xl bg-neutral-800 border border-neutral-700">
+        Back to Home
+      </Link>
     </div>
   );
 }
@@ -260,7 +253,10 @@ function KPIBand() {
   const data = [
     { label: "New today", value: stats.newToday },
     { label: "Total videos", value: stats.total },
-    { label: "Last updated", value: stats.lastUpdated ? new Date(stats.lastUpdated).toLocaleTimeString() : "—" },
+    {
+      label: "Last updated",
+      value: stats.lastUpdated ? new Date(stats.lastUpdated).toLocaleTimeString() : "—",
+    },
   ];
 
   return (
@@ -344,22 +340,22 @@ function FeaturedRail() {
 
 function SectionTabs() {
   const location = useLocation();
-  const tabs = [{ label: "All", to: "/" }, ...SECTIONS.filter((s) => s.key !== "featured")];
+  const tabs = [{ key: "all", label: "All", to: "/" }, ...SECTION_ORDER.filter((k) => k !== "featured")];
 
   return (
     <div className="mb-4 flex flex-wrap gap-2">
       {tabs.map((t) => (
         <Link
-          key={t.key || t.to}
-          to={t.to || `/section/${t.key}`}
+          key={t.key || t}
+          to={t.to || `/section/${t}`}
           className={clsx(
             "px-3 py-1.5 rounded-2xl border text-sm",
-            location.pathname === (t.to || `/section/${t.key}`)
+            location.pathname === (t.to || `/section/${t}`)
               ? "border-neutral-700 bg-neutral-900/60"
               : "border-neutral-800 bg-neutral-900/30 hover:border-neutral-700"
           )}
         >
-          {t.label}
+          {t.label || SECTION_LABELS[t]}
         </Link>
       ))}
     </div>
@@ -369,9 +365,7 @@ function SectionTabs() {
 function PageTitle({ title, eyebrow, compact }) {
   return (
     <div className={clsx("mb-4", compact && "mb-2")}>
-      {eyebrow && (
-        <div className="uppercase tracking-widest text-[10px] text-neutral-400">{eyebrow}</div>
-      )}
+      {eyebrow && <div className="uppercase tracking-widest text-[10px] text-neutral-400">{eyebrow}</div>}
       <h2 className="text-xl md:text-2xl font-semibold">{title}</h2>
     </div>
   );
@@ -393,12 +387,3 @@ const container = document.getElementById("root");
 if (container) {
   createRoot(container).render(<Root />);
 }
-
-
-// ------------------ Next Steps ------------------
-// 1) npm i react-router-dom
-// 2) Keep this as src/main.jsx (JS only). No TS syntax.
-// 3) Ensure Tailwind is set up; classes assume dark-first.
-// 4) Later, wire real fetches to /api/v1/articles and hydrate cards.
-// 5) Add scroll restoration per Phase 6 (preserve items + position).
-
