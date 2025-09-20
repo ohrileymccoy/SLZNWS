@@ -105,8 +105,10 @@ export default function ArticleCard({
           <div className="mt-2 text-xs text-neutral-500">{footer}</div>
         )}
 
-        {/* Show preview comments only for videos */}
-        {isVideo && videoId && <CommentPreview videoId={videoId} />}
+        {/* Show preview comments (videos or photos) */}
+{isVideo && videoId && <CommentPreview videoId={videoId} />}
+{isPhoto && photoId && <CommentPreview photoId={photoId} />}
+
       </div>
     </div>
   );
