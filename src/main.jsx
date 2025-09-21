@@ -64,13 +64,19 @@ function AppShell() {
 export function Header() {
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
-  const dropdownRef = useRef(null);
+  const menuRef = useRef(null);      // menu container
+  const buttonRef = useRef(null);    // hamburger button
 
   const isActive = (path) => location.pathname === path;
 
   useEffect(() => {
     function handleClickOutside(e) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(e.target) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(e.target)
+      ) {
         setMenuOpen(false);
       }
     }
@@ -83,51 +89,28 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 backdrop-blur supports-[backdrop-filter]:bg-neutral-950/70 border-b border-neutral-800">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        {/* Left: Logo + Title */}
-        <Link to="/" className="group flex items-center gap-2 shrink-0 h-full">
-          <img src={slnLogo} alt="Sleazy News Logo" className="h-full w-auto object-contain" />
-          <span className="font-semibold tracking-wide text-lg transition-colors">
-            <span className="group-hover:text-blue-400">S.</span>
-            <span className="text-neutral-400 group-hover:text-blue-400">L.N</span>
-          </span>
-        </Link>
+        {/* Left logo ... */}
 
-        {/* Center: Nav (desktop) */}
-        <nav className="hidden md:flex flex-1 justify-center items-center gap-2">
-          <NavLink to="/" label="Home" active={isActive("/")} />
-          {SECTION_ORDER.map((key) => (
-            <NavLink
-              key={key}
-              to={key === "featured" ? "/featured" : `/section/${key}`}
-              label={SECTION_LABELS[key]}
-              active={
-                key === "featured"
-                  ? isActive("/featured")
-                  : isActive(`/section/${key}`)
-              }
-            />
-          ))}
-        </nav>
-
-        {/* Right: mobile toggle + submit */}
-        <div className="flex items-center gap-2" ref={dropdownRef}>
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="md:hidden p-2 rounded bg-neutral-800 hover:bg-neutral-700"
-            aria-label="Toggle menu"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none"
-              viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-          <SubmitButtons />
-        </div>
+        {/* Hamburger button */}
+        <button
+          ref={buttonRef}
+          onClick={() => setMenuOpen((o) => !o)}   // toggles properly
+          className="md:hidden p-2 rounded bg-neutral-800 hover:bg-neutral-700"
+          aria-label="Toggle menu"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
       </div>
 
       {/* Mobile dropdown */}
       {menuOpen && (
-        <div className="md:hidden bg-neutral-950 border-t border-neutral-800" ref={dropdownRef}>
+        <div
+          ref={menuRef}
+          className="md:hidden bg-neutral-950 border-t border-neutral-800"
+        >
           <nav className="flex flex-col px-4 py-3 space-y-2">
             <NavLink to="/" label="Home" active={isActive("/")} />
             {SECTION_ORDER.map((key) => (
