@@ -12,11 +12,8 @@ export async function onRequestPost(
 ): Promise<Response> {
   try {
     // --- Auth check ---
-    const auth = request.headers.get("Authorization");
-    if (!env.ADMIN_SECRET || auth !== `Bearer ${env.ADMIN_SECRET}`) {
-      return new Response("Unauthorized", { status: 401 });
-    }
-
+  // 🔓 Public uploads allowed — no admin check
+    // If you still want admin-only routes, handle them separately.
     const form = await request.formData();
     const file = form.get("file") as File;
     if (!(file instanceof File)) {
