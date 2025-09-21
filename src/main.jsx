@@ -161,6 +161,7 @@ export function Header() {
   );
 }
 
+
 function NavLink({ to, label, active }) {
   return (
     <Link
