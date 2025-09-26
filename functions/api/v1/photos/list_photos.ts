@@ -1,3 +1,5 @@
+/// <reference types="@cloudflare/workers-types" />
+
 // functions/api/v1/photos/list.ts
 export interface Env {
   DB: D1Database;
@@ -9,6 +11,8 @@ type PhotoRow = {
   slug: string;
   title: string;
   caption: string;
+  desc: string;
+  charge: string
   section: string;
   r2_keys: string;  // stored as JSON array of keys
   created_at: string;
