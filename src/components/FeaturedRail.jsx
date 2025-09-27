@@ -1,14 +1,17 @@
-import { useEffect, useState } from "react";
-import { motion, useAnimation, useMotionValue } from "framer-motion";
+import { useEffect, useState, useRef } from "react";
+import { motion, useMotionValue } from "framer-motion";
 
 export default function FeaturedRail({
-  speed = 25, // slightly faster baseline
-  fastSpeed = 8,
+  baseDuration = 25,   // baseline seconds for one full loop
+  burstDuration = 8,   // seconds for fast scroll
   pauseOnHover = true,
 }) {
   const [items, setItems] = useState([]);
-  const controls = useAnimation();
-  const x = useMotionValue(0); // track horizontal offset
+  const x = useMotionValue(0);
+  const trackRef = useRef(null);
+  const frameRef = useRef(null);
+  const [running, setRunning] = useState(true);
+  const [duration, setDuration] = useState(baseDuration);
 
   useEffect(() => {
     async function load() {
@@ -23,36 +26,60 @@ export default function FeaturedRail({
     load();
   }, []);
 
+  // duplicate items so loop is seamless
   const repeatCount = 3;
   const looped = Array.from({ length: repeatCount }).flatMap(() => items);
 
-  // Continuous marquee animation from current x
-  const startMarquee = (duration = speed, direction = "right") => {
-    const distance = -50; // move by -50% of width
-    controls.start({
-      x: [x.get(), `${distance}%`],
-      transition: { repeat: Infinity, duration, ease: "linear" },
-    });
+  // Calculate speed (px/frame) based on track width and duration
+  const getSpeed = () => {
+    const track = trackRef.current;
+    if (!track) return 1;
+    const loopWidth = track.scrollWidth / 2; // since we repeat items
+    return loopWidth / (duration * 60); // px per frame, assuming 60fps
   };
 
-  const handleMouseEnter = () => pauseOnHover && controls.stop();
-  const handleMouseLeave = () => pauseOnHover && startMarquee();
-
+  // RAF loop
   useEffect(() => {
-    if (items.length > 0) {
-      startMarquee();
-    }
-  }, [items]);
+    const tick = () => {
+      if (running && trackRef.current) {
+        const track = trackRef.current;
+        const loopWidth = track.scrollWidth / 2;
+        const newX = x.get() - getSpeed();
 
+        // wrap seamlessly when half the track is scrolled
+        if (Math.abs(newX) >= loopWidth) {
+          x.set(0);
+        } else {
+          x.set(newX);
+        }
+      }
+      frameRef.current = requestAnimationFrame(tick);
+    };
+    frameRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frameRef.current);
+  }, [running, duration]);
+
+  // Hover pause/resume
+  const handleMouseEnter = () => pauseOnHover && setRunning(false);
+  const handleMouseLeave = () => pauseOnHover && setRunning(true);
+
+  // Arrow click = proportional nudge + burst speed
   const handleArrow = (direction) => {
-    controls.stop();
-    startMarquee(fastSpeed, direction);
-    setTimeout(() => startMarquee(speed, "right"), 2000);
+    if (!trackRef.current) return;
+    const track = trackRef.current;
+    const loopWidth = track.scrollWidth / 2;
+
+    // nudge by 10% of loop width
+    const nudge = loopWidth * 0.1;
+    x.set(x.get() + (direction === "right" ? -nudge : nudge));
+
+    // temporary speed burst
+    setDuration(burstDuration);
+    setTimeout(() => setDuration(baseDuration), 2000);
   };
 
   return (
     <section className="mb-8">
-      {/* Chyron frame */}
       <div className="bg-neutral-950/90 border-y-2 border-neutral-800 shadow-[0_0_20px_rgba(0,0,0,0.6)] rounded-lg overflow-hidden">
         {/* Title strip */}
         <div className="px-4 py-2 bg-neutral-900 border-b border-neutral-800">
@@ -80,9 +107,9 @@ export default function FeaturedRail({
             onMouseLeave={handleMouseLeave}
           >
             <motion.div
+              ref={trackRef}
               className="flex gap-3"
-              animate={controls}
-              style={{ x }} // bind motionValue
+              style={{ x }}
             >
               {looped.map((it, idx) => (
                 <div
