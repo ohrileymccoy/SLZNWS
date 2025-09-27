@@ -1,10 +1,13 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { motion, useAnimation } from "framer-motion";
 
-export default function FeaturedRail({ speed = 40, fastSpeed = 5, pauseOnHover = true }) {
+export default function FeaturedRail({
+  speed = 40,
+  fastSpeed = 5,
+  pauseOnHover = true,
+}) {
   const [items, setItems] = useState([]);
   const controls = useAnimation();
-  const containerRef = useRef(null);
 
   useEffect(() => {
     async function load() {
@@ -19,6 +22,7 @@ export default function FeaturedRail({ speed = 40, fastSpeed = 5, pauseOnHover =
     load();
   }, []);
 
+  // Duplicate items so ticker never ends
   const repeatCount = 3;
   const looped = Array.from({ length: repeatCount }).flatMap(() => items);
 
@@ -28,61 +32,50 @@ export default function FeaturedRail({ speed = 40, fastSpeed = 5, pauseOnHover =
     transition: { repeat: Infinity, duration, ease: "linear" },
   });
 
-  // Hover handlers
-  const handleMouseEnter = () => {
-    if (pauseOnHover) controls.stop();
-  };
-  const handleMouseLeave = () => {
-    if (pauseOnHover) controls.start(marqueeAnim());
-  };
+  // Hover pause
+  const handleMouseEnter = () => pauseOnHover && controls.stop();
+  const handleMouseLeave = () => pauseOnHover && controls.start(marqueeAnim());
 
-  // Start scrolling when items load
+  // Start default scroll
   useEffect(() => {
     if (items.length > 0) {
       controls.start(marqueeAnim());
     }
   }, [items]);
 
-  // Arrow handler = speed burst
+  // Arrow = burst speed
   const handleArrow = (direction) => {
-    // Stop current slow scroll
     controls.stop();
-
-    // Burst scroll
     controls.start(
       marqueeAnim(fastSpeed, direction === "right" ? "right" : "left")
     );
-
-    // After 2 seconds, return to normal slow scroll
     setTimeout(() => {
       controls.start(marqueeAnim(speed, "right"));
     }, 2000);
   };
 
   return (
-    <section className="mb-8 overflow-hidden">
-      <div className="flex items-center justify-between mb-3 relative group">
-        <h2 className="relative text-lg font-semibold text-neutral-100 pb-1 transition-all duration-300">
-          <span className="relative z-10 group-hover:text-white">Local Mugshots</span>
-          <span className="absolute inset-0 rounded-lg bg-neutral-800/80 shadow-lg opacity-0 scale-90 
-                           group-hover:opacity-100 group-hover:scale-100 transition-all duration-300"></span>
+    <section className="fixed bottom-0 left-0 w-full bg-neutral-950/95 border-t border-neutral-800 shadow-[0_-2px_20px_rgba(0,0,0,0.6)] z-50">
+      {/* Header strip inside the ticker */}
+      <div className="px-4 py-2 border-b border-neutral-800">
+        <h2 className="text-sm font-semibold text-neutral-200 tracking-wide">
+          Local Mugshots
         </h2>
       </div>
 
-      {/* Carousel with arrows outside */}
-      <div className="relative flex items-center">
+      {/* Main ticker row */}
+      <div className="relative flex items-center h-44 overflow-hidden">
         {/* Left arrow */}
         <button
           onClick={() => handleArrow("left")}
-          className="absolute -left-10 z-20 bg-neutral-900/70 hover:bg-neutral-800 text-white text-3xl rounded-full shadow-[0_0_15px_#0ff] px-3 py-1"
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-neutral-900/80 hover:bg-neutral-800 text-white text-2xl rounded-full shadow-[0_0_15px_#0ff] px-2 py-1"
         >
           ‹
         </button>
 
-        {/* Scrolling container */}
+        {/* Scrolling content */}
         <div
           className="overflow-hidden flex-1"
-          ref={containerRef}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
         >
@@ -95,10 +88,10 @@ export default function FeaturedRail({ speed = 40, fastSpeed = 5, pauseOnHover =
                 <img
                   src={it.public_url}
                   alt={it.name}
-                  className="w-full h-40 object-cover"
+                  className="w-full h-32 object-cover"
                 />
-                <div className="p-2 text-center">
-                  <p className="text-sm text-neutral-300">{it.name}</p>
+                <div className="p-1 text-center">
+                  <p className="text-xs text-neutral-300">{it.name}</p>
                 </div>
               </div>
             ))}
@@ -108,7 +101,7 @@ export default function FeaturedRail({ speed = 40, fastSpeed = 5, pauseOnHover =
         {/* Right arrow */}
         <button
           onClick={() => handleArrow("right")}
-          className="absolute -right-10 z-20 bg-neutral-900/70 hover:bg-neutral-800 text-white text-3xl rounded-full shadow-[0_0_15px_#0ff] px-3 py-1"
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-neutral-900/80 hover:bg-neutral-800 text-white text-2xl rounded-full shadow-[0_0_15px_#0ff] px-2 py-1"
         >
           ›
         </button>
