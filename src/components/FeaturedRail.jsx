@@ -1,7 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { motion, useAnimation } from "framer-motion";
 
-export default function FeaturedRail() {
+export default function FeaturedRail({ speed = 40, pauseOnHover = true }) {
   const [items, setItems] = useState([]);
+  const controls = useAnimation();
+  const containerRef = useRef(null);
 
   useEffect(() => {
     async function load() {
@@ -17,8 +20,29 @@ export default function FeaturedRail() {
   }, []);
 
   // Duplicate items to guarantee continuous loop
-  const repeatCount = 3; // adjust as needed
+  const repeatCount = 3;
   const looped = Array.from({ length: repeatCount }).flatMap(() => items);
+
+  // Motion config
+  const marqueeAnim = {
+    x: ["0%", "-50%"],
+    transition: { repeat: Infinity, duration: speed, ease: "linear" },
+  };
+
+  // Hover handlers (pause/resume)
+  const handleMouseEnter = () => {
+    if (pauseOnHover) controls.stop();
+  };
+  const handleMouseLeave = () => {
+    if (pauseOnHover) controls.start(marqueeAnim);
+  };
+
+  // Start animation on mount
+  useEffect(() => {
+    if (items.length > 0) {
+      controls.start(marqueeAnim);
+    }
+  }, [items]);
 
   return (
     <section className="mb-8 overflow-hidden">
@@ -30,9 +54,13 @@ export default function FeaturedRail() {
         </h2>
       </div>
 
-      {/* Marquee wrapper */}
-      <div className="overflow-hidden">
-        <div className="marquee">
+      <div
+        className="overflow-hidden"
+        ref={containerRef}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        <motion.div className="flex gap-3" animate={controls}>
           {looped.map((it, idx) => (
             <div
               key={idx}
@@ -48,7 +76,7 @@ export default function FeaturedRail() {
               </div>
             </div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );
