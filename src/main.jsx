@@ -24,6 +24,8 @@ import SubmitButtons from "./components/SubmitButtons";
 import PhotoPage from "./pages/PhotoPage.jsx";
 import { SECTION_LABELS, SECTION_ORDER } from "./constants/sections"; // ✅ single source of truth
 import FeaturedRail from "./components/FeaturedRail"; // ✅ standalone component
+import { AdBanner } from "./components/AdBanner";
+
 
 const brand = {
   primary: "#0430FC",
@@ -197,8 +199,8 @@ function HomePage() {
   const navigate = useNavigate();
   return (
     <div className="py-8">
-      <KPIBand />
-      <FeaturedRail onOpen={(slug) => navigate(`/article/${slug}`)} /> {/* ✅ uses imported component */}
+      <AdBanner /> {/* ✅ replaces KPIBand, same slot in layout */}
+      <FeaturedRail onOpen={(slug) => navigate(`/article/${slug}`)} />
       <SectionTabs />
       <Feed />
     </div>
@@ -242,37 +244,6 @@ function NotFound({ message = "We couldn't find that." }) {
 }
 
 // ------------------ Modules ------------------
-
-import { useEffect } from "react";
-
-export default function AdBanner() {
-  useEffect(() => {
-    try {
-      // Tell Google to render the ad after script loads
-      if (window.adsbygoogle && Array.isArray(window.adsbygoogle)) {
-        window.adsbygoogle.push({});
-      }
-    } catch (err) {
-      console.error("Adsense error:", err);
-    }
-  }, []);
-
-  return (
-    <div className="my-6">
-      <div className="rounded-2xl bg-neutral-900/60 border border-neutral-800 p-2 shadow-md overflow-hidden">
-        {/* AdSense placeholder */}
-        <ins
-          className="adsbygoogle block w-full h-32"
-          style={{ display: "block" }}
-          data-ad-client="ca-pub-XXXXXXX"   // replace with your client's AdSense ID
-          data-ad-slot="YYYYYYY"           // replace with your ad slot ID
-          data-ad-format="auto"
-          data-full-width-responsive="true"
-        ></ins>
-      </div>
-    </div>
-  );
-}
 
 function SectionTabs() {
   const location = useLocation();
