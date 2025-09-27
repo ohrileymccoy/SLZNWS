@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { motion, useAnimation } from "framer-motion";
 
-export default function FeaturedRail({ speed = 40, pauseOnHover = true }) {
+export default function FeaturedRail({ speed = 40, fastSpeed = 5, pauseOnHover = true }) {
   const [items, setItems] = useState([]);
   const controls = useAnimation();
   const containerRef = useRef(null);
@@ -19,42 +19,48 @@ export default function FeaturedRail({ speed = 40, pauseOnHover = true }) {
     load();
   }, []);
 
-  // Duplicate items to guarantee continuous loop
   const repeatCount = 3;
   const looped = Array.from({ length: repeatCount }).flatMap(() => items);
 
-  // Motion config
-  const marqueeAnim = {
-    x: ["0%", "-50%"],
-    transition: { repeat: Infinity, duration: speed, ease: "linear" },
-  };
+  // Base marquee animation
+  const marqueeAnim = (duration = speed, direction = "right") => ({
+    x: direction === "right" ? ["0%", "-50%"] : ["-50%", "0%"],
+    transition: { repeat: Infinity, duration, ease: "linear" },
+  });
 
-  // Hover handlers (pause/resume)
+  // Hover handlers
   const handleMouseEnter = () => {
     if (pauseOnHover) controls.stop();
   };
   const handleMouseLeave = () => {
-    if (pauseOnHover) controls.start(marqueeAnim);
+    if (pauseOnHover) controls.start(marqueeAnim());
   };
 
-  // Start animation on mount
+  // Start scrolling when items load
   useEffect(() => {
     if (items.length > 0) {
-      controls.start(marqueeAnim);
+      controls.start(marqueeAnim());
     }
   }, [items]);
 
-  // Manual arrow scroll (nudge left/right)
+  // Arrow handler = speed burst
   const handleArrow = (direction) => {
+    // Stop current slow scroll
     controls.stop();
-    controls.start({
-      x: direction === "left" ? "+=200" : "-=200", // nudge 200px
-      transition: { duration: 0.4, ease: "easeOut" },
-    });
+
+    // Burst scroll
+    controls.start(
+      marqueeAnim(fastSpeed, direction === "right" ? "right" : "left")
+    );
+
+    // After 2 seconds, return to normal slow scroll
+    setTimeout(() => {
+      controls.start(marqueeAnim(speed, "right"));
+    }, 2000);
   };
 
   return (
-    <section className="mb-8 overflow-hidden relative">
+    <section className="mb-8 overflow-hidden">
       <div className="flex items-center justify-between mb-3 relative group">
         <h2 className="relative text-lg font-semibold text-neutral-100 pb-1 transition-all duration-300">
           <span className="relative z-10 group-hover:text-white">Local Mugshots</span>
@@ -63,43 +69,49 @@ export default function FeaturedRail({ speed = 40, pauseOnHover = true }) {
         </h2>
       </div>
 
-      {/* Arrows */}
-      <button
-        onClick={() => handleArrow("left")}
-        className="absolute left-2 top-1/2 -translate-y-1/2 z-20 bg-neutral-900/70 hover:bg-neutral-800 text-white text-3xl rounded-full shadow-[0_0_15px_#0ff] px-3 py-1"
-      >
-        ‹
-      </button>
-      <button
-        onClick={() => handleArrow("right")}
-        className="absolute right-2 top-1/2 -translate-y-1/2 z-20 bg-neutral-900/70 hover:bg-neutral-800 text-white text-3xl rounded-full shadow-[0_0_15px_#0ff] px-3 py-1"
-      >
-        ›
-      </button>
+      {/* Carousel with arrows outside */}
+      <div className="relative flex items-center">
+        {/* Left arrow */}
+        <button
+          onClick={() => handleArrow("left")}
+          className="absolute -left-10 z-20 bg-neutral-900/70 hover:bg-neutral-800 text-white text-3xl rounded-full shadow-[0_0_15px_#0ff] px-3 py-1"
+        >
+          ‹
+        </button>
 
-      <div
-        className="overflow-hidden"
-        ref={containerRef}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-      >
-        <motion.div className="flex gap-3" animate={controls}>
-          {looped.map((it, idx) => (
-            <div
-              key={idx}
-              className="min-w-[160px] bg-neutral-900/60 border border-neutral-800 rounded-2xl overflow-hidden"
-            >
-              <img
-                src={it.public_url}
-                alt={it.name}
-                className="w-full h-40 object-cover"
-              />
-              <div className="p-2 text-center">
-                <p className="text-sm text-neutral-300">{it.name}</p>
+        {/* Scrolling container */}
+        <div
+          className="overflow-hidden flex-1"
+          ref={containerRef}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+        >
+          <motion.div className="flex gap-3" animate={controls}>
+            {looped.map((it, idx) => (
+              <div
+                key={idx}
+                className="min-w-[160px] bg-neutral-900/60 border border-neutral-800 rounded-2xl overflow-hidden"
+              >
+                <img
+                  src={it.public_url}
+                  alt={it.name}
+                  className="w-full h-40 object-cover"
+                />
+                <div className="p-2 text-center">
+                  <p className="text-sm text-neutral-300">{it.name}</p>
+                </div>
               </div>
-            </div>
-          ))}
-        </motion.div>
+            ))}
+          </motion.div>
+        </div>
+
+        {/* Right arrow */}
+        <button
+          onClick={() => handleArrow("right")}
+          className="absolute -right-10 z-20 bg-neutral-900/70 hover:bg-neutral-800 text-white text-3xl rounded-full shadow-[0_0_15px_#0ff] px-3 py-1"
+        >
+          ›
+        </button>
       </div>
     </section>
   );
