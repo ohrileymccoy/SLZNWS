@@ -55,7 +55,7 @@ export default function FeaturedRail({
   };
 
   return (
-    <section className="fixed bottom-0 left-0 w-full bg-neutral-950/95 border-t border-neutral-800 shadow-[0_-2px_20px_rgba(0,0,0,0.6)] z-50">
+    <section className="fixed bottom-0 left-0 w-full bg-neutral-950/95 border-t border-neutral-800 shadow-[0_-2px_20px_rgba(0,0,0,0.6)] z-30">
       {/* Header strip inside the ticker */}
       <div className="px-4 py-2 border-b border-neutral-800">
         <h2 className="text-sm font-semibold text-neutral-200 tracking-wide">
