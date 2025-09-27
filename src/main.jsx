@@ -23,6 +23,7 @@ import SubmitPhoto from "./pages/SubmitPhoto.jsx";
 import SubmitButtons from "./components/SubmitButtons";
 import PhotoPage from "./pages/PhotoPage.jsx";
 import { SECTION_LABELS, SECTION_ORDER } from "./constants/sections"; // ✅ single source of truth
+import FeaturedRail from "./components/FeaturedRail"; // ✅ standalone component
 
 const brand = {
   primary: "#0430FC",
@@ -64,12 +65,11 @@ export function Header() {
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const menuRef = useRef(null);    // mobile dropdown container
-  const buttonRef = useRef(null);  // hamburger button
+  const menuRef = useRef(null);
+  const buttonRef = useRef(null);
 
   const isActive = (path) => location.pathname === path;
 
-  // Close when clicking outside
   useEffect(() => {
     function handleClickOutside(e) {
       if (
@@ -87,7 +87,6 @@ export function Header() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [menuOpen]);
 
-  // Helper: close menu when link is clicked
   const handleNavClick = () => setMenuOpen(false);
 
   return (
@@ -102,7 +101,7 @@ export function Header() {
           </span>
         </Link>
 
-        {/* Center: Nav (desktop only) */}
+        {/* Center: Nav */}
         <nav className="hidden md:flex flex-1 justify-center items-center gap-2">
           <NavLink to="/" label="Home" active={isActive("/")} />
           {SECTION_ORDER.map((key) => (
@@ -119,7 +118,7 @@ export function Header() {
           ))}
         </nav>
 
-        {/* Right: mobile toggle + submit */}
+        {/* Right */}
         <div className="flex items-center gap-2">
           <button
             ref={buttonRef}
@@ -161,7 +160,6 @@ export function Header() {
   );
 }
 
-
 function NavLink({ to, label, active }) {
   return (
     <Link
@@ -200,7 +198,7 @@ function HomePage() {
   return (
     <div className="py-8">
       <KPIBand />
-      <FeaturedRail onOpen={(slug) => navigate(`/article/${slug}`)} />
+      <FeaturedRail onOpen={(slug) => navigate(`/article/${slug}`)} /> {/* ✅ uses imported component */}
       <SectionTabs />
       <Feed />
     </div>
@@ -285,69 +283,6 @@ function KPIBand() {
         </div>
       ))}
     </div>
-  );
-}
-
-function FeaturedRail() {
-  const scrollRef = useRef(null);
-  const [items, setItems] = useState([]);
-
-  useEffect(() => {
-    async function load() {
-      try {
-        const res = await fetch("/api/v1/mugshots/list");
-        const json = await res.json();
-        setItems(json.items || []);
-      } catch (err) {
-        console.error("Failed to load mugshots:", err);
-      }
-    }
-    load();
-  }, []);
-
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-
-    let frame;
-    const speed = 0.5;
-    function tick() {
-      if (!el) return;
-      el.scrollLeft += speed;
-      if (el.scrollLeft >= el.scrollWidth / 2) {
-        el.scrollLeft = 0;
-      }
-      frame = requestAnimationFrame(tick);
-    }
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
-  }, [items]);
-
-  return (
-    <section className="mb-8">
-      <div className="flex items-center justify-between mb-3 relative group">
-        <h2 className="relative text-lg font-semibold text-neutral-100 pb-1 transition-all duration-300">
-          <span className="relative z-10 group-hover:text-white">Local Mugshots</span>
-          <span className="absolute inset-0 rounded-lg bg-neutral-800/80 shadow-lg opacity-0 scale-90 
-                           group-hover:opacity-100 group-hover:scale-100 transition-all duration-300"></span>
-        </h2>
-      </div>
-      <div ref={scrollRef} className="flex overflow-x-hidden gap-3 pb-2 snap-none" style={{ scrollBehavior: "auto" }}>
-        {Array.from({ length: 10 }).map((_, repeatIdx) =>
-          items.map((it, idx) => (
-            <div
-              key={`${repeatIdx}-${idx}`}
-              className="min-w-[160px] bg-neutral-900/60 border border-neutral-800 rounded-2xl overflow-hidden"
-            >
-              <img src={it.public_url} alt={it.name} className="w-full h-40 object-cover" />
-              <div className="p-2 text-center">
-                <p className="text-sm text-neutral-300">{it.name}</p>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
-    </section>
   );
 }
 
