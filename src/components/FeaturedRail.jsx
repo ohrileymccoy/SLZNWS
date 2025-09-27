@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
-import { motion, useAnimation } from "framer-motion";
+import { motion, useAnimation, useMotionValue } from "framer-motion";
 
 export default function FeaturedRail({
-  speed = 40,
-  fastSpeed = 5,
+  speed = 25, // slightly faster baseline
+  fastSpeed = 8,
   pauseOnHover = true,
 }) {
   const [items, setItems] = useState([]);
   const controls = useAnimation();
+  const x = useMotionValue(0); // track horizontal offset
 
   useEffect(() => {
     async function load() {
@@ -22,36 +23,31 @@ export default function FeaturedRail({
     load();
   }, []);
 
-  // Duplicate items so ticker never ends
   const repeatCount = 3;
   const looped = Array.from({ length: repeatCount }).flatMap(() => items);
 
-  // Base marquee animation
-  const marqueeAnim = (duration = speed, direction = "right") => ({
-    x: direction === "right" ? ["0%", "-50%"] : ["-50%", "0%"],
-    transition: { repeat: Infinity, duration, ease: "linear" },
-  });
+  // Continuous marquee animation from current x
+  const startMarquee = (duration = speed, direction = "right") => {
+    const distance = -50; // move by -50% of width
+    controls.start({
+      x: [x.get(), `${distance}%`],
+      transition: { repeat: Infinity, duration, ease: "linear" },
+    });
+  };
 
-  // Hover pause
   const handleMouseEnter = () => pauseOnHover && controls.stop();
-  const handleMouseLeave = () => pauseOnHover && controls.start(marqueeAnim());
+  const handleMouseLeave = () => pauseOnHover && startMarquee();
 
-  // Start default scroll
   useEffect(() => {
     if (items.length > 0) {
-      controls.start(marqueeAnim());
+      startMarquee();
     }
   }, [items]);
 
-  // Arrow = burst speed
   const handleArrow = (direction) => {
     controls.stop();
-    controls.start(
-      marqueeAnim(fastSpeed, direction === "right" ? "right" : "left")
-    );
-    setTimeout(() => {
-      controls.start(marqueeAnim(speed, "right"));
-    }, 2000);
+    startMarquee(fastSpeed, direction);
+    setTimeout(() => startMarquee(speed, "right"), 2000);
   };
 
   return (
@@ -65,7 +61,7 @@ export default function FeaturedRail({
           </h2>
         </div>
 
-        {/* Ticker row with arrows */}
+        {/* Ticker row */}
         <div className="relative flex items-center h-44 overflow-hidden">
           {/* Left arrow */}
           <button
@@ -83,7 +79,11 @@ export default function FeaturedRail({
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
           >
-            <motion.div className="flex gap-3" animate={controls}>
+            <motion.div
+              className="flex gap-3"
+              animate={controls}
+              style={{ x }} // bind motionValue
+            >
               {looped.map((it, idx) => (
                 <div
                   key={idx}
