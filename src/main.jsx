@@ -243,45 +243,33 @@ function NotFound({ message = "We couldn't find that." }) {
 
 // ------------------ Modules ------------------
 
-function KPIBand() {
-  const [stats, setStats] = useState(null);
+import { useEffect } from "react";
 
+export default function AdBanner() {
   useEffect(() => {
-    async function loadStats() {
-      try {
-        const res = await fetch("/api/v1/videos/stats");
-        const json = await res.json();
-        if (json.ok) setStats(json.stats);
-      } catch (err) {
-        console.error("Failed to load stats", err);
+    try {
+      // Tell Google to render the ad after script loads
+      if (window.adsbygoogle && Array.isArray(window.adsbygoogle)) {
+        window.adsbygoogle.push({});
       }
+    } catch (err) {
+      console.error("Adsense error:", err);
     }
-    loadStats();
   }, []);
 
-  if (!stats) return null;
-
-  const data = [
-    { label: "New today", value: stats.newToday },
-    { label: "Total videos", value: stats.total },
-    {
-      label: "Last updated",
-      value: stats.lastUpdated ? new Date(stats.lastUpdated).toLocaleTimeString() : "—",
-    },
-  ];
-
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
-      {data.map((k) => (
-        <div
-          key={k.label}
-          className="rounded-2xl bg-neutral-900/60 border border-neutral-800 p-4 flex items-center justify-between 
-                     transition-transform duration-200 hover:scale-105 active:scale-95 cursor-pointer"
-        >
-          <span className="text-neutral-400 text-sm">{k.label}</span>
-          <span className="text-lg font-semibold">{k.value}</span>
-        </div>
-      ))}
+    <div className="my-6">
+      <div className="rounded-2xl bg-neutral-900/60 border border-neutral-800 p-2 shadow-md overflow-hidden">
+        {/* AdSense placeholder */}
+        <ins
+          className="adsbygoogle block w-full h-32"
+          style={{ display: "block" }}
+          data-ad-client="ca-pub-XXXXXXX"   // replace with your client's AdSense ID
+          data-ad-slot="YYYYYYY"           // replace with your ad slot ID
+          data-ad-format="auto"
+          data-full-width-responsive="true"
+        ></ins>
+      </div>
     </div>
   );
 }
