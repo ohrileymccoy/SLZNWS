@@ -10,8 +10,10 @@ export default function FeaturedRail({
   const x = useMotionValue(0);
   const trackRef = useRef(null);
   const frameRef = useRef(null);
+
   const [running, setRunning] = useState(true);
   const [duration, setDuration] = useState(baseDuration);
+  const [direction, setDirection] = useState("right"); // 👈 NEW
 
   useEffect(() => {
     async function load() {
@@ -26,7 +28,6 @@ export default function FeaturedRail({
     load();
   }, []);
 
-  // duplicate items so loop is seamless
   const repeatCount = 3;
   const looped = Array.from({ length: repeatCount }).flatMap(() => items);
 
@@ -34,8 +35,8 @@ export default function FeaturedRail({
   const getSpeed = () => {
     const track = trackRef.current;
     if (!track) return 1;
-    const loopWidth = track.scrollWidth / 2; // since we repeat items
-    return loopWidth / (duration * 60); // px per frame, assuming 60fps
+    const loopWidth = track.scrollWidth / 2;
+    return loopWidth / (duration * 60); // px per frame
   };
 
   // RAF loop
@@ -44,36 +45,43 @@ export default function FeaturedRail({
       if (running && trackRef.current) {
         const track = trackRef.current;
         const loopWidth = track.scrollWidth / 2;
-        const newX = x.get() - getSpeed();
+        const delta = getSpeed() * (direction === "right" ? -1 : 1); // 👈 direction matters
+        let newX = x.get() + delta;
 
-        // wrap seamlessly when half the track is scrolled
-        if (Math.abs(newX) >= loopWidth) {
+        // wrap seamlessly
+        if (direction === "right" && Math.abs(newX) >= loopWidth) {
           x.set(0);
+        } else if (direction === "left" && newX > 0) {
+          x.set(-loopWidth);
         } else {
           x.set(newX);
         }
       }
       frameRef.current = requestAnimationFrame(tick);
     };
+
     frameRef.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frameRef.current);
-  }, [running, duration]);
+  }, [running, duration, direction]); // 👈 depends on direction too
 
   // Hover pause/resume
   const handleMouseEnter = () => pauseOnHover && setRunning(false);
   const handleMouseLeave = () => pauseOnHover && setRunning(true);
 
-  // Arrow click = proportional nudge + burst speed
-  const handleArrow = (direction) => {
+  // Arrow click = nudge + burst speed + change direction
+  const handleArrow = (dir) => {
     if (!trackRef.current) return;
     const track = trackRef.current;
     const loopWidth = track.scrollWidth / 2;
 
     // nudge by 10% of loop width
     const nudge = loopWidth * 0.1;
-    x.set(x.get() + (direction === "right" ? -nudge : nudge));
+    x.set(x.get() + (dir === "right" ? -nudge : nudge));
 
-    // temporary speed burst
+    // update scroll direction
+    setDirection(dir);
+
+    // temporary burst
     setDuration(burstDuration);
     setTimeout(() => setDuration(baseDuration), 2000);
   };
