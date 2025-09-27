@@ -31,17 +31,21 @@ export default function FeaturedRail() {
 
       {/* Marquee wrapper */}
       <div className="overflow-hidden">
-        <div className="flex gap-3 animate-marquee hover:[animation-play-state:paused] active:[animation-play-state:paused]">
-          {looped.map((it, idx) => (
-            <div
-              key={idx}
-              className="min-w-[160px] bg-neutral-900/60 border border-neutral-800 rounded-2xl overflow-hidden"
-            >
-              <img src={it.public_url} alt={it.name} className="w-full h-40 object-cover" />
-              <div className="p-2 text-center">
-                <p className="text-sm text-neutral-300">{it.name}</p>
-              </div>
-            </div>
+  <div className="flex gap-3 animate-marquee hover:[animation-play-state:paused] active:[animation-play-state:paused]">
+    {looped.map((it, idx) => (
+      <div
+        key={idx}
+        className="min-w-[160px] bg-neutral-900/60 border border-neutral-800 rounded-2xl overflow-hidden"
+      >
+        <img
+          src={it.public_url}
+          alt={it.name}
+          className="w-full h-40 object-cover"
+        />
+        <div className="p-2 text-center">
+          <p className="text-sm text-neutral-300">{it.name}</p>
+        </div>
+      </div>
           ))}
         </div>
       </div>
