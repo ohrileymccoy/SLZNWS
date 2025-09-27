@@ -44,8 +44,17 @@ export default function FeaturedRail({ speed = 40, pauseOnHover = true }) {
     }
   }, [items]);
 
+  // Manual arrow scroll (nudge left/right)
+  const handleArrow = (direction) => {
+    controls.stop();
+    controls.start({
+      x: direction === "left" ? "+=200" : "-=200", // nudge 200px
+      transition: { duration: 0.4, ease: "easeOut" },
+    });
+  };
+
   return (
-    <section className="mb-8 overflow-hidden">
+    <section className="mb-8 overflow-hidden relative">
       <div className="flex items-center justify-between mb-3 relative group">
         <h2 className="relative text-lg font-semibold text-neutral-100 pb-1 transition-all duration-300">
           <span className="relative z-10 group-hover:text-white">Local Mugshots</span>
@@ -53,6 +62,20 @@ export default function FeaturedRail({ speed = 40, pauseOnHover = true }) {
                            group-hover:opacity-100 group-hover:scale-100 transition-all duration-300"></span>
         </h2>
       </div>
+
+      {/* Arrows */}
+      <button
+        onClick={() => handleArrow("left")}
+        className="absolute left-2 top-1/2 -translate-y-1/2 z-20 bg-neutral-900/70 hover:bg-neutral-800 text-white text-3xl rounded-full shadow-[0_0_15px_#0ff] px-3 py-1"
+      >
+        ‹
+      </button>
+      <button
+        onClick={() => handleArrow("right")}
+        className="absolute right-2 top-1/2 -translate-y-1/2 z-20 bg-neutral-900/70 hover:bg-neutral-800 text-white text-3xl rounded-full shadow-[0_0_15px_#0ff] px-3 py-1"
+      >
+        ›
+      </button>
 
       <div
         className="overflow-hidden"
