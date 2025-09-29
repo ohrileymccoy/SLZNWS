@@ -26,122 +26,143 @@ export default function TOSModal() {
       <div className="bg-neutral-900 text-white rounded-xl p-8 max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl">
         <h2 className="text-2xl font-bold mb-4">Terms of Service</h2>
 
-        {/* Scrollable box-within-a-box */}
-        <div className="flex-1 overflow-y-auto pr-2 mb-6 text-sm text-neutral-300 space-y-4">
-          {/* Replace with your real TOS content */}
-          <p>
-            LEGAL AGREEMENT: TERMS OF USE
-Last updated: September 24, 2025
+        {/* Scrollable TOS content */}
+        <div className="flex-1 overflow-y-auto pr-2 mb-6 text-sm text-neutral-300 space-y-6 text-left">
+          <div>
+            <h3 className="text-lg font-semibold text-white">
+              LEGAL AGREEMENT: TERMS OF USE
+            </h3>
+            <p className="italic text-neutral-400">Last updated: September 24, 2025</p>
+            <p>
+              PLEASE READ CAREFULLY. BY ACCESSING THIS WEBSITE, YOU ARE
+              ENTERING INTO A BINDING LEGAL AGREEMENT.
+            </p>
+            <p>
+              These Terms of Use (“Terms”) govern your access to and use of Sleazy Media LLC (“we,” “us,” or “our”). By accessing or using our website, you acknowledge that you have read, understood, and agree to be bound by these Terms.
+            </p>
+          </div>
 
-PLEASE READ CAREFULLY. BY ACCESSING THIS WEBSITE, YOU ARE ENTERING INTO A BINDING LEGAL AGREEMENT.
+          <Section number="1" title="JURISDICTION AND GOVERNING LAW">
+            <ul className="list-disc list-inside space-y-1">
+              <li>You are accessing a private server physically located in the State of West Virginia, United States.</li>
+              <li>All interactions are subject exclusively to West Virginia and applicable U.S. Federal law.</li>
+              <li>Any legal action must be instituted exclusively in West Virginia courts.</li>
+              <li>You waive objections to jurisdiction and venue in such courts.</li>
+            </ul>
+          </Section>
 
-These Terms of Use (“Terms”) govern your access to and use of Sleazy Media LLC (“we,” “us,” or “our”). By accessing or using our website, you acknowledge that you have read, understood, and agree to be bound by these Terms.
+          <Section number="2" title="NO FEES FOR REMOVAL OR ALTERATION">
+            <p>
+              Sleazy Media LLC does not charge any fees for removal, alteration, or modification of any content. Requests are evaluated
+              under our internal policies and applicable law.
+            </p>
+          </Section>
 
-1. JURISDICTION AND GOVERNING LAW
-You hereby acknowledge and agree that:
+          <Section number="3" title="NO ADVERTISING, DATA SELLING, OR MONETIZATION">
+            <ul className="list-disc list-inside space-y-1">
+              <li>No selling, renting, or transferring user data</li>
+              <li>No affiliate marketing or sponsored content</li>
+              <li>No subscriptions, premium tiers, or paid features</li>
+              <li>No targeted ads or ad networks</li>
+              <li>No lead generation or preferential treatment sales</li>
+            </ul>
+            <p>This site is not monetized in any way.</p>
+          </Section>
 
-You are accessing a private server physically located in the State of West Virginia, United States.
+          <Section number="4" title="PUBLIC RECORDS">
+            <p>All information provided is derived from public records or other publicly available sources. We make no guarantees or warranties regarding accuracy, completeness, or timeliness.</p>
+          </Section>
 
-Any and all interactions with Sleazy Media LLC are subject exclusively to the laws of the State of West Virginia and applicable Federal laws of the United States.
+          <Section number="5" title="DISCLAIMER OF WARRANTIES">
+            <p>Your use is at your sole risk. Content is provided on an “AS IS” and “AS AVAILABLE” basis without warranties of any kind.</p>
+          </Section>
 
-Any legal action or proceeding arising out of or relating to these Terms shall be instituted exclusively in the courts of the State of West Virginia.
+          <Section number="6" title="LIMITATION OF LIABILITY">
+            <p>In no event shall Sleazy Media LLC or its affiliates be liable for any indirect, incidental, consequential, or exemplary damages.</p>
+          </Section>
 
-You waive any objection to the exercise of jurisdiction over you by such courts and to venue in such courts.
+          <Section number="7" title="FIRST AMENDMENT PROTECTIONS">
+            <p>Content published is protected speech under the First Amendment. We reserve the right to publish, decline, or remove content consistent with these rights.</p>
+          </Section>
 
-2. NO FEES FOR REMOVAL OR ALTERATION
-Sleazy Media LLC does not charge any fees for removal, alteration, or modification of any content displayed on this website. Any request for removal or modification will be evaluated according to our internal policies and applicable laws of the State of West Virginia and applicable Federal laws of the United States.
+          <Section number="8" title="JURISDICTIONAL RESTRICTIONS">
+            <p>We make no representation that the site is appropriate outside the U.S. Accessing from prohibited jurisdictions is strictly forbidden.</p>
+          </Section>
 
-3. NO ADVERTISING, DATA SELLING, OR MONETIZATION
-Sleazy Media LLC does not sell advertising space on its platform. Additionally, Sleazy Media LLC does not engage in any of the following revenue-generating practices:
+          <Section number="9" title="AGE RESTRICTION">
+            <p>You must be at least 18 years old to access this website.</p>
+          </Section>
 
-We do not sell, trade, rent, or otherwise transfer user data to third parties for marketing, advertising, or other commercial purposes;
+          <Section number="10" title="INTELLECTUAL PROPERTY">
+            <p>All content and trademarks are the property of Sleazy Media LLC or its licensors. Unauthorized use is strictly prohibited.</p>
+          </Section>
 
-We do not monetize through affiliate marketing or sponsored content;
+          <Section number="11" title="ACCOUNT ACCESS & DEVICE SHARING">
+            <p>You are responsible for maintaining account confidentiality. Sharing access with unauthorized users is prohibited.</p>
+          </Section>
 
-We do not offer premium features, subscriptions, or paid tiers;
+          <Section number="12" title="CONSTITUTIONAL PROTECTIONS">
+            <p>We assert protections under the U.S. Constitution, including but not limited to the First Amendment and Dormant Commerce Clause.</p>
+          </Section>
 
-We do not collect or sell aggregated user statistics or analytics;
+          <Section number="13" title="COMMUNICATIONS DECENCY ACT">
+            <p>Pursuant to Section 230 of the Communications Decency Act, Sleazy Media LLC is not responsible for content posted by third parties.</p>
+          </Section>
 
-We do not accept payment for preferential treatment, enhanced listings, or priority placement of information;
+          <Section number="14" title="PUBLIC FIGURE DOCTRINE">
+            <p>Content related to public figures is afforded additional protections under U.S. law, including heightened standards for defamation.</p>
+          </Section>
 
-We do not utilize targeted advertising technologies or ad networks;
+          <Section number="15" title="DORMANT COMMERCE CLAUSE">
+            <p>We reserve the right to operate services across state lines consistent with the Dormant Commerce Clause.</p>
+          </Section>
 
-We do not generate revenue through lead generation activities.
+          <Section number="16" title="NOT A CONSUMER REPORTING AGENCY">
+            <p>We are not a consumer reporting agency under the FCRA. Content is not intended for credit, employment, housing, or other regulated uses.</p>
+          </Section>
 
-Sleazy Media LLC is not currently monetized in any way and operates solely as an information and media service.
+          <Section number="17" title="USER CONDUCT">
+            <p>You agree not to misuse the site, including hacking, harassment, or illegal activities.</p>
+          </Section>
 
-4. PUBLIC RECORDS
-All information provided on Sleazy Media LLC platforms is derived from public records or other publicly available sources. We make no guarantees or warranties regarding the accuracy, completeness, or timeliness of the information displayed.
+          <Section number="18" title="INDEMNIFICATION">
+            <p>You agree to indemnify and hold harmless Sleazy Media LLC and affiliates against claims arising out of your use of the site.</p>
+          </Section>
 
-5. DISCLAIMER OF WARRANTIES
-Your use of this website is at your sole risk. The website and all content are provided on an “AS IS” and “AS AVAILABLE” basis without warranties of any kind, either express or implied. Sleazy Media LLC disclaims all warranties, including but not limited to implied warranties of merchantability, fitness for a particular purpose, and non-infringement.
+          <Section number="19" title="NO LEGAL ADVICE">
+            <p>Content is informational only and does not constitute legal advice. Consult an attorney for legal concerns.</p>
+          </Section>
 
-6. LIMITATION OF LIABILITY
-In no event shall Sleazy Media LLC, its officers, directors, employees, affiliates, or agents be liable for any indirect, incidental, consequential, special, or exemplary damages arising from or relating to your use of the website, even if advised of the possibility of such damages.
+          <Section number="20" title="DISPUTE RESOLUTION & ARBITRATION">
+            <p>Disputes shall be resolved first through negotiation, then binding arbitration in West Virginia under AAA rules.</p>
+          </Section>
 
-7. FIRST AMENDMENT PROTECTIONS
-This website operates under the principles of the First Amendment to the United States Constitution. Content published by Sleazy Media LLC is protected speech. We reserve the right to publish, decline to publish, or remove any content consistent with these rights and applicable law.
+          <Section number="21" title="DMCA POLICY">
+            <p>If you believe your copyrighted material has been misused, submit a DMCA notice. We will respond under applicable law.</p>
+          </Section>
 
-8. JURISDICTIONAL RESTRICTIONS
-This website is controlled and operated from within the United States. We make no representation that the website or its content is appropriate or available for use in other jurisdictions. Accessing the website from locations where its content is illegal is strictly prohibited.
+          <Section number="22" title="ERRORS & OMISSIONS">
+            <p>We do not warrant that the website will be free from errors. We reserve the right to correct inaccuracies without notice.</p>
+          </Section>
 
-9. AGE RESTRICTION
-You must be at least 18 years old to access or use this website. By accessing this website, you represent and warrant that you meet this age requirement.
+          <Section number="23" title="CHANGES">
+            <p>We reserve the right to update or revise these Terms at any time. Continued use constitutes acceptance of changes.</p>
+          </Section>
 
-10. INTELLECTUAL PROPERTY
-All content, trademarks, service marks, and other intellectual property on this website are the exclusive property of Sleazy Media LLC or its licensors. Unauthorized use, reproduction, or distribution is strictly prohibited.
+          <Section number="24" title="RESERVATION OF RIGHTS">
+            <p>All rights not expressly granted are reserved.</p>
+          </Section>
 
-11. ACCOUNT ACCESS & DEVICE SHARING
-If account features are provided, you are responsible for maintaining the confidentiality of your account credentials. You agree not to share access with unauthorized users and acknowledge that Sleazy Media LLC is not liable for unauthorized access resulting from your actions.
+          <Section number="25" title="SEVERABILITY & ENTIRE AGREEMENT">
+            <p>If any provision is invalid, the remainder remains in effect. These Terms constitute the entire agreement between you and Sleazy Media LLC.</p>
+          </Section>
 
-12. CONSTITUTIONAL PROTECTIONS
-Sleazy Media LLC asserts protections under the Constitution of the United States, including but not limited to the First Amendment and Dormant Commerce Clause, for the operation of its website and the dissemination of information.
-
-13. COMMUNICATIONS DECENCY ACT
-Pursuant to Section 230 of the Communications Decency Act (47 U.S.C. § 230), Sleazy Media LLC is not responsible for content posted by third parties.
-
-14. PUBLIC FIGURE DOCTRINE
-Content related to public figures is afforded additional protections under U.S. law, including heightened standards for defamation and public interest reporting.
-
-15. DORMANT COMMERCE CLAUSE
-Sleazy Media LLC reserves the right to operate its services across state lines consistent with the Dormant Commerce Clause of the United States Constitution.
-
-16. NOT A CONSUMER REPORTING AGENCY
-Sleazy Media LLC is not a consumer reporting agency as defined by the Fair Credit Reporting Act (FCRA). Information displayed on this website is not intended for purposes of credit, employment, housing, or other FCRA-regulated uses.
-
-17. USER CONDUCT
-You agree not to misuse the website, including but not limited to engaging in illegal activities, attempting to hack or disrupt services, or harassing other users.
-
-18. INDEMNIFICATION
-You agree to indemnify, defend, and hold harmless Sleazy Media LLC, its affiliates, and their officers, directors, employees, and agents from any claims, liabilities, damages, or expenses arising out of your use of the website or violation of these Terms.
-
-19. NO LEGAL ADVICE
-The content on this website is for informational purposes only and does not constitute legal advice. Users should consult with an attorney for specific legal concerns.
-
-20. DISPUTE RESOLUTION & ARBITRATION
-Any dispute arising under or relating to these Terms shall first be attempted to be resolved through good faith negotiations. If unresolved, disputes shall be settled by binding arbitration in West Virginia under the rules of the American Arbitration Association.
-
-21. DMCA POLICY
-If you believe your copyrighted material has been used on this website without authorization, you may submit a notice pursuant to the Digital Millennium Copyright Act (DMCA). Sleazy Media LLC will respond in accordance with applicable law.
-
-22. ERRORS & OMISSIONS
-We do not warrant that the website will be free from errors, inaccuracies, or omissions. We reserve the right to correct any errors without prior notice.
-
-23. CHANGES
-We reserve the right to update, modify, or revise these Terms at any time. Continued use of the website following such changes constitutes acceptance of the revised Terms.
-
-24. RESERVATION OF RIGHTS
-Sleazy Media LLC reserves all rights not expressly granted in these Terms.
-
-25. SEVERABILITY & ENTIRE AGREEMENT
-If any provision of these Terms is held invalid, the remaining provisions shall remain in full force and effect. These Terms constitute the entire agreement between you and Sleazy Media LLC regarding use of the website.
-
-26. ACCEPTANCE OF TERMS
-By accessing or using this website, you affirm that you have read, understood, and agreed to be bound by these Terms of Use.
-          </p>
+          <Section number="26" title="ACCEPTANCE OF TERMS">
+            <p>By using this website, you affirm that you have read, understood, and agreed to be bound by these Terms of Use.</p>
+          </Section>
         </div>
 
-        {/* Action buttons stay fixed at bottom */}
+        {/* Action buttons */}
         <div className="flex gap-4 justify-center">
           <button
             onClick={handleConsent}
@@ -157,6 +178,17 @@ By accessing or using this website, you affirm that you have read, understood, a
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+function Section({ number, title, children }) {
+  return (
+    <div>
+      <h4 className="font-semibold text-white mb-1">
+        {number}. {title}
+      </h4>
+      <div className="space-y-2">{children}</div>
     </div>
   );
 }
