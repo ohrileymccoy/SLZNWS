@@ -41,7 +41,7 @@ function clsx(...xs) {
 
 function AppShell() {
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100">
+    <div className="min-h-screen bg-white text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100">
       <TOSModal />
       <Header />
       <main className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 pb-24">
@@ -62,7 +62,6 @@ function AppShell() {
     </div>
   );
 }
-
 // ------------------ Header ------------------
 export function Header() {
   return <NavBar />;
