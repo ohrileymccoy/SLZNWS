@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import SubmitButtons from "./SubmitButtons";
 import { SECTION_LABELS, SECTION_ORDER } from "../constants/sections";
 import { useTheme } from "./ThemeProvider";
+import slnLogo from "../assets/preview2.png";
 
 export default function NavBar() {
   const location = useLocation();
@@ -34,13 +35,14 @@ export default function NavBar() {
   return (
     <nav className="w-full border-b border-neutral-800 bg-neutral-950/80 backdrop-blur">
       <div className="flex items-center justify-between px-3 h-16">
-        {/* Brand */}
-        <Link
-          to="/"
-          className="text-base sm:text-lg font-semibold tracking-tight whitespace-nowrap"
-        >
-          Sleazy News (Beckley)
-        </Link>
+     {/* Brand */}
+<Link to="/" className="group flex items-center gap-2 shrink-0 h-full">
+  <img src={slnLogo} alt="Sleazy News Logo" className="h-full w-auto object-contain" />
+  <span className="font-semibold tracking-wide text-lg transition-colors">
+    <span className="group-hover:text-blue-400">S.</span>
+    <span className="text-neutral-400 group-hover:text-blue-400">L.N</span>
+  </span>
+</Link>
 
         {/* Right controls: Theme toggle + Hamburger + Submit */}
         <div className="flex items-center gap-2">
