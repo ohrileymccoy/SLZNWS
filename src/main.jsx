@@ -25,7 +25,7 @@ import PhotoPage from "./pages/PhotoPage.jsx";
 import { SECTION_LABELS, SECTION_ORDER } from "./constants/sections"; // ✅ single source of truth
 import FeaturedRail from "./components/FeaturedRail"; // ✅ standalone component
 import { AdBanner } from "./components/AdBanner";
-
+import { ThemeProvider } from "./ThemeProvider"; // 👈 correct
 
 const brand = {
   primary: "#0430FC",
