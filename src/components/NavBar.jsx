@@ -1,11 +1,39 @@
-import { Link } from "react-router-dom";
+import { useState, useRef, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import SubmitButtons from "./SubmitButtons";
-import { SECTION_LABELS, SECTION_ORDER } from "./constants/sections"; 
+import { SECTION_LABELS, SECTION_ORDER } from "./constants/sections";
+import { useTheme } from "../ThemeProvider"; // 👈 from earlier setup
 
 export default function NavBar() {
+  const location = useLocation();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+  const buttonRef = useRef(null);
+  const { theme, setTheme } = useTheme();
+
+  // detect active path
+  const isActive = (path) => location.pathname === path;
+
+  // close menu on outside click
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(e.target) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(e.target)
+      ) {
+        setMenuOpen(false);
+      }
+    }
+    if (menuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [menuOpen]);
+
   return (
     <nav className="w-full border-b border-neutral-800 bg-neutral-950/80 backdrop-blur">
-      {/* Top row (brand + desktop nav) */}
       <div className="flex items-center justify-between px-3 h-16">
         {/* Brand */}
         <Link
@@ -15,38 +43,62 @@ export default function NavBar() {
           Sleazy News (Beckley)
         </Link>
 
-        {/* Desktop nav */}
-        <div className="hidden md:flex items-center gap-4 text-sm text-neutral-300">
-          {SECTION_ORDER.map((key) => (
-            <Link
-              key={key}
-              to={key === "news" ? "/" : `/section/${key}`}
-              className="hover:text-white"
+        {/* Right controls: Hamburger + Theme toggle + Submit buttons */}
+        <div className="flex items-center gap-2">
+          {/* Theme toggle button */}
+          <button
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className="p-2 rounded bg-neutral-800 hover:bg-neutral-700"
+            aria-label="Toggle theme"
+          >
+            {theme === "dark" ? "🌞" : "🌙"}
+          </button>
+
+          {/* Hamburger */}
+          <button
+            ref={buttonRef}
+            onClick={() => setMenuOpen((o) => !o)}
+            className="p-2 rounded bg-neutral-800 hover:bg-neutral-700"
+            aria-label="Toggle menu"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 text-white"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth="2"
             >
-              {SECTION_LABELS[key]}
-            </Link>
-          ))}
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
 
           {/* Shared submit buttons */}
           <SubmitButtons />
         </div>
       </div>
 
-      {/* Mobile nav */}
-      <div className="flex justify-center gap-2 py-2 border-t border-neutral-800 text-xs md:hidden">
-        {SECTION_ORDER.map((key) => (
-          <Link
-            key={key}
-            to={key === "news" ? "/" : `/section/${key}`}
-            className="px-2 py-1 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-200"
-          >
-            {SECTION_LABELS[key]}
-          </Link>
-        ))}
-
-        {/* Shared submit buttons */}
-        <SubmitButtons />
-      </div>
+      {/* Always hamburger menu for sections */}
+      {menuOpen && (
+        <div ref={menuRef} className="bg-neutral-950 border-t border-neutral-800">
+          <nav className="flex flex-col px-4 py-3 space-y-2">
+            {SECTION_ORDER.map((key) => (
+              <Link
+                key={key}
+                to={key === "news" ? "/" : `/section/${key}`}
+                onClick={() => setMenuOpen(false)}
+                className={`px-3 py-1.5 rounded-xl text-sm transition-colors border ${
+                  isActive(key === "news" ? "/" : `/section/${key}`)
+                    ? "bg-neutral-800/80 border-neutral-700"
+                    : "bg-neutral-900/40 border-transparent hover:border-neutral-700"
+                }`}
+              >
+                {SECTION_LABELS[key]}
+              </Link>
+            ))}
+          </nav>
+        </div>
+      )}
     </nav>
   );
 }

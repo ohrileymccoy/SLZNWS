@@ -284,7 +284,9 @@ function Root() {
   return (
     <StrictMode>
       <BrowserRouter>
-        <AppShell />
+        <ThemeProvider>
+          <AppShell />
+        </ThemeProvider>
       </BrowserRouter>
     </StrictMode>
   );
