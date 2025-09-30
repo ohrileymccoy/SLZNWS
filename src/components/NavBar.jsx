@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import SubmitButtons from "./SubmitButtons";
 import { SECTION_LABELS, SECTION_ORDER } from "../constants/sections";
-import { useTheme } from "../ThemeProvider";
+import { useTheme } from "./ThemeProvider";
 
 export default function NavBar() {
   const location = useLocation();
