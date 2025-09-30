@@ -48,15 +48,20 @@ export default function MugshotGrid() {
             alt={it.name}
             className="w-full h-40 object-cover"
           />
-          <div className="p-2 text-center">
-            <p className="text-sm text-neutral-300">{it.name}</p>
-            <button
-              onClick={() => handleDelete(it.id)}
-              className="mt-2 px-3 py-1 text-xs rounded bg-red-600 hover:bg-red-700 transition"
-            >
-              Delete
-            </button>
-          </div>
+          <div className="p-2 text-center space-y-1">
+  <p className="text-sm font-semibold text-neutral-200">{it.name}</p>
+  {it.stats && <p className="text-xs text-neutral-400">{it.stats}</p>}
+  {it.charges && (
+    <p className="text-xs text-red-400 line-clamp-2">{it.charges}</p>
+  )}
+  <button
+    onClick={() => handleDelete(it.id)}
+    className="mt-2 px-3 py-1 text-xs rounded bg-red-600 hover:bg-red-700 transition"
+  >
+    Delete
+  </button>
+</div>
+
         </div>
       ))}
     </div>

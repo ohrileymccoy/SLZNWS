@@ -1,4 +1,7 @@
 // functions/api/v1/mugshots/delete.ts
+
+/// <reference types="@cloudflare/workers-types" />
+
 export async function onRequestPost({ request, env }) {
   try {
     const { id } = await request.json();

@@ -129,9 +129,12 @@ export default function FeaturedRail({
                     alt={it.name}
                     className="w-full h-32 object-cover"
                   />
-                  <div className="p-1 text-center">
-                    <p className="text-xs text-neutral-300">{it.name}</p>
-                  </div>
+                 <div className="p-1 text-center">
+  <p className="text-xs font-medium text-neutral-200">{it.name}</p>
+  {it.stats && <p className="text-[11px] text-neutral-400">{it.stats}</p>}
+  {it.charges && <p className="text-[10px] text-red-400 line-clamp-2">{it.charges}</p>}
+</div>
+
                 </div>
               ))}
             </motion.div>

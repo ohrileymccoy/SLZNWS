@@ -1,0 +1,2 @@
+ALTER TABLE mugshots ADD COLUMN stats TEXT;
+ALTER TABLE mugshots ADD COLUMN charges TEXT;

@@ -1,3 +1,5 @@
+/// <reference types="@cloudflare/workers-types" />
+
 interface Env {
   DB: D1Database;
   R2_PUBLIC_BASE: string;
@@ -5,8 +7,9 @@ interface Env {
 
 export const onRequestGet: PagesFunction<Env> = async ({ env }) => {
   const { results } = await env.DB.prepare(
-    "SELECT id, slug, name, r2_key, created_at FROM mugshots WHERE status='uploaded' ORDER BY created_at DESC LIMIT 50"
-  ).all();
+  "SELECT id, slug, name, stats, charges, r2_key, created_at FROM mugshots WHERE status='uploaded' ORDER BY created_at DESC LIMIT 50"
+).all();
+
 
   const base = env.R2_PUBLIC_BASE || "";
   const items = results.map((m: any) => ({
