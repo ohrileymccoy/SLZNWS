@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import SubmitButtons from "./SubmitButtons";
 import { SECTION_LABELS, SECTION_ORDER } from "./constants/sections";
-import { useTheme } from "../ThemeProvider"; // 👈 from earlier setup
+import { useTheme } from "../ThemeProvider";
 
 export default function NavBar() {
   const location = useLocation();
@@ -11,7 +11,6 @@ export default function NavBar() {
   const buttonRef = useRef(null);
   const { theme, setTheme } = useTheme();
 
-  // detect active path
   const isActive = (path) => location.pathname === path;
 
   // close menu on outside click
@@ -43,9 +42,9 @@ export default function NavBar() {
           Sleazy News (Beckley)
         </Link>
 
-        {/* Right controls: Hamburger + Theme toggle + Submit buttons */}
+        {/* Right controls: Theme toggle + Hamburger + Submit */}
         <div className="flex items-center gap-2">
-          {/* Theme toggle button */}
+          {/* Theme toggle */}
           <button
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             className="p-2 rounded bg-neutral-800 hover:bg-neutral-700"
@@ -78,10 +77,21 @@ export default function NavBar() {
         </div>
       </div>
 
-      {/* Always hamburger menu for sections */}
+      {/* Hamburger drawer */}
       {menuOpen && (
         <div ref={menuRef} className="bg-neutral-950 border-t border-neutral-800">
           <nav className="flex flex-col px-4 py-3 space-y-2">
+            <Link
+              to="/"
+              onClick={() => setMenuOpen(false)}
+              className={`px-3 py-1.5 rounded-xl text-sm transition-colors border ${
+                isActive("/") 
+                  ? "bg-neutral-800/80 border-neutral-700"
+                  : "bg-neutral-900/40 border-transparent hover:border-neutral-700"
+              }`}
+            >
+              Home
+            </Link>
             {SECTION_ORDER.map((key) => (
               <Link
                 key={key}
