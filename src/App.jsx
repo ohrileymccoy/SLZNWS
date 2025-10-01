@@ -5,18 +5,16 @@ import viteLogo from '/vite.svg'
 import './App.css'
 import { SITE } from './config/site'
 import TOSModal from "./components/TOSModal";
-
 function App() {
   const [count, setCount] = useState(0)
 
   return (
     <Layout>
-      {/* 🔹 TOS modal is mounted at the very top of the app */}
       <TOSModal />
 
-     <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] p-10">
-  <div className="rounded-2xl border border-[var(--color-border)] 
-                  bg-[var(--color-surface)] backdrop-blur-md p-6">
+      <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] p-10">
+        <div className="rounded-2xl border border-[var(--color-border)] 
+                        bg-[var(--color-surface)] backdrop-blur-md p-6">
           <div className="flex items-center gap-6">
             <a href="https://vite.dev" target="_blank" rel="noreferrer">
               <img src={viteLogo} className="h-16 w-16" alt="Vite logo" />
@@ -30,17 +28,20 @@ function App() {
 
           <div className="mt-4">
             <button
-              className="rounded-xl border border-white/10 bg-white/10 px-4 py-2 hover:bg-white/15 active:scale-95 transition"
+              className="rounded-xl border border-[var(--color-border)] 
+                         bg-[var(--color-surface-alt)] 
+                         hover:bg-[var(--color-border-strong)] 
+                         active:scale-95 transition px-4 py-2"
               onClick={() => setCount((c) => c + 1)}
             >
               count is {count}
             </button>
-            <p className="mt-2 text-neutral-300">
-              Edit <code className="text-neutral-100/80">src/App.jsx</code> and save to test HMR
+            <p className="mt-2 text-[var(--color-muted)]">
+              Edit <code className="text-[var(--color-heading)]/80">src/App.jsx</code> and save to test HMR
             </p>
           </div>
 
-          <p className="mt-6 text-sm text-neutral-400">
+          <p className="mt-6 text-sm text-[var(--color-muted)]">
             Click on the Vite and React logos to learn more
           </p>
         </div>
@@ -51,11 +52,11 @@ function App() {
 
 function Layout({ children }) {
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100">
-     <header className="p-4 flex justify-between items-center border-b border-[var(--color-border)] 
-                   sticky top-0 bg-[var(--color-surface)]/80 backdrop-blur">
+    <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)]">
+      <header className="p-4 flex justify-between items-center border-b border-[var(--color-border)] 
+                         sticky top-0 bg-[var(--color-surface)]/80 backdrop-blur">
         <h1 className="text-xl font-bold">
-          <span className="text-[#DCFC04]">{SITE.name}</span>
+          <span className="text-[var(--color-accent-alt)]">{SITE.name}</span>
         </h1>
         <nav className="space-x-4 text-sm">
           <Link to="/?section=news" className="hover:underline">News</Link>
@@ -67,5 +68,6 @@ function Layout({ children }) {
     </div>
   )
 }
+
 
 export default App
