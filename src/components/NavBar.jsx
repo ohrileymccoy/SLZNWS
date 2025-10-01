@@ -32,7 +32,7 @@ export default function NavBar() {
   }, [menuOpen]);
 
   return (
-    <nav className="w-full border-b border-neutral-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-950/80 backdrop-blur">
+<nav className="w-full border-b border-[var(--color-border)] bg-[var(--color-surface)]/80 backdrop-blur">
       <div className="flex items-center justify-between px-3 h-16">
         {/* Brand */}
         <Link to="/" className="group flex items-center gap-2 shrink-0 h-full">
@@ -48,7 +48,7 @@ export default function NavBar() {
           {/* Theme toggle */}
           <button
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="p-2 rounded bg-neutral-200 hover:bg-neutral-300 dark:bg-neutral-800 dark:hover:bg-neutral-700"
+            className="p-2 rounded bg-[var(--color-surface-alt)] hover:bg-[var(--color-border-strong)]"
             aria-label="Toggle theme"
           >
             {theme === "dark" ? "🌞" : "🌙"}

@@ -14,8 +14,7 @@ export default function Home() {
       </div>
      <div
   id="sentinel"
-  className="h-10 opacity-40 text-xs flex items-center justify-center border border-dashed 
-             border-neutral-200 dark:border-neutral-700 rounded-xl"
+  className="h-10 opacity-40 text-xs flex items-center justify-center border border-dashed border-[var(--color-border)] rounded-xl"
 >
   sentinel
 </div>
