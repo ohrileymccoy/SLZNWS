@@ -11,11 +11,13 @@ export function ThemeProvider({ children }) {
 
   useEffect(() => {
     const root = window.document.documentElement;
+    console.log("Setting theme:", theme); // 👈 debug
     if (theme === "dark") {
       root.classList.add("dark");
     } else {
       root.classList.remove("dark");
     }
+     console.log("html.className is now:", root.className); // 👈 debug
     localStorage.setItem("theme", theme);
   }, [theme]);
 
