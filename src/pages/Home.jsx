@@ -12,9 +12,14 @@ export default function Home() {
           <ArticleCard key={idx} i={idx + 1} />
         ))}
       </div>
-      <div id="sentinel" className="h-10 opacity-40 text-xs flex items-center justify-center border border-dashed border-white/10 rounded-xl">
-        sentinel
-      </div>
+     <div
+  id="sentinel"
+  className="h-10 opacity-40 text-xs flex items-center justify-center border border-dashed 
+             border-neutral-200 dark:border-neutral-700 rounded-xl"
+>
+  sentinel
+</div>
+
     </div>
   );
 }

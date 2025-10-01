@@ -14,8 +14,9 @@ function App() {
       {/* 🔹 TOS modal is mounted at the very top of the app */}
       <TOSModal />
 
-      <div className="min-h-screen bg-neutral-950 text-neutral-100 p-10">
-        <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-6">
+     <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] p-10">
+  <div className="rounded-2xl border border-[var(--color-border)] 
+                  bg-[var(--color-surface)] backdrop-blur-md p-6">
           <div className="flex items-center gap-6">
             <a href="https://vite.dev" target="_blank" rel="noreferrer">
               <img src={viteLogo} className="h-16 w-16" alt="Vite logo" />
@@ -51,7 +52,8 @@ function App() {
 function Layout({ children }) {
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100">
-      <header className="p-4 flex justify-between items-center border-b border-neutral-900 sticky top-0 bg-neutral-950/80 backdrop-blur">
+     <header className="p-4 flex justify-between items-center border-b border-[var(--color-border)] 
+                   sticky top-0 bg-[var(--color-surface)]/80 backdrop-blur">
         <h1 className="text-xl font-bold">
           <span className="text-[#DCFC04]">{SITE.name}</span>
         </h1>
