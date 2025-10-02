@@ -32,7 +32,8 @@ export default function NavBar() {
   }, [menuOpen]);
 
   return (
-<nav className="w-full border-b border-[var(--color-border)] bg-[var(--color-surface)]/80 backdrop-blur">
+<nav className="w-full border-b border-[var(--color-border)] bg-[var(--color-surface-alt)] backdrop-blur">
+
       <div className="flex items-center justify-between px-3 h-16">
         {/* Brand */}
         <Link to="/" className="group flex items-center gap-2 shrink-0 h-full">

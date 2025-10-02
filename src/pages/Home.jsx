@@ -1,28 +1,37 @@
-// src/pages/Home.jsx
-import Hero from "../components/Hero.jsx";
-import SectionRail from "../components/SectionRail.jsx";
-import ArticleCard from "../components/ArticleCard.jsx";
+// src/components/NavBar.jsx
+import { Link } from "react-router-dom";
+import SubmitButtons from "./SubmitButtons";
+import { SECTION_LABELS, SECTION_ORDER } from "./constants/sections"; 
 
-export default function Home() {
+export default function NavBar() {
   return (
-    <div className="space-y-6">
-      <Hero />
-      <SectionRail />
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        {Array.from({ length: 6 }).map((_, idx) => (
-          <ArticleCard key={idx} i={idx + 1} />
-        ))}
-      </div>
+    <nav className="w-full border-b border-[var(--color-border)] bg-[var(--color-bg)]/80 backdrop-blur">
+      {/* Top row (brand + desktop nav) */}
+      <div className="flex items-center justify-between px-3 h-16">
+        {/* Brand */}
+        <Link
+          to="/"
+          className="text-base sm:text-lg font-semibold tracking-tight whitespace-nowrap text-[var(--color-heading)]"
+        >
+          Sleazy News (Beckley)
+        </Link>
 
-      {/* sentinel box */}
-      <div
-        id="sentinel"
-        className="h-10 opacity-40 text-xs flex items-center justify-center 
-                   border border-dashed border-[var(--color-border)] 
-                   text-[var(--color-muted)] rounded-xl"
-      >
-        sentinel
+        {/* Desktop nav */}
+        <div className="hidden md:flex items-center gap-4 text-sm text-[var(--color-muted)]">
+          {SECTION_ORDER.map((key) => (
+            <Link
+              key={key}
+              to={key === "news" ? "/" : `/section/${key}`}
+              className="hover:text-[var(--color-text)]"
+            >
+              {SECTION_LABELS[key]}
+            </Link>
+          ))}
+
+          {/* Shared submit buttons */}
+          <SubmitButtons />
+        </div>
       </div>
-    </div>
+    </nav>
   );
 }
