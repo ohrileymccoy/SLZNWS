@@ -1199,41 +1199,44 @@
    THEME TOKENS (light + dark)
    ================================ */
 :root {
-  /* Core surfaces */
-  --color-bg: #ffffff;            /* page background */
-  --color-surface: #f9fafb;       /* cards, panels */
-  --color-surface-alt: #f3f4f6;   /* secondary background */
+  /* Light mode defaults */
+  --color-bg: #ffffff;
+  --color-surface: #f9fafb;
+  --color-surface-alt: #f3f4f6;
 
-  /* Text */
-  --color-text: #111827;          /* default text (neutral-900) */
-  --color-heading: #000000;       /* strong headers */
-  --color-muted: #6b7280;         /* neutral-500 for captions, subtle */
+  --color-text: #111827;
+  --color-heading: #000000;
+  --color-muted: #6b7280;
 
-  /* Borders */
-  --color-border: #e5e7eb;        /* neutral-200 */
-  --color-border-strong: #d1d5db; /* neutral-300 */
+  --color-border: #e5e7eb;
+  --color-border-strong: #d1d5db;
 
-  /* Semantic states */
-  --color-error: #f87171;         /* red-400 */
-  --color-success: #4ade80;       /* green-400 */
-  --color-accent: #0430FC;        /* your brand blue */
-  --color-accent-alt: #DCFC04;    /* your brand yellow */
+  --color-error: #f87171;
+  --color-success: #4ade80;
+  --color-accent: #0430FC;
+  --color-accent-alt: #DCFC04;
 }
 
-.dark {
-  --color-bg: #0a0a0a;            /* dark neutral-950 */
-  --color-surface: #111827;       /* dark neutral-900 */
-  --color-surface-alt: #1f2937;   /* dark neutral-800 */
+html.dark {
+  /* Dark mode overrides */
+  --color-bg: #0a0a0a;
+  --color-surface: #111827;
+  --color-surface-alt: #1f2937;
 
-  --color-text: #f5f5f5;          /* neutral-100 */
+  --color-text: #f5f5f5;
   --color-heading: #ffffff;
-  --color-muted: #9ca3af;         /* lighter muted for contrast */
+  --color-muted: #9ca3af;
 
-  --color-border: #262626;        /* neutral-800 */
-  --color-border-strong: #404040; /* neutral-700 */
+  --color-border: #262626;
+  --color-border-strong: #404040;
 
-  --color-error: #f87171;         /* keep red consistent */
+  --color-error: #f87171;
   --color-success: #4ade80;
-  --color-accent: #0430FC;        /* keep brand same */
+  --color-accent: #0430FC;
   --color-accent-alt: #DCFC04;
+}
+
+/* Smooth fade */
+html, body {
+  transition: background-color 0.5s, color 0.5s;
 }
