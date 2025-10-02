@@ -35,7 +35,7 @@ function clsx(...xs) {
 
 function AppShell() {
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)]">
+    <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] transition-colors duration-500">
       <TOSModal />
       <Header />
       <main className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 pb-24">
