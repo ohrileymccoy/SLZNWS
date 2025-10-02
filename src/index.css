@@ -2,7 +2,6 @@
    Tailwind v4 layers
    ================================ */
 @import "tailwindcss/preflight";
-@import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
 /* ================================
