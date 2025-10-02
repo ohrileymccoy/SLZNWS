@@ -4,13 +4,13 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tailwindcss -i ./src/input.css -o ./src/index.css && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview --port 5174 --strictPort",
-    "tw:dev": "tailwindcss -i ./src/input.css -o ./src/index.css -w",
-    "cf:dev": "wrangler pages dev dist --port=8788"
-  },
+  "dev": "vite",
+  "build": "vite build",
+  "lint": "eslint .",
+  "preview": "vite preview --port 5174 --strictPort",
+  "cf:dev": "wrangler pages dev dist --port=8788"
+}
+,
   "dependencies": {
     "framer-motion": "^12.23.22",
     "react": "^19.1.1",
