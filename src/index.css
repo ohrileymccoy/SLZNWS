@@ -2,6 +2,7 @@
    Tailwind v4 layers
    ================================ */
 @import "tailwindcss/preflight";
+@import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
 /* ================================
@@ -44,7 +45,7 @@
 }
 
 /* ================================
-   Base resets & smooth transitions
+   Smooth transitions
    ================================ */
 html, body {
   max-width: 100%;
@@ -59,36 +60,22 @@ html, body {
 }
 
 /* ================================
-   Utility extras
+   Extra utilities
    ================================ */
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* ================================
-   Keyframes & animations
-   ================================ */
-@keyframes pulse {
-  50% { opacity: 0.5; }
-}
-
+@keyframes pulse { 50% { opacity: 0.5; } }
 @keyframes marquee {
   0%   { transform: translateX(0%); }
   100% { transform: translateX(-50%); }
 }
-
 .marquee {
   display: flex;
   flex-wrap: nowrap;
-  gap: 0.75rem; /* Tailwind gap-3 */
+  gap: 0.75rem;
   animation: marquee 40s linear infinite;
   will-change: transform;
 }
 .marquee:hover,
-.marquee:active {
-  animation-play-state: paused;
-}
+.marquee:active { animation-play-state: paused; }
