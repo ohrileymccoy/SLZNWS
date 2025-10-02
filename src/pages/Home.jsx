@@ -1,3 +1,4 @@
+// src/pages/Home.jsx
 import Hero from "../components/Hero.jsx";
 import SectionRail from "../components/SectionRail.jsx";
 import ArticleCard from "../components/ArticleCard.jsx";
@@ -12,13 +13,16 @@ export default function Home() {
           <ArticleCard key={idx} i={idx + 1} />
         ))}
       </div>
-     <div
-  id="sentinel"
-  className="h-10 opacity-40 text-xs flex items-center justify-center border border-dashed border-[var(--color-border)] rounded-xl"
->
-  sentinel
-</div>
 
+      {/* sentinel box */}
+      <div
+        id="sentinel"
+        className="h-10 opacity-40 text-xs flex items-center justify-center 
+                   border border-dashed border-[var(--color-border)] 
+                   text-[var(--color-muted)] rounded-xl"
+      >
+        sentinel
+      </div>
     </div>
   );
 }

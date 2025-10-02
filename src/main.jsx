@@ -1,5 +1,5 @@
 // src/main.jsx
-import { StrictMode, useEffect, useRef, useState } from "react";
+import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import {
   BrowserRouter,
@@ -15,23 +15,17 @@ import "./index.css";
 import SecureAdmin from "./components/SecureAdmin.jsx";
 import Feed from "./components/Feed.jsx";
 import Submit from "./pages/Submit.jsx";
-import slnLogo from "./assets/preview2.png";
 import ArticlePage from "./pages/ArticlePage.jsx";
 import MugshotPage from "./pages/MugshotPage.jsx";
 import TOSModal from "./components/TOSModal";
 import SubmitPhoto from "./pages/SubmitPhoto.jsx";
 import SubmitButtons from "./components/SubmitButtons";
 import PhotoPage from "./pages/PhotoPage.jsx";
-import { SECTION_LABELS, SECTION_ORDER } from "./constants/sections"; // ✅ single source of truth
-import FeaturedRail from "./components/FeaturedRail"; // ✅ standalone component
+import { SECTION_LABELS, SECTION_ORDER } from "./constants/sections";
+import FeaturedRail from "./components/FeaturedRail";
 import { AdBanner } from "./components/AdBanner";
 import { ThemeProvider } from "./components/ThemeProvider";
 import NavBar from "./components/NavBar";
-
-const brand = {
-  primary: "#0430FC",
-  accent: "#DCFC04",
-};
 
 function clsx(...xs) {
   return xs.filter(Boolean).join(" ");
@@ -41,7 +35,7 @@ function clsx(...xs) {
 
 function AppShell() {
   return (
-    <div className="min-h-screen bg-white text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100">
+    <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)]">
       <TOSModal />
       <Header />
       <main className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 pb-24">
@@ -62,6 +56,7 @@ function AppShell() {
     </div>
   );
 }
+
 // ------------------ Header ------------------
 export function Header() {
   return <NavBar />;
@@ -71,11 +66,14 @@ export function Header() {
 
 function Footer() {
   return (
-    <footer className="border-t border-neutral-800">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-10 text-sm text-neutral-400 flex items-center justify-between">
+    <footer className="border-t border-[var(--color-border)]">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-10 text-sm text-[var(--color-muted)] flex items-center justify-between">
         <p>© {new Date().getFullYear()} Sleazy News Beckley</p>
         <p>
-          <span className="inline-block h-2 w-2 rounded-full mr-2" style={{ background: brand.accent }} />
+          <span
+            className="inline-block h-2 w-2 rounded-full mr-2"
+            style={{ background: "var(--color-accent-alt)" }}
+          />
           Half-news, half-satire.
         </p>
       </div>
@@ -89,7 +87,7 @@ function HomePage() {
   const navigate = useNavigate();
   return (
     <div className="py-8">
-      <AdBanner /> {/* ✅ replaces KPIBand, same slot in layout */}
+      <AdBanner />
       <FeaturedRail onOpen={(slug) => navigate(`/article/${slug}`)} />
       <SectionTabs />
       <Feed />
@@ -125,8 +123,11 @@ function NotFound({ message = "We couldn't find that." }) {
   return (
     <div className="py-24 text-center">
       <h2 className="text-xl font-semibold mb-2">404 — Not Found</h2>
-      <p className="text-neutral-400 mb-6">{message}</p>
-      <Link to="/" className="px-4 py-2 rounded-xl bg-neutral-800 border border-neutral-700">
+      <p className="text-[var(--color-muted)] mb-6">{message}</p>
+      <Link
+        to="/"
+        className="px-4 py-2 rounded-xl bg-[var(--color-surface-alt)] border border-[var(--color-border)]"
+      >
         Back to Home
       </Link>
     </div>
@@ -141,20 +142,23 @@ function SectionTabs() {
 
   return (
     <div className="mb-4 flex flex-wrap gap-2">
-      {tabs.map((t) => (
-        <Link
-          key={t.key || t}
-          to={t.to || `/section/${t}`}
-          className={clsx(
-            "px-3 py-1.5 rounded-2xl border text-sm",
-            location.pathname === (t.to || `/section/${t}`)
-              ? "border-neutral-700 bg-neutral-900/60"
-              : "border-neutral-800 bg-neutral-900/30 hover:border-neutral-700"
-          )}
-        >
-          {t.label || SECTION_LABELS[t]}
-        </Link>
-      ))}
+      {tabs.map((t) => {
+        const active = location.pathname === (t.to || `/section/${t}`);
+        return (
+          <Link
+            key={t.key || t}
+            to={t.to || `/section/${t}`}
+            className={clsx(
+              "px-3 py-1.5 rounded-2xl border text-sm",
+              active
+                ? "bg-[var(--color-surface-alt)] border-[var(--color-border-strong)]"
+                : "bg-[var(--color-surface)] border-[var(--color-border)] hover:border-[var(--color-border-strong)]"
+            )}
+          >
+            {t.label || SECTION_LABELS[t]}
+          </Link>
+        );
+      })}
     </div>
   );
 }
@@ -162,8 +166,14 @@ function SectionTabs() {
 function PageTitle({ title, eyebrow, compact }) {
   return (
     <div className={clsx("mb-4", compact && "mb-2")}>
-      {eyebrow && <div className="uppercase tracking-widest text-[10px] text-neutral-400">{eyebrow}</div>}
-      <h2 className="text-xl md:text-2xl font-semibold">{title}</h2>
+      {eyebrow && (
+        <div className="uppercase tracking-widest text-[10px] text-[var(--color-muted)]">
+          {eyebrow}
+        </div>
+      )}
+      <h2 className="text-xl md:text-2xl font-semibold text-[var(--color-heading)]">
+        {title}
+      </h2>
     </div>
   );
 }
