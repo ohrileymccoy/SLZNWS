@@ -1,15 +1,94 @@
+/* ================================
+   Tailwind v4 layers
+   ================================ */
 @import "tailwindcss/preflight";
 @import "tailwindcss/utilities";
 
-/* test only */
+/* ================================
+   THEME TOKENS (light + dark)
+   ================================ */
 :root {
-  --color-bg: pink;
-  --color-text: black;
-  --color-border: red;
+  --color-bg: #ffffff;            /* light background */
+  --color-surface: #f9fafb;
+  --color-surface-alt: #f3f4f6;
+
+  --color-text: #111827;          /* light text */
+  --color-heading: #000000;
+  --color-muted: #6b7280;
+
+  --color-border: #e5e7eb;
+  --color-border-strong: #d1d5db;
+
+  --color-error: #f87171;
+  --color-success: #4ade80;
+  --color-accent: #0430FC;
+  --color-accent-alt: #DCFC04;
 }
 
 .dark {
-  --color-bg: lime;
-  --color-text: white;
-  --color-border: blue;
+  --color-bg: #0a0a0a;            /* dark background */
+  --color-surface: #111827;
+  --color-surface-alt: #1f2937;
+
+  --color-text: #f5f5f5;          /* dark text */
+  --color-heading: #ffffff;
+  --color-muted: #9ca3af;
+
+  --color-border: #262626;
+  --color-border-strong: #404040;
+
+  --color-error: #f87171;
+  --color-success: #4ade80;
+  --color-accent: #0430FC;
+  --color-accent-alt: #DCFC04;
+}
+
+/* ================================
+   Smooth transitions
+   ================================ */
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+  transition: background-color 0.5s ease, color 0.5s ease;
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  tab-size: 4;
+  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ================================
+   Utility extras
+   ================================ */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ================================
+   Keyframes & animations
+   ================================ */
+@keyframes pulse {
+  50% { opacity: 0.5; }
+}
+
+@keyframes marquee {
+  0%   { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+.marquee {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.75rem; /* Tailwind gap-3 */
+  animation: marquee 40s linear infinite;
+  will-change: transform;
+}
+.marquee:hover,
+.marquee:active {
+  animation-play-state: paused;
 }
