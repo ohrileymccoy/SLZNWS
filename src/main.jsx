@@ -91,6 +91,20 @@ function HomePage() {
       <FeaturedRail onOpen={(slug) => navigate(`/article/${slug}`)} />
       <SectionTabs />
       <Feed />
+
+      {/* 🔥 Theme test box */}
+      <div
+        style={{
+          background: "var(--color-bg)",
+          color: "var(--color-text)",
+          border: "1px solid var(--color-border)",
+          padding: "1rem",
+          borderRadius: "0.5rem",
+          marginTop: "1rem",
+        }}
+      >
+        This box should change color with theme toggle.
+      </div>
     </div>
   );
 }
