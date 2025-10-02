@@ -82,7 +82,6 @@ function Footer() {
 }
 
 // ------------------ Pages ------------------
-
 function HomePage() {
   const navigate = useNavigate();
   return (

@@ -1,53 +1,15 @@
-/* ================================
-   Tailwind layers (v4 syntax)
-   ================================ */
 @import "tailwindcss/preflight";
+@import "tailwindcss/utilities";
 
-/* ================================
-   THEME TOKENS (light + dark)
-   ================================ */
+/* test only */
 :root {
-  --color-bg: #ffffff;
-  --color-surface: #f9fafb;
-  --color-surface-alt: #f3f4f6;
-
-  --color-text: #111827;
-  --color-heading: #000000;
-  --color-muted: #6b7280;
-
-  --color-border: #e5e7eb;
-  --color-border-strong: #d1d5db;
-
-  --color-error: #f87171;
-  --color-success: #4ade80;
-  --color-accent: #0430FC;
-  --color-accent-alt: #DCFC04;
+  --color-bg: pink;
+  --color-text: black;
+  --color-border: red;
 }
 
 .dark {
-  --color-bg: #0a0a0a;
-  --color-surface: #111827;
-  --color-surface-alt: #1f2937;
-
-  --color-text: #f5f5f5;
-  --color-heading: #ffffff;
-  --color-muted: #9ca3af;
-
-  --color-border: #262626;
-  --color-border-strong: #404040;
-
-  --color-error: #f87171;
-  --color-success: #4ade80;
-  --color-accent: #0430FC;
-  --color-accent-alt: #DCFC04;
+  --color-bg: lime;
+  --color-text: white;
+  --color-border: blue;
 }
-
-/* smooth fade */
-html, body {
-  transition: background-color 0.5s ease, color 0.5s ease;
-}
-
-/* ================================
-   Tailwind utilities
-   ================================ */
-@import "tailwindcss/utilities";
