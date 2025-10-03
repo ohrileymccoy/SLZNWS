@@ -72,6 +72,19 @@ export function Header() {
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
 
+  // 👇 add search state + navigation
+  const [query, setQuery] = useState("");
+  const navigate = useNavigate();
+
+  function handleSearch(e) {
+    e.preventDefault();
+    if (query.trim()) {
+      navigate(`/search?q=${encodeURIComponent(query)}`);
+      setQuery("");
+      setMenuOpen(false); // optional: close mobile menu after searching
+    }
+  }
+
   const menuRef = useRef(null);
   const buttonRef = useRef(null);
 
@@ -125,29 +138,30 @@ export function Header() {
           ))}
         </nav>
 
-     {/* Right */}
-<div className="flex items-center gap-2">
-  <form onSubmit={handleSearch} className="hidden md:block">
-    <input
-      type="text"
-      value={query}
-      onChange={(e) => setQuery(e.target.value)}
-      placeholder="Search…"
-      className="rounded bg-neutral-900 border border-neutral-700 px-2 py-1 text-sm outline-none focus:border-neutral-500"
-    />
-  </form>
+        {/* Right */}
+        <div className="flex items-center gap-2">
+          {/* Desktop search */}
+          <form onSubmit={handleSearch} className="hidden md:block">
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search…"
+              className="rounded bg-neutral-900 border border-neutral-700 px-2 py-1 text-sm outline-none focus:border-neutral-500"
+            />
+          </form>
 
-  <button
-    ref={buttonRef}
-    onClick={() => setMenuOpen((o) => !o)}
-    className="md:hidden p-2 rounded bg-neutral-800 hover:bg-neutral-700"
-    aria-label="Toggle menu"
-  >
-    …
-  </button>
-  <SubmitButtons />
-</div>
-</div>
+          <button
+            ref={buttonRef}
+            onClick={() => setMenuOpen((o) => !o)}
+            className="md:hidden p-2 rounded bg-neutral-800 hover:bg-neutral-700"
+            aria-label="Toggle menu"
+          >
+            …
+          </button>
+          <SubmitButtons />
+        </div>
+      </div>
 
       {/* Mobile dropdown */}
       {menuOpen && (
@@ -168,12 +182,22 @@ export function Header() {
               />
             ))}
           </nav>
+
+          {/* Mobile search */}
+          <form onSubmit={handleSearch} className="px-4 mt-2">
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search…"
+              className="w-full rounded bg-neutral-900 border border-neutral-700 px-2 py-1 text-sm outline-none focus:border-neutral-500"
+            />
+          </form>
         </div>
       )}
     </header>
   );
 }
-
 function NavLink({ to, label, active }) {
   return (
     <Link
