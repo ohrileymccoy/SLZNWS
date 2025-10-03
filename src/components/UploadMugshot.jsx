@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 
 export default function UploadMugshot() {
   const [name, setName] = useState("");
+  const [stats, setStats] = useState("");
+  const [charges, setCharges] = useState("");
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
@@ -17,6 +19,8 @@ export default function UploadMugshot() {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("name", name);
+    formData.append("stats", stats);
+    formData.append("charges", charges);
 
     try {
       setLoading(true);
@@ -31,6 +35,8 @@ export default function UploadMugshot() {
       if (json.ok) {
         setMessage("✅ Mugshot uploaded successfully");
         setName("");
+        setStats("");
+        setCharges("");
         setFile(null);
       } else {
         setMessage("❌ Upload failed: " + (json.error || "Unknown error"));
@@ -51,7 +57,9 @@ export default function UploadMugshot() {
 
       {/* Name bubble */}
       <div>
-        <label className="block text-xs text-neutral-400 mb-1">Name / Label</label>
+        <label className="block text-xs text-neutral-400 mb-1">
+          Name / Label
+        </label>
         <input
           type="text"
           value={name}
@@ -59,6 +67,32 @@ export default function UploadMugshot() {
           className="w-full rounded-xl bg-neutral-900 border border-neutral-800 px-3 py-2 text-sm outline-none focus:border-neutral-600"
           placeholder="John Doe"
           required
+        />
+      </div>
+
+      {/* Height / Weight */}
+      <div>
+        <label className="block text-xs text-neutral-400 mb-1">
+          Height / Weight
+        </label>
+        <input
+          type="text"
+          value={stats}
+          onChange={(e) => setStats(e.target.value)}
+          className="w-full rounded-xl bg-neutral-900 border border-neutral-800 px-3 py-2 text-sm outline-none focus:border-neutral-600"
+          placeholder={`e.g. "5'10 / 160 lbs"`}
+        />
+      </div>
+
+      {/* Charges */}
+      <div>
+        <label className="block text-xs text-neutral-400 mb-1">Charges</label>
+        <textarea
+          value={charges}
+          onChange={(e) => setCharges(e.target.value)}
+          className="w-full rounded-xl bg-neutral-900 border border-neutral-800 px-3 py-2 text-sm outline-none focus:border-neutral-600"
+          placeholder="Disorderly conduct, resisting arrest..."
+          rows={2}
         />
       </div>
 
@@ -74,7 +108,7 @@ export default function UploadMugshot() {
         />
       </div>
 
-      {/* Bubble-style submit */}
+      {/* Submit */}
       <button
         type="submit"
         disabled={loading}
@@ -83,7 +117,7 @@ export default function UploadMugshot() {
         {loading ? "Uploading…" : "Upload Mugshot"}
       </button>
 
-      {/* Status message */}
+      {/* Status */}
       {message && <p className="text-sm mt-2">{message}</p>}
 
       {/* Navigation bubble */}

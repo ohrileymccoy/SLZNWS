@@ -8,7 +8,11 @@ export default function MugshotGrid() {
     try {
       const res = await fetch("/api/v1/mugshots/list");
       const json = await res.json();
-      setItems(json.items || []);
+      if (json.ok) {
+        setItems(json.items || []);
+      } else {
+        console.error("Mugshot load error:", json.error);
+      }
     } catch (err) {
       console.error("Failed to load mugshots:", err);
     } finally {
@@ -49,19 +53,18 @@ export default function MugshotGrid() {
             className="w-full h-40 object-cover"
           />
           <div className="p-2 text-center space-y-1">
-  <p className="text-sm font-semibold text-neutral-200">{it.name}</p>
-  {it.stats && <p className="text-xs text-neutral-400">{it.stats}</p>}
-  {it.charges && (
-    <p className="text-xs text-red-400 line-clamp-2">{it.charges}</p>
-  )}
-  <button
-    onClick={() => handleDelete(it.id)}
-    className="mt-2 px-3 py-1 text-xs rounded bg-red-600 hover:bg-red-700 transition"
-  >
-    Delete
-  </button>
-</div>
-
+            <p className="text-sm font-semibold text-neutral-200">{it.name}</p>
+            {it.stats && <p className="text-xs text-neutral-400">{it.stats}</p>}
+            {it.charges && (
+              <p className="text-xs text-red-400 line-clamp-2">{it.charges}</p>
+            )}
+            <button
+              onClick={() => handleDelete(it.id)}
+              className="mt-2 px-3 py-1 text-xs rounded bg-red-600 hover:bg-red-700 transition"
+            >
+              Delete
+            </button>
+          </div>
         </div>
       ))}
     </div>
