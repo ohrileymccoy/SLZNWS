@@ -125,22 +125,29 @@ export function Header() {
           ))}
         </nav>
 
-        {/* Right */}
-        <div className="flex items-center gap-2">
-          <button
-            ref={buttonRef}
-            onClick={() => setMenuOpen((o) => !o)}
-            className="md:hidden p-2 rounded bg-neutral-800 hover:bg-neutral-700"
-            aria-label="Toggle menu"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none"
-              viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-          <SubmitButtons />
-        </div>
-      </div>
+     {/* Right */}
+<div className="flex items-center gap-2">
+  <form onSubmit={handleSearch} className="hidden md:block">
+    <input
+      type="text"
+      value={query}
+      onChange={(e) => setQuery(e.target.value)}
+      placeholder="Search…"
+      className="rounded bg-neutral-900 border border-neutral-700 px-2 py-1 text-sm outline-none focus:border-neutral-500"
+    />
+  </form>
+
+  <button
+    ref={buttonRef}
+    onClick={() => setMenuOpen((o) => !o)}
+    className="md:hidden p-2 rounded bg-neutral-800 hover:bg-neutral-700"
+    aria-label="Toggle menu"
+  >
+    …
+  </button>
+  <SubmitButtons />
+</div>
+</div>
 
       {/* Mobile dropdown */}
       {menuOpen && (
