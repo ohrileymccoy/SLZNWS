@@ -25,6 +25,7 @@ import PhotoPage from "./pages/PhotoPage.jsx";
 import { SECTION_LABELS, SECTION_ORDER } from "./constants/sections"; // ✅ single source of truth
 import FeaturedRail from "./components/FeaturedRail"; // ✅ standalone component
 import { AdBanner } from "./components/AdBanner";
+import SearchPage from "./pages/SearchPage.jsx";
 
 
 const brand = {
@@ -45,17 +46,21 @@ function AppShell() {
       <Header />
       <main className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 pb-24">
         <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/SSHadmin" element={<SecureAdmin />} />
-          <Route path="/mugshot" element={<MugshotPage />} />
-          <Route path="/section/:section" element={<SectionPage />} />
-          <Route path="/featured" element={<FeaturedPage />} />
-          <Route path="/article/:id" element={<ArticlePage />} />
-          <Route path="/submit" element={<Submit />} />
-          <Route path="/submit-photo" element={<SubmitPhoto />} />
-          <Route path="/photo/:id" element={<PhotoPage />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+  <Route path="/" element={<HomePage />} />
+  <Route path="/SSHadmin" element={<SecureAdmin />} />
+  <Route path="/mugshot" element={<MugshotPage />} />
+  <Route path="/section/:section" element={<SectionPage />} />
+  <Route path="/featured" element={<FeaturedPage />} />
+  <Route path="/article/:id" element={<ArticlePage />} />
+  <Route path="/submit" element={<Submit />} />
+  <Route path="/submit-photo" element={<SubmitPhoto />} />
+  <Route path="/photo/:id" element={<PhotoPage />} />
+
+  {/* 🔎 New search route */}
+  <Route path="/search" element={<SearchPage />} />
+
+  <Route path="*" element={<NotFound />} />
+</Routes>
       </main>
       <Footer />
     </div>
