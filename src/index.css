@@ -44,37 +44,54 @@
 }
 
 /* ================================
-   Smooth transitions
+   Global adjustments
    ================================ */
-html, body {
+html,
+body {
   max-width: 100%;
   overflow-x: hidden;
   transition: background-color 0.5s ease, color 0.5s ease;
-  line-height: 1.5;
-  -webkit-text-size-adjust: 100%;
-  tab-size: 4;
   font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
     "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  -webkit-tap-highlight-color: transparent;
 }
 
 /* ================================
-   Extra utilities
+   Utility extras
    ================================ */
-.no-scrollbar::-webkit-scrollbar { display: none; }
-.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-@keyframes pulse { 50% { opacity: 0.5; } }
-@keyframes marquee {
-  0%   { transform: translateX(0%); }
-  100% { transform: translateX(-50%); }
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ================================
+   Keyframes & animations
+   ================================ */
+@keyframes pulse {
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
 .marquee {
   display: flex;
   flex-wrap: nowrap;
-  gap: 0.75rem;
+  gap: 0.75rem; /* same as gap-3 */
   animation: marquee 40s linear infinite;
   will-change: transform;
 }
 .marquee:hover,
-.marquee:active { animation-play-state: paused; }
+.marquee:active {
+  animation-play-state: paused;
+}
