@@ -219,27 +219,61 @@ export default function FeaturedRail({
 // ---- Card ----
 function Card({ it, active, onClick }) {
   return (
-    <div
-      onClick={onClick}
-      className={`mug-card min-w-[160px] border border-neutral-800 rounded-2xl overflow-hidden 
-      bg-neutral-900/60 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] 
-      ${active
-        ? "scale-110 brightness-125 shadow-[0_0_25px_#0ff] z-10"
-        : "hover:cursor-pointer hover:scale-105"}`}
-    >
-      <img
-        src={it.public_url}
-        alt={it.name}
-        className="w-full h-32 object-cover select-none"
-        draggable={false}
-      />
-      <div className="p-1 text-center">
-        <p className="text-xs font-medium text-neutral-200">{it.name}</p>
-        {it.stats && <p className="text-[11px] text-neutral-400">{it.stats}</p>}
-        {it.charges && (
-          <p className="text-[10px] text-red-400 line-clamp-2">{it.charges}</p>
-        )}
+    <>
+      <div
+        onClick={onClick}
+        className={`mug-card relative min-w-[160px] border border-neutral-800 rounded-2xl overflow-hidden
+        bg-neutral-900/60 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]
+        ${active
+          ? "z-50 scale-110 brightness-125 shadow-[0_0_25px_#0ff]"
+          : "hover:cursor-pointer hover:scale-105"}`}
+      >
+        <img
+          src={it.public_url}
+          alt={it.name}
+          className="w-full h-32 object-cover select-none"
+          draggable={false}
+        />
+        <div className="p-1 text-center">
+          <p className="text-xs font-medium text-neutral-200">{it.name}</p>
+          {it.stats && <p className="text-[11px] text-neutral-400">{it.stats}</p>}
+          {it.charges && (
+            <p className="text-[10px] text-red-400 line-clamp-2">{it.charges}</p>
+          )}
+        </div>
       </div>
-    </div>
+
+      {/* Overlay popup for the active card */}
+      {active && (
+        <div
+          className="fixed inset-0 z-[999] flex items-center justify-center bg-black/70 backdrop-blur-sm
+                     transition-opacity duration-300"
+          onClick={onClick} // click again to close
+        >
+          <div className="relative w-[90vw] max-w-md bg-neutral-950 border border-cyan-500 rounded-3xl
+                          shadow-[0_0_60px_rgba(0,255,255,0.5)] overflow-hidden animate-popcard">
+            <img
+              src={it.public_url}
+              alt={it.name}
+              className="w-full h-64 object-cover"
+            />
+            <div className="p-4 text-center">
+              <h3 className="text-lg font-semibold text-cyan-400 mb-1">
+                {it.name}
+              </h3>
+              {it.stats && (
+                <p className="text-sm text-neutral-300 mb-1">{it.stats}</p>
+              )}
+              {it.charges && (
+                <p className="text-sm text-red-400 mb-2">{it.charges}</p>
+              )}
+              <p className="text-xs text-neutral-500">
+                (Tap or click anywhere to close)
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
