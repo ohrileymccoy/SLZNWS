@@ -10,10 +10,12 @@ export default function FeaturedRail({
   const [items, setItems] = useState([]);
   const [loopWidth, setLoopWidth] = useState(0);
   const [useCSSFallback, setUseCSSFallback] = useState(false);
+  const [selectedIdx, setSelectedIdx] = useState(null);
 
   const x = useMotionValue(0);
   const trackRef = useRef(null);
   const frameRef = useRef(null);
+  const cardWidthRef = useRef(160); // fallback
 
   const [running, setRunning] = useState(true);
   const [duration, setDuration] = useState(baseDuration);
@@ -40,24 +42,23 @@ export default function FeaturedRail({
   useEffect(() => {
     if (!trackRef.current) return;
     const raf = requestAnimationFrame(() => {
-      if (trackRef.current) {
-        const width = trackRef.current.scrollWidth / 2;
-        setLoopWidth(width);
-      }
+      const width = trackRef.current.scrollWidth / 2;
+      setLoopWidth(width);
+      const firstCard = trackRef.current.querySelector(".mug-card");
+      if (firstCard) cardWidthRef.current = firstCard.offsetWidth + 12; // include gap
     });
     return () => cancelAnimationFrame(raf);
   }, [items]);
 
-  // -------- Detect Safari / fallback --------
+  // -------- Safari detection --------
   useEffect(() => {
     const ua = navigator.userAgent.toLowerCase();
     if (/safari/.test(ua) && !/chrome/.test(ua)) {
-      // if no rAF or motion update bug detected later, fallback
       if (!window.requestAnimationFrame) setUseCSSFallback(true);
     }
   }, []);
 
-  // -------- Main animation loop --------
+  // -------- RAF ticker loop --------
   useEffect(() => {
     if (useCSSFallback) return;
     const tick = () => {
@@ -71,7 +72,7 @@ export default function FeaturedRail({
         return;
       }
 
-      const speed = loopWidth / (duration * 60); // px per frame
+      const speed = loopWidth / (duration * 60);
       const delta = speed * (direction === "right" ? -1 : 1);
       let newX = x.get() + delta;
 
@@ -85,23 +86,35 @@ export default function FeaturedRail({
 
       frameRef.current = requestAnimationFrame(tick);
     };
-
     frameRef.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frameRef.current);
   }, [running, duration, direction, loopWidth, useCSSFallback]);
 
-  // -------- Pause/resume on hover --------
+  // -------- Pause on hover (desktop only) --------
   const handleMouseEnter = () => pauseOnHover && setRunning(false);
   const handleMouseLeave = () => pauseOnHover && setRunning(true);
 
-  // -------- Arrows --------
+  // -------- Arrow buttons --------
   const handleArrow = (dir) => {
     if (!trackRef.current) return;
-    const nudge = loopWidth * 0.1;
+    const nudge = cardWidthRef.current;
     x.set(x.get() + (dir === "right" ? -nudge : nudge));
     setDirection(dir);
+    // quick burst
     setDuration(burstDuration);
     setTimeout(() => setDuration(baseDuration), 2000);
+  };
+
+  // -------- Card click: move one card + glow --------
+  const handleCardClick = (idx, dir = "right") => {
+    setRunning(false);
+    setSelectedIdx(idx);
+    const offset = cardWidthRef.current * (dir === "right" ? -1 : 1);
+    x.set(x.get() + offset);
+    setTimeout(() => {
+      setSelectedIdx(null);
+      setRunning(true);
+    }, 1500);
   };
 
   return (
@@ -124,7 +137,7 @@ export default function FeaturedRail({
             ‹
           </button>
 
-          {/* Scrolling content */}
+          {/* Scrolling track */}
           <div
             className="overflow-hidden flex-1"
             onMouseEnter={handleMouseEnter}
@@ -133,20 +146,27 @@ export default function FeaturedRail({
             {useCSSFallback ? (
               <div className="flex gap-3 animate-marquee will-change-transform">
                 {looped.map((it, idx) => (
-                  <Card it={it} key={idx} />
+                  <Card
+                    it={it}
+                    key={idx}
+                    active={idx === selectedIdx}
+                    onClick={() => handleCardClick(idx)}
+                  />
                 ))}
               </div>
             ) : (
               <motion.div
                 ref={trackRef}
                 className="flex gap-3 will-change-transform"
-                style={{
-                  x,
-                  transform: "translate3d(0,0,0)",
-                }}
+                style={{ x, transform: "translate3d(0,0,0)" }}
               >
                 {looped.map((it, idx) => (
-                  <Card it={it} key={idx} />
+                  <Card
+                    it={it}
+                    key={idx}
+                    active={idx === selectedIdx}
+                    onClick={() => handleCardClick(idx)}
+                  />
                 ))}
               </motion.div>
             )}
@@ -167,14 +187,23 @@ export default function FeaturedRail({
   );
 }
 
-// ---- small pure card component ----
-function Card({ it }) {
+// ---- Card ----
+function Card({ it, active, onClick }) {
   return (
-    <div className="min-w-[160px] bg-neutral-900/60 border border-neutral-800 rounded-2xl overflow-hidden">
+    <div
+      onClick={onClick}
+      className={`mug-card min-w-[160px] border border-neutral-800 rounded-2xl overflow-hidden 
+      bg-neutral-900/60 transition-all duration-300 ${
+        active
+          ? "shadow-[0_0_20px_#0ff] scale-105 brightness-110"
+          : "hover:cursor-pointer"
+      }`}
+    >
       <img
         src={it.public_url}
         alt={it.name}
-        className="w-full h-32 object-cover transition-transform duration-500 hover:scale-105 hover:brightness-110"
+        className="w-full h-32 object-cover"
+        draggable={false}
       />
       <div className="p-1 text-center">
         <p className="text-xs font-medium text-neutral-200">{it.name}</p>
