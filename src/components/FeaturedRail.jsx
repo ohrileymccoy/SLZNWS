@@ -1,4 +1,3 @@
-// src/components/FeaturedRail.jsx
 import { useEffect, useState, useRef } from "react";
 import { motion, useMotionValue } from "framer-motion";
 
@@ -10,6 +9,7 @@ export default function FeaturedRail({
   const [items, setItems] = useState([]);
   const [loopWidth, setLoopWidth] = useState(0);
   const [useCSSFallback, setUseCSSFallback] = useState(false);
+  const [error, setError] = useState(null);
 
   const x = useMotionValue(0);
   const trackRef = useRef(null);
@@ -19,70 +19,79 @@ export default function FeaturedRail({
   const [duration, setDuration] = useState(baseDuration);
   const [direction, setDirection] = useState("right");
 
-  // -------- Fetch data --------
+  // ---- Fetch data ----
   useEffect(() => {
+    let active = true;
     async function load() {
       try {
         const res = await fetch("/api/v1/mugshots/list");
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const json = await res.json();
-        setItems(json.items || []);
+        if (active) setItems(json.items || []);
       } catch (err) {
         console.error("Failed to load mugshots:", err);
+        if (active) setError("Failed to load mugshots.");
       }
     }
     load();
+    return () => (active = false);
   }, []);
 
   const repeatCount = 3;
   const looped = Array.from({ length: repeatCount }).flatMap(() => items);
 
-  // -------- Measure width safely --------
+  // ---- Safe width measurement ----
   useEffect(() => {
     if (!trackRef.current) return;
     const raf = requestAnimationFrame(() => {
-      if (trackRef.current) {
-        const width = trackRef.current.scrollWidth / 2;
-        setLoopWidth(width);
+      try {
+        const w = trackRef.current?.scrollWidth || 0;
+        setLoopWidth(w / 2);
+      } catch {
+        setLoopWidth(0);
       }
     });
     return () => cancelAnimationFrame(raf);
   }, [items]);
 
-  // -------- Detect Safari / fallback --------
+  // ---- Detect Safari fallback ----
   useEffect(() => {
     const ua = navigator.userAgent.toLowerCase();
-    if (/safari/.test(ua) && !/chrome/.test(ua)) {
-      // if no rAF or motion update bug detected later, fallback
-      if (!window.requestAnimationFrame) setUseCSSFallback(true);
-    }
+    const isSafari = /safari/.test(ua) && !/chrome/.test(ua);
+    if (isSafari && !window.requestAnimationFrame) setUseCSSFallback(true);
   }, []);
 
-  // -------- Main animation loop --------
+  // ---- Animation loop ----
   useEffect(() => {
     if (useCSSFallback) return;
+
     const tick = () => {
-      if (
-        !running ||
-        !trackRef.current ||
-        document.visibilityState !== "visible" ||
-        !loopWidth
-      ) {
-        frameRef.current = requestAnimationFrame(tick);
-        return;
+      try {
+        if (
+          !running ||
+          !trackRef.current ||
+          !loopWidth ||
+          document.visibilityState !== "visible"
+        ) {
+          frameRef.current = requestAnimationFrame(tick);
+          return;
+        }
+
+        const speed = loopWidth / (duration * 60);
+        const delta = speed * (direction === "right" ? -1 : 1);
+        let newX = x.get() + delta;
+
+        if (direction === "right" && Math.abs(newX) >= loopWidth) {
+          x.set(0);
+        } else if (direction === "left" && newX > 0) {
+          x.set(-loopWidth);
+        } else {
+          x.set(newX);
+        }
+      } catch (err) {
+        console.error("Ticker loop error:", err);
+        setUseCSSFallback(true); // graceful degrade
       }
-
-      const speed = loopWidth / (duration * 60); // px per frame
-      const delta = speed * (direction === "right" ? -1 : 1);
-      let newX = x.get() + delta;
-
-      if (direction === "right" && Math.abs(newX) >= loopWidth) {
-        x.set(0);
-      } else if (direction === "left" && newX > 0) {
-        x.set(-loopWidth);
-      } else {
-        x.set(newX);
-      }
-
       frameRef.current = requestAnimationFrame(tick);
     };
 
@@ -90,19 +99,34 @@ export default function FeaturedRail({
     return () => cancelAnimationFrame(frameRef.current);
   }, [running, duration, direction, loopWidth, useCSSFallback]);
 
-  // -------- Pause/resume on hover --------
+  // ---- Hover handlers ----
   const handleMouseEnter = () => pauseOnHover && setRunning(false);
   const handleMouseLeave = () => pauseOnHover && setRunning(true);
 
-  // -------- Arrows --------
+  // ---- Arrow controls ----
   const handleArrow = (dir) => {
-    if (!trackRef.current) return;
+    if (!trackRef.current || !loopWidth) return;
     const nudge = loopWidth * 0.1;
     x.set(x.get() + (dir === "right" ? -nudge : nudge));
     setDirection(dir);
     setDuration(burstDuration);
     setTimeout(() => setDuration(baseDuration), 2000);
   };
+
+  // ---- Render ----
+  if (error)
+    return (
+      <section className="p-6 text-center text-sm text-red-400">
+        {error}
+      </section>
+    );
+
+  if (!items.length)
+    return (
+      <section className="p-6 text-center text-sm text-neutral-500">
+        Loading mugshots…
+      </section>
+    );
 
   return (
     <section className="mb-8">
@@ -114,7 +138,6 @@ export default function FeaturedRail({
         </div>
 
         <div className="relative flex items-center h-44 overflow-hidden">
-          {/* Left arrow */}
           <button
             onClick={() => handleArrow("left")}
             className="absolute left-0 top-1/2 -translate-y-1/2 z-20 
@@ -124,7 +147,6 @@ export default function FeaturedRail({
             ‹
           </button>
 
-          {/* Scrolling content */}
           <div
             className="overflow-hidden flex-1"
             onMouseEnter={handleMouseEnter}
@@ -152,7 +174,6 @@ export default function FeaturedRail({
             )}
           </div>
 
-          {/* Right arrow */}
           <button
             onClick={() => handleArrow("right")}
             className="absolute right-0 top-1/2 -translate-y-1/2 z-20 
@@ -167,7 +188,6 @@ export default function FeaturedRail({
   );
 }
 
-// ---- small pure card component ----
 function Card({ it }) {
   return (
     <div className="min-w-[160px] bg-neutral-900/60 border border-neutral-800 rounded-2xl overflow-hidden">
