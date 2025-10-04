@@ -72,8 +72,8 @@ function AppShell() {
 export function Header() {
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
-
   const [query, setQuery] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
   const navigate = useNavigate();
 
   function handleSearch(e) {
@@ -81,6 +81,7 @@ export function Header() {
     if (query.trim()) {
       navigate(`/search?q=${encodeURIComponent(query)}`);
       setQuery("");
+      setSearchOpen(false);
       setMenuOpen(false);
     }
   }
@@ -99,105 +100,187 @@ export function Header() {
         setMenuOpen(false);
       }
     }
-    if (menuOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
+    if (menuOpen) document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [menuOpen]);
-return (
-  <header className="sticky top-0 z-40 backdrop-blur bg-neutral-950/80 border-b border-neutral-800">
-    <div className="mx-auto w-full px-3 sm:px-4 md:px-6 h-14 sm:h-16 flex items-center justify-between gap-2">
-      {/* Left: Logo */}
-      <Link to="/" className="group flex items-center gap-1 sm:gap-2 shrink-0 h-full">
-        <img
-          src={slnLogo}
-          alt="Sleazy News Logo"
-          className="h-8 w-auto sm:h-10 object-contain"
-        />
-        <span className="font-semibold tracking-wide text-sm sm:text-lg transition-colors">
-          <span className="group-hover:text-blue-400">S.</span>
-          <span className="text-neutral-400 group-hover:text-blue-400">L.N</span>
-        </span>
-      </Link>
 
-      {/* Center: search bar (mobile fits nicely) */}
-      <form
-        onSubmit={handleSearch}
-        className="flex-1 px-2 sm:px-4 min-w-[100px]"
-      >
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search…"
-          className="w-full h-8 sm:h-9 rounded-md bg-neutral-900 border border-neutral-700 px-2 sm:px-3 text-[13px] sm:text-sm outline-none focus:border-neutral-500"
-        />
-      </form>
-
-      {/* Right: menu + buttons */}
-      <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-        <button
-          ref={buttonRef}
-          onClick={() => setMenuOpen((o) => !o)}
-          className="md:hidden p-1.5 sm:p-2 rounded bg-neutral-800 hover:bg-neutral-700"
-          aria-label="Toggle menu"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-4 w-4 sm:h-5 sm:w-5 text-white"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
-        <div className="hidden xs:flex sm:flex">
-          <SubmitButtons />
-        </div>
-      </div>
-    </div>
-
-    {/* Mobile dropdown (unchanged except padding) */}
-    {menuOpen && (
-      <div ref={menuRef} className="md:hidden bg-neutral-950 border-t border-neutral-800">
-        <nav className="flex flex-col px-3 py-3 space-y-2">
+  return (
+    <>
+      {/* 🔹 Navbar container */}
+      <header className="sticky top-0 z-40 backdrop-blur bg-neutral-950/80 border-b border-neutral-800">
+        <div className="mx-auto w-full px-3 sm:px-4 md:px-6 h-14 sm:h-16 flex items-center justify-between gap-2">
+          
+          {/* Left: Logo */}
           <Link
             to="/"
-            className="px-3 py-1.5 rounded-xl text-sm border border-neutral-700 bg-neutral-900/60"
-            onClick={() => setMenuOpen(false)}
+            className="group flex items-center gap-1 sm:gap-2 shrink-0 h-full"
           >
-            Home
+            <img
+              src={slnLogo}
+              alt="Sleazy News Logo"
+              className="h-8 w-auto sm:h-10 object-contain"
+            />
+            <span className="font-semibold tracking-wide text-sm sm:text-lg transition-colors">
+              <span className="group-hover:text-blue-400">S.</span>
+              <span className="text-neutral-400 group-hover:text-blue-400">L.N</span>
+            </span>
           </Link>
 
-          {SECTION_ORDER.map((key) => (
-            <Link
-              key={key}
-              to={key === 'featured' ? '/featured' : `/section/${key}`}
-              className="px-3 py-1.5 rounded-xl text-sm border border-transparent hover:border-neutral-700 hover:bg-neutral-900/40"
-              onClick={() => setMenuOpen(false)}
-            >
-              {SECTION_LABELS[key]}
-            </Link>
-          ))}
-
-          <form onSubmit={handleSearch} className="mt-2">
+          {/* Center: search bar (desktop only) */}
+          <form
+            onSubmit={handleSearch}
+            className="hidden sm:flex flex-1 px-2 sm:px-4 min-w-[100px]"
+          >
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search…"
-              className="w-full rounded-md bg-neutral-900 border border-neutral-700 px-3 py-1.5 text-sm outline-none focus:border-neutral-500"
+              className="w-full h-8 sm:h-9 rounded-md bg-neutral-900 border border-neutral-700 px-2 sm:px-3 text-[13px] sm:text-sm outline-none focus:border-neutral-500"
             />
           </form>
-        </nav>
-      </div>
-    )}
-  </header>
-);
+
+          {/* Right: buttons & hamburger */}
+          <div className="flex items-center gap-2 shrink-0">
+            {/* 🔍 mobile search icon */}
+            <button
+              onClick={() => setSearchOpen(true)}
+              className="sm:hidden p-2 rounded bg-neutral-800 hover:bg-neutral-700"
+              aria-label="Open search"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 text-neutral-300"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            </button>
+
+            {/* Upload + Submit buttons (always visible) */}
+            <div className="flex gap-1">
+              <Link
+                to="/submit-photo"
+                className="px-2 sm:px-3 py-1 rounded-md bg-red-600 hover:bg-red-700 text-xs sm:text-sm text-white font-semibold"
+              >
+                Upload Photo +
+              </Link>
+              <Link
+                to="/submit"
+                className="px-2 sm:px-3 py-1 rounded-md bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm text-white font-semibold"
+              >
+                Submit Video +
+              </Link>
+            </div>
+
+            {/* Hamburger (mobile only) */}
+            <button
+              ref={buttonRef}
+              onClick={() => setMenuOpen((o) => !o)}
+              className="md:hidden p-2 rounded bg-neutral-800 hover:bg-neutral-700"
+              aria-label="Toggle menu"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 text-white"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile dropdown */}
+        {menuOpen && (
+          <div
+            ref={menuRef}
+            className="md:hidden bg-neutral-950 border-t border-neutral-800"
+          >
+            <nav className="flex flex-col px-3 py-3 space-y-2">
+              <Link
+                to="/"
+                className="px-3 py-1.5 rounded-xl text-sm border border-neutral-700 bg-neutral-900/60"
+                onClick={() => setMenuOpen(false)}
+              >
+                Home
+              </Link>
+              {SECTION_ORDER.map((key) => (
+                <Link
+                  key={key}
+                  to={key === "featured" ? "/featured" : `/section/${key}`}
+                  className="px-3 py-1.5 rounded-xl text-sm border border-transparent hover:border-neutral-700 hover:bg-neutral-900/40"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  {SECTION_LABELS[key]}
+                </Link>
+              ))}
+            </nav>
+          </div>
+        )}
+      </header>
+
+      {/* 🔍 Search overlay (mobile) */}
+      {searchOpen &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[999] bg-black/70 backdrop-blur-sm flex items-center justify-center"
+            onClick={() => setSearchOpen(false)}
+          >
+            <form
+              onSubmit={handleSearch}
+              className="relative bg-neutral-950 border border-neutral-700 rounded-xl p-4 w-[90%] max-w-sm shadow-[0_0_30px_rgba(0,255,255,0.2)]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search Sleazy News…"
+                className="w-full rounded-md bg-neutral-900 border border-neutral-700 px-3 py-2 text-sm text-neutral-200 focus:border-cyan-400 outline-none"
+                autoFocus
+              />
+              <button
+                type="submit"
+                className="absolute right-5 top-1/2 -translate-y-1/2 text-cyan-400 hover:text-cyan-300"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+              </button>
+            </form>
+          </div>,
+          document.body
+        )}
+    </>
+  );
 }
-  
+
 
 // ------------------ Footer ------------------
 
