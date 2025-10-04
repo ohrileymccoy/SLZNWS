@@ -26,7 +26,7 @@ import { SECTION_LABELS, SECTION_ORDER } from "./constants/sections"; // ✅ sin
 import FeaturedRail from "./components/FeaturedRail"; // ✅ standalone component
 import { AdBanner } from "./components/AdBanner";
 import SearchPage from "./pages/SearchPage.jsx";
-
+import { createPortal } from "react-dom"; //
 
 const brand = {
   primary: "#0430FC",
@@ -106,7 +106,6 @@ export function Header() {
 
   return (
     <>
-      {/* 🔹 Navbar container */}
       <header className="sticky top-0 z-40 backdrop-blur bg-neutral-950/80 border-b border-neutral-800">
         <div className="mx-auto w-full px-3 sm:px-4 md:px-6 h-14 sm:h-16 flex items-center justify-between gap-2">
           
@@ -126,7 +125,7 @@ export function Header() {
             </span>
           </Link>
 
-          {/* Center: search bar (desktop only) */}
+          {/* Center: Search (desktop only) */}
           <form
             onSubmit={handleSearch}
             className="hidden sm:flex flex-1 px-2 sm:px-4 min-w-[100px]"
@@ -140,9 +139,9 @@ export function Header() {
             />
           </form>
 
-          {/* Right: buttons & hamburger */}
+          {/* Right: Controls */}
           <div className="flex items-center gap-2 shrink-0">
-            {/* 🔍 mobile search icon */}
+            {/* Mobile search icon */}
             <button
               onClick={() => setSearchOpen(true)}
               className="sm:hidden p-2 rounded bg-neutral-800 hover:bg-neutral-700"
@@ -164,7 +163,7 @@ export function Header() {
               </svg>
             </button>
 
-            {/* Upload + Submit buttons (always visible) */}
+            {/* Upload / Submit buttons always visible */}
             <div className="flex gap-1">
               <Link
                 to="/submit-photo"
@@ -180,7 +179,7 @@ export function Header() {
               </Link>
             </div>
 
-            {/* Hamburger (mobile only) */}
+            {/* Hamburger menu */}
             <button
               ref={buttonRef}
               onClick={() => setMenuOpen((o) => !o)}
@@ -234,7 +233,7 @@ export function Header() {
         )}
       </header>
 
-      {/* 🔍 Search overlay (mobile) */}
+      {/* ✅ Mobile Search Overlay (Portal) */}
       {searchOpen &&
         createPortal(
           <div
@@ -243,7 +242,7 @@ export function Header() {
           >
             <form
               onSubmit={handleSearch}
-              className="relative bg-neutral-950 border border-neutral-700 rounded-xl p-4 w-[90%] max-w-sm shadow-[0_0_30px_rgba(0,255,255,0.2)]"
+              className="relative bg-neutral-950 border border-neutral-700 rounded-xl p-4 w-[90%] max-w-sm shadow-[0_0_30px_rgba(0,255,255,0.2)] animate-[fadeIn_0.2s_ease-out]"
               onClick={(e) => e.stopPropagation()}
             >
               <input
@@ -280,7 +279,6 @@ export function Header() {
     </>
   );
 }
-
 
 // ------------------ Footer ------------------
 
