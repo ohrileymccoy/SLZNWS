@@ -11,11 +11,12 @@ export default function FeaturedRail({
   const [loopWidth, setLoopWidth] = useState(0);
   const [useCSSFallback, setUseCSSFallback] = useState(false);
   const [selectedIdx, setSelectedIdx] = useState(null);
+  const [activeArrow, setActiveArrow] = useState(null);
 
   const x = useMotionValue(0);
   const trackRef = useRef(null);
   const frameRef = useRef(null);
-  const cardWidthRef = useRef(160); // fallback
+  const cardWidthRef = useRef(160); // fallback width
 
   const [running, setRunning] = useState(true);
   const [duration, setDuration] = useState(baseDuration);
@@ -45,7 +46,7 @@ export default function FeaturedRail({
       const width = trackRef.current.scrollWidth / 2;
       setLoopWidth(width);
       const firstCard = trackRef.current.querySelector(".mug-card");
-      if (firstCard) cardWidthRef.current = firstCard.offsetWidth + 12; // include gap
+      if (firstCard) cardWidthRef.current = firstCard.offsetWidth + 12;
     });
     return () => cancelAnimationFrame(raf);
   }, [items]);
@@ -95,68 +96,76 @@ export default function FeaturedRail({
   const handleMouseLeave = () => pauseOnHover && setRunning(true);
 
   // -------- Arrow buttons --------
-const handleArrow = (dir) => {
-  if (!trackRef.current || !cardWidthRef.current) return;
+  const handleArrow = (dir) => {
+    if (!trackRef.current || !cardWidthRef.current) return;
 
-  setRunning(false); // pause scrolling when user interacts
-
-  const distance = cardWidthRef.current * (dir === "right" ? -1 : 1);
-
-  // Smoothly animate to next card
-  const current = x.get();
-  const target = current + distance;
-  const stepCount = 20;
-  let step = 0;
-
-  const animateStep = () => {
-    step++;
-    const progress = step / stepCount;
-    const eased = 1 - Math.pow(1 - progress, 3); // ease-out-cubic
-    const value = current + (target - current) * eased;
-    x.set(value);
-    if (step < stepCount) requestAnimationFrame(animateStep);
-  };
-  requestAnimationFrame(animateStep);
-
-  // toggle resume only if user clicks again
-  if (running) setRunning(false);
-  else setRunning(true);
-};
-
-// -------- Card click --------
-const handleCardClick = (idx) => {
-  // toggle pause/resume on card click
-  if (running) {
     setRunning(false);
-    setSelectedIdx(idx);
-  } else {
-    setRunning(true);
-    setSelectedIdx(null);
-  }
-};
+    setActiveArrow(dir);
 
+    const distance = cardWidthRef.current * (dir === "right" ? -1 : 1);
+    const current = x.get();
+    const target = current + distance;
+    const stepCount = 20;
+    let step = 0;
+
+    const animateStep = () => {
+      step++;
+      const progress = step / stepCount;
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const value = current + (target - current) * eased;
+      x.set(value);
+      if (step < stepCount) requestAnimationFrame(animateStep);
+    };
+    requestAnimationFrame(animateStep);
+
+    // remove arrow glow after 300ms
+    setTimeout(() => setActiveArrow(null), 300);
+
+    // resume scroll if already paused, or pause if running
+    setRunning((prev) => !prev);
+  };
+
+  // -------- Card click --------
+  const handleCardClick = (idx) => {
+    // If clicking a different card, switch directly
+    if (selectedIdx !== null && selectedIdx !== idx) {
+      setSelectedIdx(idx);
+      return;
+    }
+
+    if (running) {
+      setRunning(false);
+      setSelectedIdx(idx);
+    } else {
+      setRunning(true);
+      setSelectedIdx(null);
+    }
+  };
 
   return (
     <section className="mb-8">
       <div className="bg-neutral-950/90 border-y-2 border-neutral-800 shadow-[0_0_20px_rgba(0,0,0,0.6)] rounded-lg overflow-hidden">
+        {/* Title */}
         <div className="px-4 py-2 bg-neutral-900 border-b border-neutral-800">
           <h2 className="text-sm font-semibold text-neutral-200 tracking-wide uppercase">
             Local Mugshots
           </h2>
         </div>
 
+        {/* Carousel */}
         <div className="relative flex items-center h-44 overflow-hidden">
           {/* Left arrow */}
           <button
             onClick={() => handleArrow("left")}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-20 
-                       bg-neutral-900/80 hover:bg-neutral-800 text-white text-2xl 
-                       rounded-full shadow-[0_0_15px_#0ff] px-2 py-1"
+            className={`absolute left-0 top-1/2 -translate-y-1/2 z-20 text-white text-2xl rounded-full px-2 py-1 transition-all duration-300
+            ${activeArrow === "left"
+              ? "bg-cyan-500/30 shadow-[0_0_20px_#0ff]"
+              : "bg-neutral-900/80 hover:bg-neutral-800"}`}
           >
             ‹
           </button>
 
-          {/* Scrolling track */}
+          {/* Track */}
           <div
             className="overflow-hidden flex-1"
             onMouseEnter={handleMouseEnter}
@@ -166,8 +175,8 @@ const handleCardClick = (idx) => {
               <div className="flex gap-3 animate-marquee will-change-transform">
                 {looped.map((it, idx) => (
                   <Card
-                    it={it}
                     key={idx}
+                    it={it}
                     active={idx === selectedIdx}
                     onClick={() => handleCardClick(idx)}
                   />
@@ -181,8 +190,8 @@ const handleCardClick = (idx) => {
               >
                 {looped.map((it, idx) => (
                   <Card
-                    it={it}
                     key={idx}
+                    it={it}
                     active={idx === selectedIdx}
                     onClick={() => handleCardClick(idx)}
                   />
@@ -194,9 +203,10 @@ const handleCardClick = (idx) => {
           {/* Right arrow */}
           <button
             onClick={() => handleArrow("right")}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-20 
-                       bg-neutral-900/80 hover:bg-neutral-800 text-white text-2xl 
-                       rounded-full shadow-[0_0_15px_#0ff] px-2 py-1"
+            className={`absolute right-0 top-1/2 -translate-y-1/2 z-20 text-white text-2xl rounded-full px-2 py-1 transition-all duration-300
+            ${activeArrow === "right"
+              ? "bg-cyan-500/30 shadow-[0_0_20px_#0ff]"
+              : "bg-neutral-900/80 hover:bg-neutral-800"}`}
           >
             ›
           </button>
@@ -212,16 +222,15 @@ function Card({ it, active, onClick }) {
     <div
       onClick={onClick}
       className={`mug-card min-w-[160px] border border-neutral-800 rounded-2xl overflow-hidden 
-      bg-neutral-900/60 transition-all duration-300 ${
-        active
-          ? "shadow-[0_0_20px_#0ff] scale-105 brightness-110"
-          : "hover:cursor-pointer"
-      }`}
+      bg-neutral-900/60 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] 
+      ${active
+        ? "scale-110 brightness-125 shadow-[0_0_25px_#0ff] z-10"
+        : "hover:cursor-pointer hover:scale-105"}`}
     >
       <img
         src={it.public_url}
         alt={it.name}
-        className="w-full h-32 object-cover"
+        className="w-full h-32 object-cover select-none"
         draggable={false}
       />
       <div className="p-1 text-center">
