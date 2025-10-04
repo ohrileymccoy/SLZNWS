@@ -1,6 +1,7 @@
 // src/components/FeaturedRail.jsx
 import { useEffect, useState, useRef } from "react";
 import { motion, useMotionValue } from "framer-motion";
+import { createPortal } from "react-dom";
 
 export default function FeaturedRail({
   baseDuration = 25,
@@ -16,7 +17,7 @@ export default function FeaturedRail({
   const x = useMotionValue(0);
   const trackRef = useRef(null);
   const frameRef = useRef(null);
-  const cardWidthRef = useRef(160); // fallback width
+  const cardWidthRef = useRef(160);
 
   const [running, setRunning] = useState(true);
   const [duration, setDuration] = useState(baseDuration);
@@ -91,7 +92,7 @@ export default function FeaturedRail({
     return () => cancelAnimationFrame(frameRef.current);
   }, [running, duration, direction, loopWidth, useCSSFallback]);
 
-  // -------- Pause on hover (desktop only) --------
+  // -------- Pause on hover --------
   const handleMouseEnter = () => pauseOnHover && setRunning(false);
   const handleMouseLeave = () => pauseOnHover && setRunning(true);
 
@@ -118,21 +119,16 @@ export default function FeaturedRail({
     };
     requestAnimationFrame(animateStep);
 
-    // remove arrow glow after 300ms
     setTimeout(() => setActiveArrow(null), 300);
-
-    // resume scroll if already paused, or pause if running
     setRunning((prev) => !prev);
   };
 
   // -------- Card click --------
   const handleCardClick = (idx) => {
-    // If clicking a different card, switch directly
     if (selectedIdx !== null && selectedIdx !== idx) {
       setSelectedIdx(idx);
       return;
     }
-
     if (running) {
       setRunning(false);
       setSelectedIdx(idx);
@@ -145,7 +141,6 @@ export default function FeaturedRail({
   return (
     <section className="mb-8">
       <div className="bg-neutral-950/90 border-y-2 border-neutral-800 shadow-[0_0_20px_rgba(0,0,0,0.6)] rounded-lg overflow-hidden">
-        {/* Title */}
         <div className="px-4 py-2 bg-neutral-900 border-b border-neutral-800">
           <h2 className="text-sm font-semibold text-neutral-200 tracking-wide uppercase">
             Local Mugshots
@@ -166,42 +161,41 @@ export default function FeaturedRail({
           </button>
 
           {/* Track */}
-<div
-  className={`overflow-hidden flex-1 relative transition-all duration-300 ${
-    selectedIdx !== null ? "brightness-[0.3]" : "brightness-100"
-  }`}
-  onMouseEnter={handleMouseEnter}
-  onMouseLeave={handleMouseLeave}
->
-  {useCSSFallback ? (
-    <div className="flex gap-3 animate-marquee will-change-transform">
-      {looped.map((it, idx) => (
-        <Card
-          key={idx}
-          it={it}
-          active={idx === selectedIdx}
-          onClick={() => handleCardClick(idx)}
-        />
-      ))}
-    </div>
-  ) : (
-    <motion.div
-      ref={trackRef}
-      className="flex gap-3 will-change-transform"
-      style={{ x, transform: "translate3d(0,0,0)" }}
-    >
-      {looped.map((it, idx) => (
-        <Card
-          key={idx}
-          it={it}
-          active={idx === selectedIdx}
-          onClick={() => handleCardClick(idx)}
-        />
-      ))}
-    </motion.div>
-  )}
-</div>
-
+          <div
+            className={`overflow-hidden flex-1 relative transition-all duration-300 ${
+              selectedIdx !== null ? "brightness-[0.3]" : "brightness-100"
+            }`}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+          >
+            {useCSSFallback ? (
+              <div className="flex gap-3 animate-marquee will-change-transform">
+                {looped.map((it, idx) => (
+                  <Card
+                    key={idx}
+                    it={it}
+                    active={idx === selectedIdx}
+                    onClick={() => handleCardClick(idx)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <motion.div
+                ref={trackRef}
+                className="flex gap-3 will-change-transform"
+                style={{ x, transform: "translate3d(0,0,0)" }}
+              >
+                {looped.map((it, idx) => (
+                  <Card
+                    key={idx}
+                    it={it}
+                    active={idx === selectedIdx}
+                    onClick={() => handleCardClick(idx)}
+                  />
+                ))}
+              </motion.div>
+            )}
+          </div>
 
           {/* Right arrow */}
           <button
@@ -221,68 +215,62 @@ export default function FeaturedRail({
 
 // ---- Card ----
 function Card({ it, active, onClick }) {
-  return (
+  // Body scroll lock for overlay
+  useEffect(() => {
+    if (active) document.body.style.overflow = "hidden";
+    else document.body.style.overflow = "";
+    return () => (document.body.style.overflow = "");
+  }, [active]);
+
+  // Standard in-track card
+  const card = (
     <div
       onClick={onClick}
-      className={`mug-card relative min-w-[160px] border border-neutral-800 rounded-2xl 
-        bg-neutral-900/60 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] 
-        ${active
-          ? "z-[60] shadow-[0_0_60px_#0ff] brightness-125"
-          : "hover:cursor-pointer hover:scale-105"}`}
-      style={{
-        position: active ? "absolute" : "relative",
-        top: active ? "50%" : "auto",
-        left: active ? "50%" : "auto",
-        transformOrigin: "center",
-        transform: active
-          ? "translate(-50%, -55%) scale(2.2)"
-          : "translate(0,0) scale(1)",
-      }}
+      className={`mug-card relative min-w-[160px] border border-neutral-800 rounded-2xl bg-neutral-900/60 
+      transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]
+      ${active ? "z-[60] brightness-125" : "hover:cursor-pointer hover:scale-105"}`}
     >
-      {/* Main mugshot image */}
       <img
         src={it.public_url}
         alt={it.name}
-        className={`w-full h-32 object-cover select-none rounded-t-2xl transition-all duration-500
-          ${active ? "h-52 brightness-110" : ""}`}
+        className="w-full h-32 object-cover select-none rounded-t-2xl"
         draggable={false}
       />
-
-      {/* Base info (always visible, scales with card) */}
-      <div
-        className={`p-1 text-center transition-opacity duration-300 ${
-          active ? "opacity-0 pointer-events-none" : "opacity-100"
-        }`}
-      >
+      <div className="p-1 text-center">
         <p className="text-xs font-medium text-neutral-200">{it.name}</p>
         {it.stats && <p className="text-[11px] text-neutral-400">{it.stats}</p>}
         {it.charges && (
           <p className="text-[10px] text-red-400 line-clamp-2">{it.charges}</p>
         )}
       </div>
-
-      {/* Expanded detail panel (appears when active) */}
-      {active && (
-        <div
-          className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/80 via-black/40 to-transparent
-                     rounded-2xl text-center p-3 animate-popcard"
-        >
-          <h3 className="text-sm sm:text-base font-semibold text-cyan-400 mb-1">
-            {it.name}
-          </h3>
-          {it.stats && (
-            <p className="text-xs sm:text-sm text-neutral-300 mb-1">{it.stats}</p>
-          )}
-          {it.charges && (
-            <p className="text-xs sm:text-sm text-red-400 line-clamp-3">{it.charges}</p>
-          )}
-          <p className="text-[10px] text-neutral-500 mt-1">
-            (Tap again to close)
-          </p>
-        </div>
-      )}
     </div>
   );
+
+  // Render overlay popup using React Portal
+  const popup =
+    active &&
+    createPortal(
+      <div
+        className="fixed inset-0 z-[999] flex items-center justify-center bg-black/70 backdrop-blur-sm transition-opacity duration-300"
+        onClick={onClick}
+      >
+        <div className="relative w-[90vw] max-w-md bg-neutral-950 border border-cyan-500 rounded-3xl shadow-[0_0_60px_rgba(0,255,255,0.5)] overflow-hidden animate-popcard">
+          <img src={it.public_url} alt={it.name} className="w-full h-64 object-cover" />
+          <div className="p-4 text-center">
+            <h3 className="text-lg font-semibold text-cyan-400 mb-1">{it.name}</h3>
+            {it.stats && <p className="text-sm text-neutral-300 mb-1">{it.stats}</p>}
+            {it.charges && <p className="text-sm text-red-400 mb-2">{it.charges}</p>}
+            <p className="text-xs text-neutral-500">(Tap or click anywhere to close)</p>
+          </div>
+        </div>
+      </div>,
+      document.body
+    );
+
+  return (
+    <>
+      {card}
+      {popup}
+    </>
+  );
 }
-
-
