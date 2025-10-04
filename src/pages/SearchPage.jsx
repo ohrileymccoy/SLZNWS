@@ -11,7 +11,7 @@ export default function SearchPage() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [filter, setFilter] = useState("newest"); // "newest" | "photos" | "videos"
+  const [filter, setFilter] = useState("newest");
 
   useEffect(() => {
     async function load() {
@@ -26,7 +26,32 @@ export default function SearchPage() {
         const res = await fetch(`/api/v1/search?q=${encodeURIComponent(query)}`);
         const json = await res.json();
         if (json.ok) {
-          setItems(json.items || []);
+          // 🔑 normalize API results into ArticleCard props
+          const normalized = (json.items || []).map((it) => {
+            if (it.type === "video") {
+              return {
+                type: "video",
+                id: it.id,
+                title: it.title,
+                caption: it.caption,
+                section: it.section,
+                created_at: it.created_at,
+                videoUrl: it.public_url || it.r2_key, // depends on backend field
+                posterUrl: it.poster_key || it.poster_url || null,
+              };
+            } else {
+              return {
+                type: "photo",
+                id: it.id,
+                title: it.title,
+                caption: it.caption,
+                section: it.section,
+                created_at: it.created_at,
+                photoUrls: it.photoUrls || JSON.parse(it.r2_keys || "[]"),
+              };
+            }
+          });
+          setItems(normalized);
         } else {
           setError(json.error || "Search failed");
         }
@@ -63,15 +88,13 @@ export default function SearchPage() {
     );
   }
 
-  // 🔑 Filter + sort logic (same as Feed.jsx)
+  // 🔑 Filter + sort logic (same as Feed)
   let filtered = [...items];
-
   if (filter === "photos") {
     filtered = filtered.filter((it) => it.type === "photo");
   } else if (filter === "videos") {
     filtered = filtered.filter((it) => it.type === "video");
   }
-
   filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
   return (
@@ -100,8 +123,8 @@ export default function SearchPage() {
             key={`video-${it.id}`}
             title={it.title}
             eyebrow={SECTION_LABELS[it.section] || it.section}
-            videoUrl={it.public_url}
-            posterUrl={it.poster_key}
+            videoUrl={it.videoUrl}
+            posterUrl={it.posterUrl}
             caption={it.caption}
             footer={`Uploaded ${new Date(it.created_at).toLocaleDateString()}`}
             videoId={it.id}
@@ -113,7 +136,7 @@ export default function SearchPage() {
             eyebrow={SECTION_LABELS[it.section] || it.section}
             caption={it.caption}
             footer={`Uploaded ${new Date(it.created_at).toLocaleDateString()}`}
-            photoUrls={JSON.parse(it.r2_keys || "[]")}
+            photoUrls={it.photoUrls}
             photoId={it.id}
           />
         )
