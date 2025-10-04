@@ -1,20 +1,25 @@
+// src/components/FeaturedRail.jsx
 import { useEffect, useState, useRef } from "react";
 import { motion, useMotionValue } from "framer-motion";
 
 export default function FeaturedRail({
-  baseDuration = 25,   // baseline seconds for one full loop
-  burstDuration = 8,   // seconds for fast scroll
+  baseDuration = 25,
+  burstDuration = 8,
   pauseOnHover = true,
 }) {
   const [items, setItems] = useState([]);
+  const [loopWidth, setLoopWidth] = useState(0);
+  const [useCSSFallback, setUseCSSFallback] = useState(false);
+
   const x = useMotionValue(0);
   const trackRef = useRef(null);
   const frameRef = useRef(null);
 
   const [running, setRunning] = useState(true);
   const [duration, setDuration] = useState(baseDuration);
-  const [direction, setDirection] = useState("right"); // 👈 NEW
+  const [direction, setDirection] = useState("right");
 
+  // -------- Fetch data --------
   useEffect(() => {
     async function load() {
       try {
@@ -31,57 +36,70 @@ export default function FeaturedRail({
   const repeatCount = 3;
   const looped = Array.from({ length: repeatCount }).flatMap(() => items);
 
-  // Calculate speed (px/frame) based on track width and duration
-  const getSpeed = () => {
-    const track = trackRef.current;
-    if (!track) return 1;
-    const loopWidth = track.scrollWidth / 2;
-    return loopWidth / (duration * 60); // px per frame
-  };
-
-  // RAF loop
+  // -------- Measure width safely --------
   useEffect(() => {
-    const tick = () => {
-      if (running && trackRef.current) {
-        const track = trackRef.current;
-        const loopWidth = track.scrollWidth / 2;
-        const delta = getSpeed() * (direction === "right" ? -1 : 1); // 👈 direction matters
-        let newX = x.get() + delta;
-
-        // wrap seamlessly
-        if (direction === "right" && Math.abs(newX) >= loopWidth) {
-          x.set(0);
-        } else if (direction === "left" && newX > 0) {
-          x.set(-loopWidth);
-        } else {
-          x.set(newX);
-        }
+    if (!trackRef.current) return;
+    const raf = requestAnimationFrame(() => {
+      if (trackRef.current) {
+        const width = trackRef.current.scrollWidth / 2;
+        setLoopWidth(width);
       }
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [items]);
+
+  // -------- Detect Safari / fallback --------
+  useEffect(() => {
+    const ua = navigator.userAgent.toLowerCase();
+    if (/safari/.test(ua) && !/chrome/.test(ua)) {
+      // if no rAF or motion update bug detected later, fallback
+      if (!window.requestAnimationFrame) setUseCSSFallback(true);
+    }
+  }, []);
+
+  // -------- Main animation loop --------
+  useEffect(() => {
+    if (useCSSFallback) return;
+    const tick = () => {
+      if (
+        !running ||
+        !trackRef.current ||
+        document.visibilityState !== "visible" ||
+        !loopWidth
+      ) {
+        frameRef.current = requestAnimationFrame(tick);
+        return;
+      }
+
+      const speed = loopWidth / (duration * 60); // px per frame
+      const delta = speed * (direction === "right" ? -1 : 1);
+      let newX = x.get() + delta;
+
+      if (direction === "right" && Math.abs(newX) >= loopWidth) {
+        x.set(0);
+      } else if (direction === "left" && newX > 0) {
+        x.set(-loopWidth);
+      } else {
+        x.set(newX);
+      }
+
       frameRef.current = requestAnimationFrame(tick);
     };
 
     frameRef.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frameRef.current);
-  }, [running, duration, direction]); // 👈 depends on direction too
+  }, [running, duration, direction, loopWidth, useCSSFallback]);
 
-  // Hover pause/resume
+  // -------- Pause/resume on hover --------
   const handleMouseEnter = () => pauseOnHover && setRunning(false);
   const handleMouseLeave = () => pauseOnHover && setRunning(true);
 
-  // Arrow click = nudge + burst speed + change direction
+  // -------- Arrows --------
   const handleArrow = (dir) => {
     if (!trackRef.current) return;
-    const track = trackRef.current;
-    const loopWidth = track.scrollWidth / 2;
-
-    // nudge by 10% of loop width
     const nudge = loopWidth * 0.1;
     x.set(x.get() + (dir === "right" ? -nudge : nudge));
-
-    // update scroll direction
     setDirection(dir);
-
-    // temporary burst
     setDuration(burstDuration);
     setTimeout(() => setDuration(baseDuration), 2000);
   };
@@ -89,14 +107,12 @@ export default function FeaturedRail({
   return (
     <section className="mb-8">
       <div className="bg-neutral-950/90 border-y-2 border-neutral-800 shadow-[0_0_20px_rgba(0,0,0,0.6)] rounded-lg overflow-hidden">
-        {/* Title strip */}
         <div className="px-4 py-2 bg-neutral-900 border-b border-neutral-800">
           <h2 className="text-sm font-semibold text-neutral-200 tracking-wide uppercase">
             Local Mugshots
           </h2>
         </div>
 
-        {/* Ticker row */}
         <div className="relative flex items-center h-44 overflow-hidden">
           {/* Left arrow */}
           <button
@@ -114,30 +130,26 @@ export default function FeaturedRail({
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
           >
-            <motion.div
-              ref={trackRef}
-              className="flex gap-3"
-              style={{ x }}
-            >
-              {looped.map((it, idx) => (
-                <div
-                  key={idx}
-                  className="min-w-[160px] bg-neutral-900/60 border border-neutral-800 rounded-2xl overflow-hidden"
-                >
-                  <img
-                    src={it.public_url}
-                    alt={it.name}
-                    className="w-full h-32 object-cover"
-                  />
-                 <div className="p-1 text-center">
-  <p className="text-xs font-medium text-neutral-200">{it.name}</p>
-  {it.stats && <p className="text-[11px] text-neutral-400">{it.stats}</p>}
-  {it.charges && <p className="text-[10px] text-red-400 line-clamp-2">{it.charges}</p>}
-</div>
-
-                </div>
-              ))}
-            </motion.div>
+            {useCSSFallback ? (
+              <div className="flex gap-3 animate-marquee will-change-transform">
+                {looped.map((it, idx) => (
+                  <Card it={it} key={idx} />
+                ))}
+              </div>
+            ) : (
+              <motion.div
+                ref={trackRef}
+                className="flex gap-3 will-change-transform"
+                style={{
+                  x,
+                  transform: "translate3d(0,0,0)",
+                }}
+              >
+                {looped.map((it, idx) => (
+                  <Card it={it} key={idx} />
+                ))}
+              </motion.div>
+            )}
           </div>
 
           {/* Right arrow */}
@@ -152,5 +164,25 @@ export default function FeaturedRail({
         </div>
       </div>
     </section>
+  );
+}
+
+// ---- small pure card component ----
+function Card({ it }) {
+  return (
+    <div className="min-w-[160px] bg-neutral-900/60 border border-neutral-800 rounded-2xl overflow-hidden">
+      <img
+        src={it.public_url}
+        alt={it.name}
+        className="w-full h-32 object-cover transition-transform duration-500 hover:scale-105 hover:brightness-110"
+      />
+      <div className="p-1 text-center">
+        <p className="text-xs font-medium text-neutral-200">{it.name}</p>
+        {it.stats && <p className="text-[11px] text-neutral-400">{it.stats}</p>}
+        {it.charges && (
+          <p className="text-[10px] text-red-400 line-clamp-2">{it.charges}</p>
+        )}
+      </div>
+    </div>
   );
 }

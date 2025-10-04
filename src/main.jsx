@@ -44,7 +44,8 @@ function AppShell() {
     <div className="min-h-screen bg-neutral-950 text-neutral-100">
       <TOSModal />
       <Header />
-      <main className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 pb-24">
+     <main className="w-full min-h-screen px-3 sm:px-4 md:px-6 lg:px-8 pb-24 overflow-x-hidden">
+
         <Routes>
   <Route path="/" element={<HomePage />} />
   <Route path="/SSHadmin" element={<SecureAdmin />} />
@@ -103,88 +104,100 @@ export function Header() {
     }
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [menuOpen]);
+return (
+  <header className="sticky top-0 z-40 backdrop-blur bg-neutral-950/80 border-b border-neutral-800">
+    <div className="mx-auto w-full px-3 sm:px-4 md:px-6 h-14 sm:h-16 flex items-center justify-between gap-2">
+      {/* Left: Logo */}
+      <Link to="/" className="group flex items-center gap-1 sm:gap-2 shrink-0 h-full">
+        <img
+          src={slnLogo}
+          alt="Sleazy News Logo"
+          className="h-8 w-auto sm:h-10 object-contain"
+        />
+        <span className="font-semibold tracking-wide text-sm sm:text-lg transition-colors">
+          <span className="group-hover:text-blue-400">S.</span>
+          <span className="text-neutral-400 group-hover:text-blue-400">L.N</span>
+        </span>
+      </Link>
 
-  return (
-    <header className="sticky top-0 z-40 backdrop-blur bg-neutral-950/70 border-b border-neutral-800">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        {/* Left: Logo */}
-        <Link to="/" className="group flex items-center gap-2 shrink-0 h-full">
-          <img src={slnLogo} alt="Sleazy News Logo" className="h-full w-auto object-contain" />
-          <span className="font-semibold tracking-wide text-lg transition-colors">
-            <span className="group-hover:text-blue-400">S.</span>
-            <span className="text-neutral-400 group-hover:text-blue-400">L.N</span>
-          </span>
-        </Link>
+      {/* Center: search bar (mobile fits nicely) */}
+      <form
+        onSubmit={handleSearch}
+        className="flex-1 px-2 sm:px-4 min-w-[100px]"
+      >
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search…"
+          className="w-full h-8 sm:h-9 rounded-md bg-neutral-900 border border-neutral-700 px-2 sm:px-3 text-[13px] sm:text-sm outline-none focus:border-neutral-500"
+        />
+      </form>
 
-        {/* Center: search bar (always visible, mobile + desktop) */}
-        <form onSubmit={handleSearch} className="flex-1 px-4">
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search…"
-            className="w-full rounded bg-neutral-900 border border-neutral-700 px-3 py-1.5 text-sm outline-none focus:border-neutral-500"
-          />
-        </form>
-
-        {/* Right: menu + buttons */}
-        <div className="flex items-center gap-2">
-          <button
-            ref={buttonRef}
-            onClick={() => setMenuOpen((o) => !o)}
-            className="md:hidden p-2 rounded bg-neutral-800 hover:bg-neutral-700"
-            aria-label="Toggle menu"
+      {/* Right: menu + buttons */}
+      <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+        <button
+          ref={buttonRef}
+          onClick={() => setMenuOpen((o) => !o)}
+          className="md:hidden p-1.5 sm:p-2 rounded bg-neutral-800 hover:bg-neutral-700"
+          aria-label="Toggle menu"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-4 w-4 sm:h-5 sm:w-5 text-white"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth="2"
           >
-            {/* Hamburger icon */}
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none"
-              viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+        <div className="hidden xs:flex sm:flex">
           <SubmitButtons />
         </div>
       </div>
+    </div>
 
-      {/* Mobile dropdown */}
-      {menuOpen && (
-        <div ref={menuRef} className="md:hidden bg-neutral-950 border-t border-neutral-800">
-          <nav className="flex flex-col px-4 py-3 space-y-2">
+    {/* Mobile dropdown (unchanged except padding) */}
+    {menuOpen && (
+      <div ref={menuRef} className="md:hidden bg-neutral-950 border-t border-neutral-800">
+        <nav className="flex flex-col px-3 py-3 space-y-2">
+          <Link
+            to="/"
+            className="px-3 py-1.5 rounded-xl text-sm border border-neutral-700 bg-neutral-900/60"
+            onClick={() => setMenuOpen(false)}
+          >
+            Home
+          </Link>
+
+          {SECTION_ORDER.map((key) => (
             <Link
-              to="/"
-              className="px-3 py-1.5 rounded-xl text-sm border border-neutral-700 bg-neutral-900/60"
+              key={key}
+              to={key === 'featured' ? '/featured' : `/section/${key}`}
+              className="px-3 py-1.5 rounded-xl text-sm border border-transparent hover:border-neutral-700 hover:bg-neutral-900/40"
               onClick={() => setMenuOpen(false)}
             >
-              Home
+              {SECTION_LABELS[key]}
             </Link>
+          ))}
 
-            {/* ✅ Sections inside dropdown only */}
-            {SECTION_ORDER.map((key) => (
-              <Link
-                key={key}
-                to={key === "featured" ? "/featured" : `/section/${key}`}
-                className="px-3 py-1.5 rounded-xl text-sm border border-transparent hover:border-neutral-700 hover:bg-neutral-900/40"
-                onClick={() => setMenuOpen(false)}
-              >
-                {SECTION_LABELS[key]}
-              </Link>
-            ))}
+          <form onSubmit={handleSearch} className="mt-2">
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search…"
+              className="w-full rounded-md bg-neutral-900 border border-neutral-700 px-3 py-1.5 text-sm outline-none focus:border-neutral-500"
+            />
+          </form>
+        </nav>
+      </div>
+    )}
+  </header>
+);
 
-            {/* 🔎 Mobile search duplicate inside drawer */}
-            <form onSubmit={handleSearch} className="mt-2">
-              <input
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search…"
-                className="w-full rounded bg-neutral-900 border border-neutral-700 px-3 py-1.5 text-sm outline-none focus:border-neutral-500"
-              />
-            </form>
-          </nav>
-        </div>
-      )}
-    </header>
-  );
-}
+  
 
 // ------------------ Footer ------------------
 
@@ -207,7 +220,7 @@ function Footer() {
 function HomePage() {
   const navigate = useNavigate();
   return (
-    <div className="py-8">
+    <div className="w-full min-h-screen py-8">
       <AdBanner /> {/* ✅ replaces KPIBand, same slot in layout */}
       <FeaturedRail onOpen={(slug) => navigate(`/article/${slug}`)} />
       <SectionTabs />
@@ -224,7 +237,7 @@ function SectionPage() {
   if (!valid) return <NotFound message="Unknown section." />;
 
   return (
-    <div className="py-8">
+    <div className="w-full min-h-screen py-8">
       <PageTitle title={SECTION_LABELS[sectionKey]} eyebrow="Section" />
       <Feed section={sectionKey} />
     </div>
@@ -233,7 +246,8 @@ function SectionPage() {
 
 function FeaturedPage() {
   return (
-    <div className="py-8">
+    <div className="w-full min-h-screen py-8">
+
       <PageTitle title={SECTION_LABELS.featured} eyebrow="Curated" />
       <Feed section="featured" />
     </div>
@@ -302,4 +316,5 @@ function Root() {
 const container = document.getElementById("root");
 if (container) {
   createRoot(container).render(<Root />);
+}
 }
