@@ -196,7 +196,7 @@ return (
     )}
   </header>
 );
-
+}
   
 
 // ------------------ Footer ------------------
@@ -317,4 +317,4 @@ const container = document.getElementById("root");
 if (container) {
   createRoot(container).render(<Root />);
 }
-}
+
