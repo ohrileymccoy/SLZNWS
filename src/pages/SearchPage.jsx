@@ -1,3 +1,4 @@
+// src/pages/SearchPage.jsx
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import ArticleCard from "../components/ArticleCard";
@@ -57,9 +58,7 @@ export default function SearchPage() {
   if (!items.length) {
     return (
       <div className="mx-auto max-w-3xl px-4">
-        <p className="text-neutral-400">
-          No results found for “{query}”.
-        </p>
+        <p className="text-neutral-400">No results found for “{query}”.</p>
       </div>
     );
   }
@@ -114,7 +113,7 @@ export default function SearchPage() {
             eyebrow={SECTION_LABELS[it.section] || it.section}
             caption={it.caption}
             footer={`Uploaded ${new Date(it.created_at).toLocaleDateString()}`}
-            photoUrls={it.photoUrls}
+            photoUrls={JSON.parse(it.r2_keys || "[]")}
             photoId={it.id}
           />
         )
