@@ -72,7 +72,6 @@ export function Header() {
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  // 👇 add search state + navigation
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
 
@@ -81,14 +80,12 @@ export function Header() {
     if (query.trim()) {
       navigate(`/search?q=${encodeURIComponent(query)}`);
       setQuery("");
-      setMenuOpen(false); // optional: close mobile menu after searching
+      setMenuOpen(false);
     }
   }
 
   const menuRef = useRef(null);
   const buttonRef = useRef(null);
-
-  const isActive = (path) => location.pathname === path;
 
   useEffect(() => {
     function handleClickOutside(e) {
@@ -107,12 +104,10 @@ export function Header() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [menuOpen]);
 
-  const handleNavClick = () => setMenuOpen(false);
-
   return (
-    <header className="sticky top-0 z-40 backdrop-blur supports-[backdrop-filter]:bg-neutral-950/70 border-b border-neutral-800">
+    <header className="sticky top-0 z-40 backdrop-blur bg-neutral-950/70 border-b border-neutral-800">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        {/* Left: Logo + Title */}
+        {/* Left: Logo */}
         <Link to="/" className="group flex items-center gap-2 shrink-0 h-full">
           <img src={slnLogo} alt="Sleazy News Logo" className="h-full w-auto object-contain" />
           <span className="font-semibold tracking-wide text-lg transition-colors">
@@ -121,43 +116,30 @@ export function Header() {
           </span>
         </Link>
 
-        {/* Center: Nav */}
-        <nav className="hidden md:flex flex-1 justify-center items-center gap-2">
-          <NavLink to="/" label="Home" active={isActive("/")} />
-          {SECTION_ORDER.map((key) => (
-            <NavLink
-              key={key}
-              to={key === "featured" ? "/featured" : `/section/${key}`}
-              label={SECTION_LABELS[key]}
-              active={
-                key === "featured"
-                  ? isActive("/featured")
-                  : isActive(`/section/${key}`)
-              }
-            />
-          ))}
-        </nav>
+        {/* Center: search bar (always visible, mobile + desktop) */}
+        <form onSubmit={handleSearch} className="flex-1 px-4">
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search…"
+            className="w-full rounded bg-neutral-900 border border-neutral-700 px-3 py-1.5 text-sm outline-none focus:border-neutral-500"
+          />
+        </form>
 
-        {/* Right */}
+        {/* Right: menu + buttons */}
         <div className="flex items-center gap-2">
-          {/* Desktop search */}
-          <form onSubmit={handleSearch} className="hidden md:block">
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search…"
-              className="rounded bg-neutral-900 border border-neutral-700 px-2 py-1 text-sm outline-none focus:border-neutral-500"
-            />
-          </form>
-
           <button
             ref={buttonRef}
             onClick={() => setMenuOpen((o) => !o)}
             className="md:hidden p-2 rounded bg-neutral-800 hover:bg-neutral-700"
             aria-label="Toggle menu"
           >
-            …
+            {/* Proper hamburger icon */}
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none"
+              viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
           </button>
           <SubmitButtons />
         </div>
@@ -167,32 +149,24 @@ export function Header() {
       {menuOpen && (
         <div ref={menuRef} className="md:hidden bg-neutral-950 border-t border-neutral-800">
           <nav className="flex flex-col px-4 py-3 space-y-2">
-            <NavLink to="/" label="Home" active={isActive("/")} onClick={handleNavClick} />
-            {SECTION_ORDER.map((key) => (
-              <NavLink
-                key={key}
-                to={key === "featured" ? "/featured" : `/section/${key}`}
-                label={SECTION_LABELS[key]}
-                active={
-                  key === "featured"
-                    ? isActive("/featured")
-                    : isActive(`/section/${key}`)
-                }
-                onClick={handleNavClick}
+            <Link
+              to="/"
+              className="px-3 py-1.5 rounded-xl text-sm border border-neutral-700 bg-neutral-900/60"
+              onClick={() => setMenuOpen(false)}
+            >
+              Home
+            </Link>
+            {/* 🔎 Mobile search duplicate inside drawer */}
+            <form onSubmit={handleSearch} className="mt-2">
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search…"
+                className="w-full rounded bg-neutral-900 border border-neutral-700 px-3 py-1.5 text-sm outline-none focus:border-neutral-500"
               />
-            ))}
+            </form>
           </nav>
-
-          {/* Mobile search */}
-          <form onSubmit={handleSearch} className="px-4 mt-2">
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search…"
-              className="w-full rounded bg-neutral-900 border border-neutral-700 px-2 py-1 text-sm outline-none focus:border-neutral-500"
-            />
-          </form>
         </div>
       )}
     </header>
