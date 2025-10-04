@@ -135,7 +135,7 @@ export function Header() {
             className="md:hidden p-2 rounded bg-neutral-800 hover:bg-neutral-700"
             aria-label="Toggle menu"
           >
-            {/* Proper hamburger icon */}
+            {/* Hamburger icon */}
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none"
               viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
@@ -156,6 +156,19 @@ export function Header() {
             >
               Home
             </Link>
+
+            {/* ✅ Sections inside dropdown only */}
+            {SECTION_ORDER.map((key) => (
+              <Link
+                key={key}
+                to={key === "featured" ? "/featured" : `/section/${key}`}
+                className="px-3 py-1.5 rounded-xl text-sm border border-transparent hover:border-neutral-700 hover:bg-neutral-900/40"
+                onClick={() => setMenuOpen(false)}
+              >
+                {SECTION_LABELS[key]}
+              </Link>
+            ))}
+
             {/* 🔎 Mobile search duplicate inside drawer */}
             <form onSubmit={handleSearch} className="mt-2">
               <input
@@ -170,20 +183,6 @@ export function Header() {
         </div>
       )}
     </header>
-  );
-}
-function NavLink({ to, label, active }) {
-  return (
-    <Link
-      to={to}
-      className={`px-3 py-1.5 rounded-xl text-sm transition-colors border ${
-        active
-          ? "bg-neutral-800/80 border-neutral-700"
-          : "bg-neutral-900/40 border-transparent hover:border-neutral-700"
-      }`}
-    >
-      {label}
-    </Link>
   );
 }
 
