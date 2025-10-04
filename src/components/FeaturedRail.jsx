@@ -95,27 +95,46 @@ export default function FeaturedRail({
   const handleMouseLeave = () => pauseOnHover && setRunning(true);
 
   // -------- Arrow buttons --------
-  const handleArrow = (dir) => {
-    if (!trackRef.current) return;
-    const nudge = cardWidthRef.current;
-    x.set(x.get() + (dir === "right" ? -nudge : nudge));
-    setDirection(dir);
-    // quick burst
-    setDuration(burstDuration);
-    setTimeout(() => setDuration(baseDuration), 2000);
-  };
+const handleArrow = (dir) => {
+  if (!trackRef.current || !cardWidthRef.current) return;
 
-  // -------- Card click: move one card + glow --------
-  const handleCardClick = (idx, dir = "right") => {
+  setRunning(false); // pause scrolling when user interacts
+
+  const distance = cardWidthRef.current * (dir === "right" ? -1 : 1);
+
+  // Smoothly animate to next card
+  const current = x.get();
+  const target = current + distance;
+  const stepCount = 20;
+  let step = 0;
+
+  const animateStep = () => {
+    step++;
+    const progress = step / stepCount;
+    const eased = 1 - Math.pow(1 - progress, 3); // ease-out-cubic
+    const value = current + (target - current) * eased;
+    x.set(value);
+    if (step < stepCount) requestAnimationFrame(animateStep);
+  };
+  requestAnimationFrame(animateStep);
+
+  // toggle resume only if user clicks again
+  if (running) setRunning(false);
+  else setRunning(true);
+};
+
+// -------- Card click --------
+const handleCardClick = (idx) => {
+  // toggle pause/resume on card click
+  if (running) {
     setRunning(false);
     setSelectedIdx(idx);
-    const offset = cardWidthRef.current * (dir === "right" ? -1 : 1);
-    x.set(x.get() + offset);
-    setTimeout(() => {
-      setSelectedIdx(null);
-      setRunning(true);
-    }, 1500);
-  };
+  } else {
+    setRunning(true);
+    setSelectedIdx(null);
+  }
+};
+
 
   return (
     <section className="mb-8">
