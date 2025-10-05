@@ -60,105 +60,134 @@ export default function FeaturedRail({
     }
   }, []);
 
- // -------- RAF ticker loop --------
-useEffect(() => {
-  if (useCSSFallback) return;
+  // -------- RAF ticker loop --------
+  useEffect(() => {
+    if (useCSSFallback) return;
 
-  const tick = () => {
-    if (
-      !running ||
-      !trackRef.current ||
-      document.visibilityState !== "visible" ||
-      !loopWidth
-    ) {
+    const tick = () => {
+      if (
+        !running ||
+        !trackRef.current ||
+        document.visibilityState !== "visible" ||
+        !loopWidth
+      ) {
+        frameRef.current = requestAnimationFrame(tick);
+        return;
+      }
+
+      // ✅ 25% slower scroll speed
+      const speed = (loopWidth / (duration * 60)) * 0.75;
+      const delta = speed * (direction === "right" ? -1 : 1);
+      let newX = x.get() + delta;
+
+      if (direction === "right" && Math.abs(newX) >= loopWidth) {
+        x.set(0);
+      } else if (direction === "left" && newX > 0) {
+        x.set(-loopWidth);
+      } else {
+        x.set(newX);
+      }
+
       frameRef.current = requestAnimationFrame(tick);
-      return;
-    }
-
-    // ✅ 25% slower scroll speed
-    const speed = (loopWidth / (duration * 60)) * 0.75;
-    const delta = speed * (direction === "right" ? -1 : 1);
-    let newX = x.get() + delta;
-
-    if (direction === "right" && Math.abs(newX) >= loopWidth) {
-      x.set(0);
-    } else if (direction === "left" && newX > 0) {
-      x.set(-loopWidth);
-    } else {
-      x.set(newX);
-    }
+    };
 
     frameRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frameRef.current);
+  }, [running, duration, direction, loopWidth, useCSSFallback]);
+
+  // -------- Pause/resume for desktop hover --------
+  const handleMouseEnter = () => pauseOnHover && setRunning(false);
+  const handleMouseLeave = () => pauseOnHover && setRunning(true);
+
+  // -------- Mobile touch/tap handling --------
+  useEffect(() => {
+    const el = trackRef.current;
+    if (!el) return;
+
+    if (!("ontouchstart" in window)) return; // skip on desktop
+
+    let touchStartY = 0;
+    let touchStartX = 0;
+    let moved = false;
+
+    const handleTouchStart = (e) => {
+      const t = e.touches[0];
+      touchStartX = t.clientX;
+      touchStartY = t.clientY;
+      moved = false;
+      setRunning(false);
+    };
+
+    const handleTouchMove = (e) => {
+      const t = e.touches[0];
+      if (
+        Math.abs(t.clientX - touchStartX) > 10 ||
+        Math.abs(t.clientY - touchStartY) > 10
+      ) {
+        moved = true;
+      }
+    };
+
+    const handleTouchEnd = (e) => {
+      if (!moved) {
+        const target = e.target.closest(".mug-card");
+        if (target) target.click();
+      }
+      setRunning(true);
+    };
+
+    el.addEventListener("touchstart", handleTouchStart, { passive: true });
+    el.addEventListener("touchmove", handleTouchMove, { passive: true });
+    el.addEventListener("touchend", handleTouchEnd, { passive: true });
+
+    return () => {
+      el.removeEventListener("touchstart", handleTouchStart);
+      el.removeEventListener("touchmove", handleTouchMove);
+      el.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, []);
+
+  // -------- Arrow buttons --------
+  const handleArrow = (dir) => {
+    if (!trackRef.current || !cardWidthRef.current) return;
+
+    setRunning(false);
+    setActiveArrow(dir);
+
+    const distance = cardWidthRef.current * (dir === "right" ? -1 : 1);
+    const current = x.get();
+    const target = current + distance;
+    const stepCount = 20;
+    let step = 0;
+
+    const animateStep = () => {
+      step++;
+      const progress = step / stepCount;
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const value = current + (target - current) * eased;
+      x.set(value);
+      if (step < stepCount) requestAnimationFrame(animateStep);
+    };
+    requestAnimationFrame(animateStep);
+
+    setTimeout(() => setActiveArrow(null), 300);
+    setRunning((prev) => !prev);
   };
 
-  frameRef.current = requestAnimationFrame(tick);
-  return () => cancelAnimationFrame(frameRef.current);
-}, [running, duration, direction, loopWidth, useCSSFallback]);
-
-// -------- Desktop hover + Mobile touch handling --------
-useEffect(() => {
-  const el = trackRef.current;
-  if (!el) return;
-
-  const isTouch = "ontouchstart" in window;
-
-  // --- Desktop hover handlers ---
-  const handleMouseEnter = () => {
-    if (!isTouch) setRunning(false);
-  };
-  const handleMouseLeave = () => {
-    if (!isTouch) setRunning(true);
-  };
-
-  // --- Mobile touch behavior ---
-  let touchStartY = 0;
-  let touchStartX = 0;
-  let moved = false;
-
-  const handleTouchStart = (e) => {
-    const t = e.touches[0];
-    touchStartX = t.clientX;
-    touchStartY = t.clientY;
-    moved = false;
-    setRunning(false); // pause ticker during touch
-  };
-
-  const handleTouchMove = (e) => {
-    const t = e.touches[0];
-    if (
-      Math.abs(t.clientX - touchStartX) > 10 ||
-      Math.abs(t.clientY - touchStartY) > 10
-    ) {
-      moved = true; // user is scrolling, not tapping
+  // -------- Card click --------
+  const handleCardClick = (idx) => {
+    if (selectedIdx !== null && selectedIdx !== idx) {
+      setSelectedIdx(idx);
+      return;
+    }
+    if (running) {
+      setRunning(false);
+      setSelectedIdx(idx);
+    } else {
+      setRunning(true);
+      setSelectedIdx(null);
     }
   };
-
-  const handleTouchEnd = (e) => {
-    if (!moved) {
-      // emulate click for tap
-      const target = e.target.closest(".mug-card");
-      if (target) target.click();
-    }
-    setRunning(true); // resume ticker
-  };
-
-  // --- Event bindings ---
-  el.addEventListener("mouseenter", handleMouseEnter);
-  el.addEventListener("mouseleave", handleMouseLeave);
-
-  el.addEventListener("touchstart", handleTouchStart, { passive: true });
-  el.addEventListener("touchmove", handleTouchMove, { passive: true });
-  el.addEventListener("touchend", handleTouchEnd, { passive: true });
-
-  return () => {
-    el.removeEventListener("mouseenter", handleMouseEnter);
-    el.removeEventListener("mouseleave", handleMouseLeave);
-    el.removeEventListener("touchstart", handleTouchStart);
-    el.removeEventListener("touchmove", handleTouchMove);
-    el.removeEventListener("touchend", handleTouchEnd);
-  };
-}, [trackRef, setRunning]);
-
 
   return (
     <section className="mb-8">
@@ -237,14 +266,12 @@ useEffect(() => {
 
 // ---- Card ----
 function Card({ it, active, onClick }) {
-  // Body scroll lock for overlay
   useEffect(() => {
     if (active) document.body.style.overflow = "hidden";
     else document.body.style.overflow = "";
     return () => (document.body.style.overflow = "");
   }, [active]);
 
-  // Standard in-track card
   const card = (
     <div
       onClick={onClick}
@@ -268,7 +295,6 @@ function Card({ it, active, onClick }) {
     </div>
   );
 
-  // Render overlay popup using React Portal
   const popup =
     active &&
     createPortal(
