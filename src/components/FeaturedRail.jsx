@@ -101,8 +101,16 @@ useEffect(() => {
   if (!el) return;
 
   const isTouch = "ontouchstart" in window;
-  if (!isTouch) return; // skip on desktop
 
+  // --- Desktop hover handlers ---
+  const handleMouseEnter = () => {
+    if (!isTouch) setRunning(false);
+  };
+  const handleMouseLeave = () => {
+    if (!isTouch) setRunning(true);
+  };
+
+  // --- Mobile touch behavior ---
   let touchStartY = 0;
   let touchStartX = 0;
   let moved = false;
@@ -117,30 +125,40 @@ useEffect(() => {
 
   const handleTouchMove = (e) => {
     const t = e.touches[0];
-    if (Math.abs(t.clientX - touchStartX) > 10 || Math.abs(t.clientY - touchStartY) > 10) {
+    if (
+      Math.abs(t.clientX - touchStartX) > 10 ||
+      Math.abs(t.clientY - touchStartY) > 10
+    ) {
       moved = true; // user is scrolling, not tapping
     }
   };
 
   const handleTouchEnd = (e) => {
     if (!moved) {
-      // emulate click for tap (use e.target.click())
+      // emulate click for tap
       const target = e.target.closest(".mug-card");
       if (target) target.click();
     }
     setRunning(true); // resume ticker
   };
 
+  // --- Event bindings ---
+  el.addEventListener("mouseenter", handleMouseEnter);
+  el.addEventListener("mouseleave", handleMouseLeave);
+
   el.addEventListener("touchstart", handleTouchStart, { passive: true });
   el.addEventListener("touchmove", handleTouchMove, { passive: true });
   el.addEventListener("touchend", handleTouchEnd, { passive: true });
 
   return () => {
+    el.removeEventListener("mouseenter", handleMouseEnter);
+    el.removeEventListener("mouseleave", handleMouseLeave);
     el.removeEventListener("touchstart", handleTouchStart);
     el.removeEventListener("touchmove", handleTouchMove);
     el.removeEventListener("touchend", handleTouchEnd);
   };
-}, [trackRef.current]);
+}, [trackRef, setRunning]);
+
 
   return (
     <section className="mb-8">
